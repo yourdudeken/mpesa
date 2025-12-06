@@ -10,30 +10,30 @@ echo ""
 
 # Check if PHP is installed
 if ! command -v php &> /dev/null; then
-    echo "❌ PHP is not installed. Please install PHP 7.4 or higher."
+    echo " PHP is not installed. Please install PHP 7.4 or higher."
     exit 1
 fi
 
 # Check PHP version
 PHP_VERSION=$(php -r 'echo PHP_VERSION;')
-echo "✅ PHP Version: $PHP_VERSION"
+echo " PHP Version: $PHP_VERSION"
 
 # Check if vendor directory exists
 if [ ! -d "vendor" ]; then
-    echo "❌ Vendor directory not found. Running composer install..."
+    echo " Vendor directory not found. Running composer install..."
     composer install
 fi
 
 # Create necessary directories
-echo "📁 Creating necessary directories..."
+echo " Creating necessary directories..."
 mkdir -p cache/rate_limit logs
 chmod 755 cache logs
 
 # Check if .env exists
 if [ ! -f "api/.env" ]; then
-    echo "⚠️  No .env file found. Copying from .env.example..."
+    echo "  No .env file found. Copying from .env.example..."
     cp api/.env.example api/.env
-    echo "✅ Please update api/.env with your configuration"
+    echo " Please update api/.env with your configuration"
 fi
 
 echo ""

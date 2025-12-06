@@ -8,7 +8,7 @@
 
 // Error reporting
 error_reporting(E_ALL);
-ini_set('display_errors', 0); // Don't display errors in production
+ini_set('display_errors', 0); // Disable for production
 
 // Autoload
 require_once __DIR__ . '/../vendor/autoload.php';
@@ -16,7 +16,7 @@ require_once __DIR__ . '/../src/autoload.php';
 
 // Load API classes
 spl_autoload_register(function ($class) {
-    $prefix = 'Yourdudeken\\Mpesa\\Api\\';
+    $prefix = 'Yourdudeken\Mpesa\Api\\';
     $baseDir = __DIR__ . '/';
     
     $len = strlen($prefix);
@@ -39,7 +39,7 @@ use Yourdudeken\Mpesa\Api\Middleware\RateLimitMiddleware;
 use Yourdudeken\Mpesa\Api\Controllers\MpesaController;
 
 // Load configuration
-$config = require __DIR__ . '/config/api.php';
+$config = require __DIR__ . '/Config/api.php';
 
 // Initialize middleware
 $corsMiddleware = new CorsMiddleware($config['cors']);

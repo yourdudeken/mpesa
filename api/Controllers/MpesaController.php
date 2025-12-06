@@ -15,6 +15,9 @@ use Yourdudeken\Mpesa\Engine\Core;
 use Yourdudeken\Mpesa\Engine\Config;
 use Yourdudeken\Mpesa\Engine\Cache;
 
+use Yourdudeken\Mpesa\Engine\CurlRequest;
+use Yourdudeken\Mpesa\Auth\Authenticator;
+
 class MpesaController extends BaseController
 {
     private $engine;
@@ -32,7 +35,9 @@ class MpesaController extends BaseController
     {
         $mpesaConfig = new Config();
         $cache = new Cache($mpesaConfig);
-        $this->engine = new Core($mpesaConfig, $cache);
+        $curl = new CurlRequest();
+        $auth = new Authenticator();
+        $this->engine = new Core($mpesaConfig, $cache, $curl, $auth);
     }
 
     /**

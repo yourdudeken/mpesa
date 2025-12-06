@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,39 +11,39 @@
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
         }
-        
+
         .container {
             max-width: 600px;
             margin: 0 auto;
             background: white;
             border-radius: 12px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             padding: 40px;
         }
-        
+
         h1 {
             color: #333;
             margin-bottom: 10px;
             font-size: 28px;
         }
-        
+
         .subtitle {
             color: #666;
             margin-bottom: 30px;
             font-size: 14px;
         }
-        
+
         .form-group {
             margin-bottom: 20px;
         }
-        
+
         label {
             display: block;
             margin-bottom: 8px;
@@ -50,8 +51,9 @@
             font-weight: 500;
             font-size: 14px;
         }
-        
-        input, textarea {
+
+        input,
+        textarea {
             width: 100%;
             padding: 12px;
             border: 2px solid #e0e0e0;
@@ -59,12 +61,13 @@
             font-size: 14px;
             transition: border-color 0.3s;
         }
-        
-        input:focus, textarea:focus {
+
+        input:focus,
+        textarea:focus {
             outline: none;
             border-color: #667eea;
         }
-        
+
         button {
             width: 100%;
             padding: 14px;
@@ -77,22 +80,22 @@
             cursor: pointer;
             transition: transform 0.2s, box-shadow 0.2s;
         }
-        
+
         button:hover {
             transform: translateY(-2px);
             box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
         }
-        
+
         button:active {
             transform: translateY(0);
         }
-        
+
         button:disabled {
             opacity: 0.6;
             cursor: not-allowed;
             transform: none;
         }
-        
+
         .response {
             margin-top: 30px;
             padding: 20px;
@@ -100,26 +103,26 @@
             border-radius: 8px;
             display: none;
         }
-        
+
         .response.show {
             display: block;
         }
-        
+
         .response.success {
             background: #d4edda;
             border-left: 4px solid #28a745;
         }
-        
+
         .response.error {
             background: #f8d7da;
             border-left: 4px solid #dc3545;
         }
-        
+
         .response h3 {
             margin-bottom: 10px;
             font-size: 16px;
         }
-        
+
         .response pre {
             background: white;
             padding: 15px;
@@ -128,17 +131,17 @@
             font-size: 12px;
             line-height: 1.5;
         }
-        
+
         .loading {
             text-align: center;
             padding: 20px;
             display: none;
         }
-        
+
         .loading.show {
             display: block;
         }
-        
+
         .spinner {
             border: 3px solid #f3f3f3;
             border-top: 3px solid #667eea;
@@ -148,74 +151,80 @@
             animation: spin 1s linear infinite;
             margin: 0 auto;
         }
-        
+
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
     </style>
 </head>
+
 <body>
     <div class="container">
-        <h1>🚀 M-Pesa STK Push</h1>
+        <h1> M-Pesa STK Push</h1>
         <p class="subtitle">Test the M-Pesa API integration</p>
-        
+
         <form id="paymentForm">
             <div class="form-group">
                 <label for="apiKey">API Key</label>
                 <input type="text" id="apiKey" value="demo-api-key-12345" required>
             </div>
-            
+
             <div class="form-group">
                 <label for="phoneNumber">Phone Number</label>
                 <input type="tel" id="phoneNumber" placeholder="254712345678" required>
             </div>
-            
+
             <div class="form-group">
                 <label for="amount">Amount (KES)</label>
                 <input type="number" id="amount" placeholder="100" min="1" required>
             </div>
-            
+
             <div class="form-group">
                 <label for="accountReference">Account Reference</label>
                 <input type="text" id="accountReference" placeholder="Order123" required>
             </div>
-            
+
             <div class="form-group">
                 <label for="transactionDesc">Description</label>
                 <input type="text" id="transactionDesc" placeholder="Payment for Order 123" required>
             </div>
-            
+
             <div class="form-group">
                 <label for="callbackURL">Callback URL</label>
                 <input type="url" id="callbackURL" placeholder="https://yourdomain.com/callback" required>
             </div>
-            
+
             <button type="submit">Initiate Payment</button>
         </form>
-        
+
         <div class="loading" id="loading">
             <div class="spinner"></div>
             <p style="margin-top: 10px; color: #666;">Processing...</p>
         </div>
-        
+
         <div class="response" id="response">
             <h3 id="responseTitle">Response</h3>
             <pre id="responseBody"></pre>
         </div>
     </div>
-    
+
     <script>
         const API_URL = 'http://localhost:8000/api';
-        
+
         document.getElementById('paymentForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
+
             const form = e.target;
             const submitBtn = form.querySelector('button');
             const loading = document.getElementById('loading');
             const response = document.getElementById('response');
-            
+
             // Get form data
             const data = {
                 amount: parseInt(document.getElementById('amount').value),
@@ -224,14 +233,14 @@
                 transactionDesc: document.getElementById('transactionDesc').value,
                 callBackURL: document.getElementById('callbackURL').value
             };
-            
+
             const apiKey = document.getElementById('apiKey').value;
-            
+
             // Show loading
             loading.classList.add('show');
             response.classList.remove('show');
             submitBtn.disabled = true;
-            
+
             try {
                 const res = await fetch(`${API_URL}/stk-push`, {
                     method: 'POST',
@@ -241,30 +250,30 @@
                     },
                     body: JSON.stringify(data)
                 });
-                
+
                 const result = await res.json();
-                
+
                 // Hide loading
                 loading.classList.remove('show');
-                
+
                 // Show response
                 response.classList.add('show');
                 response.classList.remove('success', 'error');
                 response.classList.add(result.success ? 'success' : 'error');
-                
-                document.getElementById('responseTitle').textContent = 
-                    result.success ? '✅ Success' : '❌ Error';
-                document.getElementById('responseBody').textContent = 
+
+                document.getElementById('responseTitle').textContent =
+                    result.success ? ' Success' : ' Error';
+                document.getElementById('responseBody').textContent =
                     JSON.stringify(result, null, 2);
-                
+
             } catch (error) {
                 // Hide loading
                 loading.classList.remove('show');
-                
+
                 // Show error
                 response.classList.add('show', 'error');
-                document.getElementById('responseTitle').textContent = '❌ Error';
-                document.getElementById('responseBody').textContent = 
+                document.getElementById('responseTitle').textContent = ' Error';
+                document.getElementById('responseBody').textContent =
                     `Network error: ${error.message}`;
             } finally {
                 submitBtn.disabled = false;
@@ -272,4 +281,5 @@
         });
     </script>
 </body>
+
 </html>
