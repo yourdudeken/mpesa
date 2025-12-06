@@ -26,8 +26,9 @@ class TestCase extends PHPUnit
     /**
      * Set mocks.
      **/
-    public function setUp()
+    protected function setUp(): void
     {
+        parent::setUp();
         $config       = new Config();
         $cache        = new Cache($config);
         $this->httpClient = $this->createMock(HttpRequest::class);

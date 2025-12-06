@@ -13,7 +13,7 @@ class B2BTest extends TestCase{
 
     
 
-    public function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         $this->cleanCache();

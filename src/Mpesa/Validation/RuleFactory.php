@@ -59,7 +59,7 @@ class RuleFactory
             'IpAddress',
             'Length',
             'LessThan',
-            'Match',
+            'MatchField',
             'MaxLength',
             'MinLength',
             'NotInList',

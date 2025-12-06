@@ -1,7 +1,7 @@
 <?php
 namespace Yourdudeken\Mpesa\Validation\Rule;
 
-class Match extends AbstractRule
+class MatchField extends AbstractRule
 {
     const OPTION_ITEM = 'item';
 

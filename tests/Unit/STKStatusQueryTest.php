@@ -12,7 +12,7 @@ use Yourdudeken\Mpesa\Exceptions\MpesaException;
 
 class STKStatusQueryTest extends TestCase{
 
-    public function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         $this->cleanCache();
