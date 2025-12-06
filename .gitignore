@@ -42,3 +42,9 @@ yarn-error.log
 # Uploaded files (depends on project structure)
 uploads/
 files/
+
+# API specific
+/logs/*.log
+/cache/rate_limit/*.json
+api/.env
+

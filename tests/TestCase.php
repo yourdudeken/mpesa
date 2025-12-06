@@ -13,7 +13,7 @@ use Yourdudeken\Mpesa\Contracts\HttpRequest;
 class TestCase extends PHPUnit
 {
     /**
-     * Engine Core.
+     * Engine Core. by Yourdudeken
      *
      * @var Engine
      **/
