@@ -182,6 +182,30 @@ Business to Business payment
 }
 ```
 
+### B2Pochi Payment
+Business to Pochi payment (send money to M-Pesa Pochi savings accounts)
+
+**Endpoint:** `POST /api/b2pochi`
+
+**Request Body:**
+```json
+{
+  "OriginatorConversationID": "B2P_12345",
+  "InitiatorName": "testapi",
+  "initiatorPassword": "Safaricom999!*!",
+  "CommandID": "BusinessPayToPochi",
+  "Amount": 1000,
+  "PartyA": "600000",
+  "PartyB": "254712345678",
+  "Remarks": "Pochi savings payment",
+  "ResultURL": "https://yourdomain.com/result",
+  "QueueTimeOutURL": "https://yourdomain.com/timeout",
+  "Occasion": "Monthly savings"
+}
+```
+
+**Note:** Provide either `SecurityCredential` (pre-encrypted) or `initiatorPassword` (will be encrypted automatically).
+
 ### C2B Register
 Register C2B validation and confirmation URLs
 
