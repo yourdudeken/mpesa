@@ -100,7 +100,7 @@ echo ""
 if [ "$HTTP_CODE" == "204" ]; then
     echo " CORS preflight handled correctly"
 else
-    echo " CORS preflight test failed"
+    echo "ate  CORS preflight test failed"
 fi
 
 echo ""
