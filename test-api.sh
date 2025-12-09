@@ -24,9 +24,9 @@ echo "$BODY" | jq '.' 2>/dev/null || echo "$BODY"
 echo ""
 
 if [ "$HTTP_CODE" == "200" ]; then
-    echo "✅ Health check passed"
+    echo " Health check passed"
 else
-    echo "❌ Health check failed"
+    echo " Health check failed"
 fi
 
 echo ""
@@ -49,9 +49,9 @@ echo "$BODY" | jq '.' 2>/dev/null || echo "$BODY"
 echo ""
 
 if [ "$HTTP_CODE" == "401" ]; then
-    echo "✅ Unauthorized request correctly rejected"
+    echo " Unauthorized request correctly rejected"
 else
-    echo "❌ Unauthorized request test failed"
+    echo " Unauthorized request test failed"
 fi
 
 echo ""
@@ -75,9 +75,9 @@ echo "$BODY" | jq '.' 2>/dev/null || echo "$BODY"
 echo ""
 
 if [ "$HTTP_CODE" == "400" ]; then
-    echo "✅ Validation error correctly returned"
+    echo " Validation error correctly returned"
 else
-    echo "❌ Validation test failed"
+    echo " Validation test failed"
 fi
 
 echo ""
@@ -98,9 +98,9 @@ echo "Response Code: $HTTP_CODE"
 echo ""
 
 if [ "$HTTP_CODE" == "204" ]; then
-    echo "✅ CORS preflight handled correctly"
+    echo " CORS preflight handled correctly"
 else
-    echo "❌ CORS preflight test failed"
+    echo "ate  CORS preflight test failed"
 fi
 
 echo ""

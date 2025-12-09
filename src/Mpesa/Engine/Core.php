@@ -176,10 +176,12 @@ class Core
         $httpCode = $this->curl->getInfo(CURLINFO_HTTP_CODE);
 
         if( $result === false){ 
-            throw new \Exception($this->curl->error());
+            $error = $this->curl->error() ?: 'cURL request failed';
+            throw new \Exception($error);
         }
         if($httpCode != 200){
-            throw new MpesaException($result,$httpCode);
+            $message = $result ?: 'HTTP request failed with code ' . $httpCode;
+            throw new MpesaException($message,$httpCode);
         } 
         return json_decode($result); 
     }
