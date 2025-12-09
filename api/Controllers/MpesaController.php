@@ -6,6 +6,7 @@ use Yourdudeken\Mpesa\LipaNaMpesaOnline\STKPush;
 use Yourdudeken\Mpesa\LipaNaMpesaOnline\STKStatusQuery;
 use Yourdudeken\Mpesa\B2C\Pay as B2CPay;
 use Yourdudeken\Mpesa\B2B\Pay as B2BPay;
+use Yourdudeken\Mpesa\B2Pochi\Pay as B2PochiPay;
 use Yourdudeken\Mpesa\C2B\Register;
 use Yourdudeken\Mpesa\C2B\Simulate;
 use Yourdudeken\Mpesa\AccountBalance\Balance;
@@ -159,6 +160,50 @@ class MpesaController extends BaseController
         } catch (\Exception $e) {
             $this->log('B2B payment failed', 'error', ['error' => $e->getMessage()]);
             $this->sendError($e->getMessage(), 'B2B_ERROR', 500);
+        }
+    }
+
+    /**
+     * B2Pochi Payment - Business to Pochi payment
+     * POST /api/b2pochi
+     */
+    public function b2pochi()
+    {
+        $data = $this->getJsonInput();
+        
+        $this->validateRequired($data, [
+            'OriginatorConversationID',
+            'InitiatorName',
+            'Amount',
+            'PartyA',
+            'PartyB',
+            'Remarks',
+            'ResultURL',
+            'QueueTimeOutURL'
+        ]);
+
+        // Require either SecurityCredential or initiatorPassword
+        if (!isset($data['SecurityCredential']) && !isset($data['initiatorPassword'])) {
+            $this->sendError(
+                'Either SecurityCredential or initiatorPassword is required',
+                'VALIDATION_ERROR',
+                400
+            );
+        }
+
+        try {
+            $b2pochi = new B2PochiPay($this->engine);
+            $result = $b2pochi->submit($data);
+            
+            $this->log('B2Pochi payment initiated', 'info', [
+                'recipient' => $data['PartyB'],
+                'amount' => $data['Amount']
+            ]);
+
+            $this->sendResponse($result);
+        } catch (\Exception $e) {
+            $this->log('B2Pochi payment failed', 'error', ['error' => $e->getMessage()]);
+            $this->sendError($e->getMessage(), 'B2POCHI_ERROR', 500);
         }
     }
 

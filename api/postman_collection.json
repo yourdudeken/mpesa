@@ -149,6 +149,31 @@
             }
         },
         {
+            "name": "B2Pochi Payment",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"OriginatorConversationID\": \"B2P_12345\",\n  \"InitiatorName\": \"testapi\",\n  \"initiatorPassword\": \"Safaricom999!*!\",\n  \"CommandID\": \"BusinessPayToPochi\",\n  \"Amount\": 1000,\n  \"PartyA\": \"600000\",\n  \"PartyB\": \"254712345678\",\n  \"Remarks\": \"Pochi savings payment\",\n  \"ResultURL\": \"https://yourdomain.com/result\",\n  \"QueueTimeOutURL\": \"https://yourdomain.com/timeout\",\n  \"Occasion\": \"Monthly savings\"\n}"
+                },
+                "url": {
+                    "raw": "{{base_url}}/b2pochi",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "b2pochi"
+                    ]
+                }
+            }
+        },
+        {
             "name": "C2B Register",
             "request": {
                 "method": "POST",

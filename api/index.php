@@ -77,6 +77,7 @@ $router->post('/stk-push', [$mpesaController, 'stkPush']);
 $router->post('/stk-query', [$mpesaController, 'stkQuery']);
 $router->post('/b2c', [$mpesaController, 'b2c']);
 $router->post('/b2b', [$mpesaController, 'b2b']);
+$router->post('/b2pochi', [$mpesaController, 'b2pochi']);
 $router->post('/c2b/register', [$mpesaController, 'c2bRegister']);
 $router->post('/c2b/simulate', [$mpesaController, 'c2bSimulate']);
 $router->post('/balance', [$mpesaController, 'balance']);
