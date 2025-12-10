@@ -2,83 +2,85 @@
 
 namespace Yourdudeken\Mpesa\B2Pochi;
 
-use Yourdudeken\Mpesa\Contracts\Transactable;
-use Yourdudeken\Mpesa\Engine\MpesaTrait;
+use Yourdudeken\Mpesa\Engine\Core;
 
-/**
- * Class Pay
- *
- * @category PHP
- *
- * @author   Kennedy Muthengi <kenmwendwamuthengi@gmail.com>
- */
-class Pay implements Transactable
-{
-    use MpesaTrait;
+class Pay {
 
-    /**
-     * Validation rules
-     *
-     * @var array
-     */
+    protected $endpoint = 'mpesa/b2c/v1/paymentrequest';
+
+    protected $engine;
+
     protected $validationRules = [
-        'OriginatorConversationID' => 'required',
-        'InitiatorName' => 'required',
-        'SecurityCredential' => 'required',
-        'CommandID' => 'required',
-        'Amount' => 'required|number',
-        'PartyA' => 'required',
-        'PartyB' => 'required',
-        'Remarks' => 'required',
-        'QueueTimeOutURL' => 'required|url',
-        'ResultURL' => 'required|url',
-        'Occasion' => '',
+        'OriginatorConversationID:OriginatorConversationID' => 'required()({label} is required)',
+        'InitiatorName:InitiatorName' => 'required()({label} is required)',
+        'SecurityCredential:SecurityCredential' => 'required()({label} is required)',
+        'CommandID:CommandID' => 'required()({label} is required)',
+        'PartyA:PartyA' => 'required()({label} is required)',
+        'PartyB:PartyB' => 'required()({label} is required)',
+        'QueueTimeOutURL:QueueTimeOutURL' => 'required()({label} is required)',
+        'ResultURL:ResultURL' => 'required()({label} is required)',
+        'Remarks:Remarks' => 'required()({label} is required)',
+        'Amount:Amount' => 'required()({label} is required)'
     ];
 
     /**
-     * Endpoint to hit when submitting a B2Pochi request
+     * Pay constructor.
      *
-     * @var string
+     * @param Core $engine
      */
-    protected $endpoint = 'mpesa/b2c/v1/paymentrequest';
-
-    /**
-     * Prepare B2Pochi request
-     *
-     * @param array $params
-     *
-     * @return mixed
-     */
-    public function submit($params = [])
+    public function __construct(Core $engine)
     {
-        // Set default values if not provided
-        $defaults = [
-            'CommandID' => 'BusinessPayToPochi',
-        ];
-
-        $params = array_merge($defaults, $params);
-
-        // Compute security credential if initiator password is provided
-        if (isset($params['initiatorPassword'])) {
-            $params['SecurityCredential'] = $this->engine->computeSecurityCredential($params['initiatorPassword']);
-            unset($params['initiatorPassword']);
-        }
-
-        return $this->makePayment($params);
+        $this->engine = $engine;
+        $this->engine->setValidationRules($this->validationRules);
     }
 
     /**
-     * Make the payment request
+     * Initiate the B2Pochi payment process.
      *
-     * @param array $body
+     * @param array $params
+     * @param string $appName
      *
      * @return mixed
+     *
+     * @throws \Exception
      */
-    private function makePayment($body)
-    {
+    public function submit($params = [], $appName = 'default'){
+        // Make sure all the indexes are in Uppercases as shown in docs
+        $userParams = [];
+        foreach ($params as $key => $value) {
+            $userParams[ucwords($key)] = $value;
+        }
+
+        $shortCode = $this->engine->config->get('mpesa.b2pochi.short_code', 
+            $this->engine->config->get('mpesa.b2c.short_code'));
+        $successCallback  = $this->engine->config->get('mpesa.b2pochi.result_url',
+            $this->engine->config->get('mpesa.b2c.result_url'));
+        $timeoutCallback  = $this->engine->config->get('mpesa.b2pochi.timeout_url',
+            $this->engine->config->get('mpesa.b2c.timeout_url'));
+        $initiator  = $this->engine->config->get('mpesa.b2pochi.initiator_name',
+            $this->engine->config->get('mpesa.b2c.initiator_name'));
+        $pass = $this->engine->config->get('mpesa.b2pochi.security_credential',
+            $this->engine->config->get('mpesa.b2c.security_credential'));
+        $securityCredential  = $this->engine->computeSecurityCredential($pass);
+        $commandId  = $this->engine->config->get('mpesa.b2pochi.default_command_id', 'BusinessPayToPochi');
+        
+        // Params coming from the config file
+        $configParams = [
+            'InitiatorName'     => $initiator,
+            'SecurityCredential'=> $securityCredential,
+            'CommandID'         => $commandId,
+            'PartyA'            => $shortCode,
+            'QueueTimeOutURL'   => $timeoutCallback,
+            'ResultURL'         => $successCallback,
+        ];
+
+        // This gives precedence to params coming from user allowing them to override config params
+        $body = array_merge($configParams, $userParams);
+
+        // Send the request to mpesa
         return $this->engine->makePostRequest([
             'endpoint' => $this->endpoint,
-            'body' => $body,
-        ]);
+            'body' => $body
+        ], $appName);
     }
 }

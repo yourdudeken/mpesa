@@ -32,9 +32,9 @@ return [
 
     'apps' => [
         'default' => [
-            'consumer_key' => 'uwd4VCfOjYcpawEsAYAkRyUYKRgCBdJ7',
+            'consumer_key' => 'fduEAZl8XCBAA5dXsoMK4d0EI278jGpcZSDGslWNAuVAGvRP',
     
-            'consumer_secret' => 'cq1hvOrJMyQYtgHU',
+            'consumer_secret' => 'of2dQDr3TaQKT6PWKClb5jpu5ooigb9AIcOLStzF2lR8EMM9SOYzfj4XIS0lbH0o',
         ],
         'bulk' => [
             'consumer_key' => '',
@@ -195,6 +195,31 @@ return [
         'short_code' => '600256',
 
         'test_phone_number' => '254708374149',
+
+        'result_url' => '',
+
+        'timeout_url' => ''
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | B2Pochi API Config
+    |--------------------------------------------------------------------------
+    |
+    | This is a fully qualified endpoint that will be be queried by Safaricom's
+    | API on completion or failure of the transaction.
+    | B2Pochi sends money to M-Pesa Pochi savings accounts.
+    |
+    */
+
+    'b2pochi' => [
+        'initiator_name' => 'testapi',
+
+        'default_command_id' => 'BusinessPayToPochi',
+
+        'security_credential' => 'Safaricom999!*!',
+
+        'short_code' => '600000',
 
         'result_url' => '',
 
