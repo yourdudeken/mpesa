@@ -2,34 +2,53 @@
 
 Send money from your business to customer M-Pesa Pochi accounts.
 
+## Configuration
+
+First, configure your B2Pochi settings in `src/config/mpesa.php`:
+
+```php
+'b2pochi' => [
+    'initiator_name' => 'testapi',
+    'default_command_id' => 'BusinessPayToPochi',
+    'security_credential' => 'Safaricom999!*!',
+    'short_code' => '600000',
+    'result_url' => 'https://yourdomain.com/result',
+    'timeout_url' => 'https://yourdomain.com/timeout'
+],
+```
+
 ## Usage
 
 ```php
 use Yourdudeken\Mpesa\B2Pochi\Pay;
+use Yourdudeken\Mpesa\Engine\Core;
 
-$b2pochi = new Pay();
+$b2pochi = new Pay(new Core());
 
 $response = $b2pochi->submit([
     'OriginatorConversationID' => 'unique-conversation-id-12345',
-    'InitiatorName' => 'testapi',
-    'initiatorPassword' => 'your-initiator-password', // Will be encrypted automatically
-    'CommandID' => 'BusinessPayToPochi', // Default value
     'Amount' => 1000,
-    'PartyA' => '600000', // Your business shortcode
     'PartyB' => '254712345678', // Customer phone number
     'Remarks' => 'Payment to Pochi account',
-    'QueueTimeOutURL' => 'https://yourdomain.com/timeout',
-    'ResultURL' => 'https://yourdomain.com/result',
     'Occasion' => 'Salary payment', // Optional
 ]);
 ```
+
+**Note:** The following parameters are automatically loaded from config:
+- `InitiatorName`
+- `SecurityCredential` (automatically encrypted)
+- `CommandID`
+- `PartyA` (shortcode)
+- `ResultURL`
+- `QueueTimeOutURL`
+
+You can override any config value by passing it in the params array.
 
 ## Parameters
 
 | Parameter | Required | Description |
 |-----------|----------|-------------|
 | `OriginatorConversationID` | Yes | Unique identifier for the transaction |
-| `InitiatorName` | Yes | API operator username |
 | `SecurityCredential` | Yes* | Encrypted initiator password |
 | `initiatorPassword` | Yes* | Plain initiator password (will be encrypted) |
 | `CommandID` | No | Transaction command (default: `BusinessPayToPochi`) |
