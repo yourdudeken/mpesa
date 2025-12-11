@@ -57,14 +57,14 @@ class Reversal {
         $pass = $this->engine->config->get('mpesa.reversal.security_credential');
         $securityCredential  = $this->engine->computeSecurityCredential($pass);
         // TODO: Compute
-        $identifierType = '4';
+        $receiverIdentifierType = '11';
 
         $configParams = [
             'Initiator'              => $initiator,
             'SecurityCredential'     => $securityCredential,
             'CommandID'              => $commandId,
             'PartyA'                 => $shortCode,
-            'RecieverIdentifierType' => $identifierType,
+            'RecieverIdentifierType' => $receiverIdentifierType,
             'QueueTimeOutURL'        => $timeoutCallback,
             'ResultURL'              => $successCallback
         ];
