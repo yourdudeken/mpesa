@@ -260,7 +260,6 @@ class MpesaController extends BaseController
         $data = $this->getJsonInput();
         
         $this->validateRequired($data, [
-            'partyB',
             'remarks',
             'resultURL',
             'queueTimeOutURL'
@@ -291,7 +290,6 @@ class MpesaController extends BaseController
         
         $this->validateRequired($data, [
             'TransactionID',
-            'partyB',
             'remarks',
             'resultURL',
             'queueTimeOutURL'

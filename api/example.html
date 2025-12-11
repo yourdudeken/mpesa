@@ -223,7 +223,8 @@
             <button class="tab" onclick="switchTab('b2c', event)">B2C</button>
             <button class="tab" onclick="switchTab('b2b', event)">B2B</button>
             <button class="tab" onclick="switchTab('b2pochi', event)">B2Pochi <span class="badge">NEW</span></button>
-            <button class="tab" onclick="switchTab('c2b', event)">C2B</button>
+            <button class="tab" onclick="switchTab('c2b-register', event)">C2B Register</button>
+            <button class="tab" onclick="switchTab('c2b-simulate', event)">C2B Simulate</button>
             <button class="tab" onclick="switchTab('balance', event)">Balance</button>
             <button class="tab" onclick="switchTab('status', event)">Status</button>
             <button class="tab" onclick="switchTab('reversal', event)">Reversal</button>
@@ -366,8 +367,8 @@
             </form>
         </div>
 
-        <!-- C2B Tab -->
-        <div id="c2b" class="tab-content">
+        <!-- C2B Register Tab -->
+        <div id="c2b-register" class="tab-content">
             <form onsubmit="submitForm(event, 'c2b/register')">
                 <div class="form-group">
                     <label for="c2bConfirm">Confirmation URL</label>
@@ -381,13 +382,28 @@
             </form>
         </div>
 
+        <!-- C2B Simulate Tab -->
+        <div id="c2b-simulate" class="tab-content">
+            <form onsubmit="submitForm(event, 'c2b/simulate')">
+                <div class="form-group">
+                    <label for="c2bSimAmount">Amount (KES)</label>
+                    <input type="number" id="c2bSimAmount" placeholder="100" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="c2bSimPhone">Phone Number</label>
+                    <input type="tel" id="c2bSimPhone" placeholder="254712345678" required>
+                </div>
+                <div class="form-group">
+                    <label for="c2bSimBillRef">Bill Reference Number</label>
+                    <input type="text" id="c2bSimBillRef" placeholder="account123" required>
+                </div>
+                <button type="submit">Simulate C2B Payment</button>
+            </form>
+        </div>
+
         <!-- Balance Tab -->
         <div id="balance" class="tab-content">
             <form onsubmit="submitForm(event, 'balance')">
-                <div class="form-group">
-                    <label for="balPartyB">Paybill Number</label>
-                    <input type="text" id="balPartyB" placeholder="600000" required>
-                </div>
                 <div class="form-group">
                     <label for="balRemarks">Remarks</label>
                     <input type="text" id="balRemarks" placeholder="Balance check" required>
@@ -410,10 +426,6 @@
                 <div class="form-group">
                     <label for="statusTxID">Transaction ID</label>
                     <input type="text" id="statusTxID" placeholder="OEI2AK4Q16" required>
-                </div>
-                <div class="form-group">
-                    <label for="statusPartyB">Paybill Number</label>
-                    <input type="text" id="statusPartyB" placeholder="600000" required>
                 </div>
                 <div class="form-group">
                     <label for="statusRemarks">Remarks</label>
@@ -549,9 +561,16 @@
                         validationURL: document.getElementById('c2bValidation').value
                     };
                     break;
+                case 'c2b/simulate':
+                    data = {
+                        amount: parseInt(document.getElementById('c2bSimAmount').value),
+                        phoneNumber: document.getElementById('c2bSimPhone').value,
+                        billRefNumber: document.getElementById('c2bSimBillRef').value
+                    };
+                    break;
                 case 'balance':
                     data = {
-                        partyB: document.getElementById('balPartyB').value,
+                        partyB: '',
                         remarks: document.getElementById('balRemarks').value,
                         resultURL: document.getElementById('balResult').value,
                         queueTimeOutURL: document.getElementById('balTimeout').value
@@ -560,7 +579,7 @@
                 case 'transaction-status':
                     data = {
                         TransactionID: document.getElementById('statusTxID').value,
-                        partyB: document.getElementById('statusPartyB').value,
+                        partyB: '',
                         remarks: document.getElementById('statusRemarks').value,
                         resultURL: document.getElementById('statusResult').value,
                         queueTimeOutURL: document.getElementById('statusTimeout').value
