@@ -140,7 +140,7 @@ return [
 
         'validation_url' => '',
 
-        'responseType' => 'Completed',
+        'responseType' => 'Completed', 'Cancelled',
 
         'short_code' => '600256',
 
