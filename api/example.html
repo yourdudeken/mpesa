@@ -371,6 +371,14 @@
         <div id="c2b-register" class="tab-content">
             <form onsubmit="submitForm(event, 'c2b/register')">
                 <div class="form-group">
+                    <label for="c2bResponseType">Response Type</label>
+                    <select id="c2bResponseType" required>
+                        <option value="">Select Response Type</option>
+                        <option value="Completed">Completed</option>
+                        <option value="Cancelled">Cancelled</option>
+                    </select>
+                </div>
+                <div class="form-group">
                     <label for="c2bConfirm">Confirmation URL</label>
                     <input type="url" id="c2bConfirm" placeholder="https://yourdomain.com/confirmation" required>
                 </div>
@@ -557,6 +565,7 @@
                     break;
                 case 'c2b/register':
                     data = {
+                        ResponseType: document.getElementById('c2bResponseType').value,
                         confirmationURL: document.getElementById('c2bConfirm').value,
                         validationURL: document.getElementById('c2bValidation').value
                     };

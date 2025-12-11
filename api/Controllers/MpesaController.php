@@ -204,6 +204,7 @@ class MpesaController extends BaseController
         $data = $this->getJsonInput();
         
         $this->validateRequired($data, [
+            'ResponseType',
             'confirmationURL',
             'validationURL'
         ]);
