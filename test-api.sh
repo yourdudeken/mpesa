@@ -24,9 +24,9 @@ echo "$BODY" | jq '.' 2>/dev/null || echo "$BODY"
 echo ""
 
 if [ "$HTTP_CODE" == "200" ]; then
-    echo "✅ Health check passed"
+    echo "Health check passed"
 else
-    echo "❌ Health check failed"
+    echo "Health check failed"
 fi
 
 echo ""
@@ -49,9 +49,9 @@ echo "$BODY" | jq '.' 2>/dev/null || echo "$BODY"
 echo ""
 
 if [ "$HTTP_CODE" == "401" ]; then
-    echo "✅ Unauthorized request correctly rejected"
+    echo "Unauthorized request correctly rejected"
 else
-    echo "❌ Unauthorized request test failed"
+    echo "Unauthorized request test failed"
 fi
 
 echo ""
@@ -75,9 +75,9 @@ echo "$BODY" | jq '.' 2>/dev/null || echo "$BODY"
 echo ""
 
 if [ "$HTTP_CODE" == "400" ]; then
-    echo "✅ Validation error correctly returned"
+    echo "Validation error correctly returned"
 else
-    echo "❌ Validation test failed"
+    echo "Validation test failed"
 fi
 
 echo ""
@@ -101,9 +101,9 @@ echo "$BODY" | jq '.' 2>/dev/null || echo "$BODY"
 echo ""
 
 if [ "$HTTP_CODE" == "400" ]; then
-    echo "✅ B2C validation working"
+    echo "B2C validation working"
 else
-    echo "❌ B2C validation test failed"
+    echo "B2C validation test failed"
 fi
 
 echo ""
@@ -127,9 +127,9 @@ echo "$BODY" | jq '.' 2>/dev/null || echo "$BODY"
 echo ""
 
 if [ "$HTTP_CODE" == "400" ]; then
-    echo "✅ B2B validation working"
+    echo "B2B validation working"
 else
-    echo "❌ B2B validation test failed"
+    echo "B2B validation test failed"
 fi
 
 echo ""
@@ -153,9 +153,9 @@ echo "$BODY" | jq '.' 2>/dev/null || echo "$BODY"
 echo ""
 
 if [ "$HTTP_CODE" == "400" ]; then
-    echo "✅ B2Pochi validation working"
+    echo "B2Pochi validation working"
 else
-    echo "❌ B2Pochi validation test failed"
+    echo "B2Pochi validation test failed"
 fi
 
 echo ""
@@ -179,9 +179,9 @@ echo "$BODY" | jq '.' 2>/dev/null || echo "$BODY"
 echo ""
 
 if [ "$HTTP_CODE" == "400" ]; then
-    echo "✅ C2B Register validation working"
+    echo "C2B Register validation working"
 else
-    echo "❌ C2B Register validation test failed"
+    echo "C2B Register validation test failed"
 fi
 
 echo ""
@@ -205,9 +205,9 @@ echo "$BODY" | jq '.' 2>/dev/null || echo "$BODY"
 echo ""
 
 if [ "$HTTP_CODE" == "400" ]; then
-    echo "✅ Balance validation working"
+    echo "Balance validation working"
 else
-    echo "❌ Balance validation test failed"
+    echo "Balance validation test failed"
 fi
 
 echo ""
@@ -231,9 +231,9 @@ echo "$BODY" | jq '.' 2>/dev/null || echo "$BODY"
 echo ""
 
 if [ "$HTTP_CODE" == "400" ]; then
-    echo "✅ Transaction Status validation working"
+    echo "Transaction Status validation working"
 else
-    echo "❌ Transaction Status validation test failed"
+    echo "Transaction Status validation test failed"
 fi
 
 echo ""
@@ -257,9 +257,9 @@ echo "$BODY" | jq '.' 2>/dev/null || echo "$BODY"
 echo ""
 
 if [ "$HTTP_CODE" == "400" ]; then
-    echo "✅ Reversal validation working"
+    echo "Reversal validation working"
 else
-    echo "❌ Reversal validation test failed"
+    echo "Reversal validation test failed"
 fi
 
 echo ""
@@ -280,20 +280,20 @@ echo "Response Code: $HTTP_CODE"
 echo ""
 
 if [ "$HTTP_CODE" == "204" ]; then
-    echo "✅ CORS preflight handled correctly"
+    echo "CORS preflight handled correctly"
 else
-    echo "❌ CORS preflight test failed"
+    echo "CORS preflight test failed"
 fi
 
 echo ""
 echo "========================================="
 echo ""
 echo "Test Summary:"
-echo "✅ Health check endpoint working"
-echo "✅ API key authentication working"
-echo "✅ Request validation working (all endpoints)"
-echo "✅ CORS handling working"
-echo "✅ B2Pochi endpoint added and working"
+echo "Health check endpoint working"
+echo "API key authentication working"
+echo "Request validation working (all endpoints)"
+echo "CORS handling working"
+echo "B2Pochi endpoint added and working"
 echo ""
 echo "Endpoints Tested:"
 echo "1. GET  /api/health"
