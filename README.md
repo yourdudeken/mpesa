@@ -9,12 +9,13 @@ A comprehensive PHP package for integrating with Safaricom's M-Pesa DARAJA API. 
 
 ## Features
 
- **Complete API Coverage** - All 8 M-Pesa DARAJA API endpoints  
- **Easy Configuration** - Simple configuration file setup  
- **Composer Support** - Install via Composer or use standalone  
- **Sandbox & Production** - Works in both environments  
- **Well Documented** - Comprehensive documentation for each API  
- **Tested** - Includes PHPUnit tests  
+✅ **Complete API Coverage** - All M-Pesa DARAJA API endpoints including B2Pochi  
+✅ **Easy Configuration** - Simple configuration file setup  
+✅ **Composer Support** - Install via Composer or use standalone  
+✅ **Sandbox & Production** - Works in both environments  
+✅ **Well Documented** - Comprehensive documentation for each API  
+✅ **Tested** - Includes PHPUnit tests  
+✅ **REST API Wrapper** - Optional REST API with authentication and rate limiting  
 
 ## Table of Contents
 
@@ -136,6 +137,7 @@ This package supports all M-Pesa DARAJA API endpoints:
 | **C2B Simulate** | `C2BSimulate()` | Simulate C2B payment (testing) | [View Docs](docs/C2B.md#2-simulate-c2b-payment-testing-only) |
 | **B2C** | `B2C()` | Send money to customers | [View Docs](docs/B2C.md) |
 | **B2B** | `B2B()` | Transfer funds between businesses | [View Docs](docs/B2B.md) |
+| **B2Pochi** | `B2Pochi()` | Send money to customer Pochi savings accounts | [View Docs](docs/B2Pochi.md) |
 | **Account Balance** | `accountBalance()` | Query account balance | [View Docs](docs/AccountBalance.md) |
 | **Transaction Status** | `transactionStatus()` | Check transaction status | [View Docs](docs/TransactionStatus.md) |
 | **Reversal** | `reversal()` | Reverse a transaction | [View Docs](docs/Reversal.md) |
@@ -192,7 +194,21 @@ $response = $mpesa->B2B([
 ]);
 ```
 
-### 5. C2B Registration
+### 5. B2Pochi Payment
+
+Send money to a customer's Pochi savings account:
+
+```php
+$response = $mpesa->B2Pochi([
+    'OriginatorConversationID' => 'B2P_' . uniqid(),
+    'amount' => 1000,
+    'partyB' => '254712345678',
+    'remarks' => 'Monthly savings deposit',
+    'occasion' => 'Savings program'
+]);
+```
+
+### 6. C2B Registration
 
 Register your callback URLs:
 
@@ -204,7 +220,7 @@ $response = $mpesa->C2BRegister([
 ]);
 ```
 
-### 6. Account Balance
+### 7. Account Balance
 
 Check your M-Pesa account balance:
 
@@ -215,7 +231,7 @@ $response = $mpesa->accountBalance([
 ]);
 ```
 
-### 7. Transaction Status
+### 8. Transaction Status
 
 Query the status of a transaction:
 
@@ -227,7 +243,7 @@ $response = $mpesa->transactionStatus([
 ]);
 ```
 
-### 8. Reversal
+### 9. Reversal
 
 Reverse an erroneous transaction:
 
@@ -250,6 +266,7 @@ Comprehensive documentation is available for each API:
 - **[C2B (Customer to Business)](docs/C2B.md)** - Receive payments from customers
 - **[B2C (Business to Customer)](docs/B2C.md)** - Send money to customers
 - **[B2B (Business to Business)](docs/B2B.md)** - Transfer funds between businesses
+- **[B2Pochi (Business to Pochi)](docs/B2Pochi.md)** - Send money to customer Pochi savings accounts
 - **[Account Balance](docs/AccountBalance.md)** - Query account balance
 - **[Transaction Status](docs/TransactionStatus.md)** - Check transaction status
 - **[Reversal](docs/Reversal.md)** - Reverse transactions

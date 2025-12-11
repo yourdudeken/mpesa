@@ -124,6 +124,7 @@ The config file includes settings for:
 - **C2B (Customer to Business)**: `c2b` section
 - **B2C (Business to Customer)**: `b2c` section
 - **B2B (Business to Business)**: `b2b` section
+- **B2Pochi (Business to Pochi)**: `b2pochi` section
 - **Account Balance**: `account_balance` section
 - **Transaction Status**: `transaction_status` section
 - **Reversal**: `reversal` section
@@ -258,6 +259,7 @@ mpesa/
 │   ├── AccountBalance.md
 │   ├── B2B.md
 │   ├── B2C.md
+│   ├── B2Pochi.md
 │   ├── C2B.md
 │   ├── LipaNaMpesaOnline.md
 │   ├── Reversal.md
@@ -300,15 +302,19 @@ The package supports all Safaricom M-Pesa DARAJA API endpoints:
    - Method: `$mpesa->B2B([])`
    - [Documentation](docs/B2B.md)
 
-6. **Transaction Status** - Check transaction status
+6. **B2Pochi (Business to Pochi)** - Send money to customer Pochi savings accounts
+   - Method: `$mpesa->B2Pochi([])`
+   - [Documentation](docs/B2Pochi.md)
+
+7. **Transaction Status** - Check transaction status
    - Method: `$mpesa->transactionStatus([])`
    - [Documentation](docs/TransactionStatus.md)
 
-7. **Reversal** - Reverse a transaction
+8. **Reversal** - Reverse a transaction
    - Method: `$mpesa->reversal([])`
    - [Documentation](docs/Reversal.md)
 
-8. **Account Balance** - Check account balance
+9. **Account Balance** - Check account balance
    - Method: `$mpesa->accountBalance([])`
    - [Documentation](docs/AccountBalance.md)
 
