@@ -9,13 +9,13 @@ A comprehensive PHP package for integrating with Safaricom's M-Pesa DARAJA API. 
 
 ## Features
 
-✅ **Complete API Coverage** - All M-Pesa DARAJA API endpoints including B2Pochi  
-✅ **Easy Configuration** - Simple configuration file setup  
-✅ **Composer Support** - Install via Composer or use standalone  
-✅ **Sandbox & Production** - Works in both environments  
-✅ **Well Documented** - Comprehensive documentation for each API  
-✅ **Tested** - Includes PHPUnit tests  
-✅ **REST API Wrapper** - Optional REST API with authentication and rate limiting  
+ **Complete API Coverage** - All M-Pesa DARAJA API endpoints including B2Pochi  
+ **Easy Configuration** - Simple configuration file setup  
+ **Composer Support** - Install via Composer or use standalone  
+ **Sandbox & Production** - Works in both environments  
+ **Well Documented** - Comprehensive documentation for each API  
+ **Tested** - Includes PHPUnit tests  
+ **REST API Wrapper** - Optional REST API with authentication and rate limiting  
 
 ## Table of Contents
 
