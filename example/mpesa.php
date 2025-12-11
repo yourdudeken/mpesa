@@ -30,6 +30,8 @@ try {
     
     // $mpesa->B2B([]);
     
+    // $mpesa->B2Pochi([]);  // NEW: Send to Pochi savings
+    
     // $mpesa->accountBalance([])
     
     // $mpesa->reversal([]);
