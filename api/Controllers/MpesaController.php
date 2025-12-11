@@ -172,24 +172,12 @@ class MpesaController extends BaseController
         $data = $this->getJsonInput();
         
         $this->validateRequired($data, [
-            'OriginatorConversationID',
-            'InitiatorName',
             'Amount',
-            'PartyA',
             'PartyB',
             'Remarks',
             'ResultURL',
             'QueueTimeOutURL'
         ]);
-
-        // Require either SecurityCredential or initiatorPassword
-        if (!isset($data['SecurityCredential']) && !isset($data['initiatorPassword'])) {
-            $this->sendError(
-                'Either SecurityCredential or initiatorPassword is required',
-                'VALIDATION_ERROR',
-                400
-            );
-        }
 
         try {
             $b2pochi = new B2PochiPay($this->engine);

@@ -11,7 +11,6 @@ class Pay {
     protected $engine;
 
     protected $validationRules = [
-        'OriginatorConversationID:OriginatorConversationID' => 'required()({label} is required)',
         'InitiatorName:InitiatorName' => 'required()({label} is required)',
         'SecurityCredential:SecurityCredential' => 'required()({label} is required)',
         'CommandID:CommandID' => 'required()({label} is required)',
