@@ -14,12 +14,13 @@ class Reversal {
         'Initiator:Initiator' => 'required()({label} is required)',
         'SecurityCredential:SecurityCredential' => 'required()({label} is required)',
         'CommandID:CommandID' => 'required()({label} is required)',
-        'RecieverIdentifierType:RecieverIdentifierType' => 'required()({label} is required)',
-        'Remarks:Remarks' => 'required()({label} is required)',
-        'PartyA:Party A' => 'required()({label} is required)',
-        'QueueTimeOutURL:QueueTimeOutURL' => 'required()({label} is required)',
-        'ResultURL:ResultURL' => 'required()({label} is required)',
         'TransactionID:TransactionID' => 'required()({label} is required)',
+        'Amount:Amount' => 'required()({label} is required)',
+        'ReceiverParty:ReceiverParty' => 'required()({label} is required)',
+        'RecieverIdentifierType:RecieverIdentifierType' => 'required()({label} is required)',
+        'ResultURL:ResultURL' => 'required()({label} is required)',
+        'QueueTimeOutURL:QueueTimeOutURL' => 'required()({label} is required)',
+        'Remarks:Remarks' => 'required()({label} is required)',
     ];
 
     /**
@@ -34,15 +35,16 @@ class Reversal {
     }
 
     /**
-     * Initiate the balance query process.
+     * Initiate the reversal process.
      *
-     * @param null $description
+     * @param array $params User parameters
+     * @param string $appName Application name
      *
      * @return mixed
      *
      * @throws \Exception
      */
-    public function submit($params = [],$appName='default'){
+    public function submit($params = [], $appName = 'default'){
         // Make sure all the indexes are in Uppercases as shown in docs
         $userParams = [];
         foreach ($params as $key => $value) {
@@ -53,28 +55,29 @@ class Reversal {
         $successCallback  = $this->engine->config->get('mpesa.reversal.result_url');
         $timeoutCallback  = $this->engine->config->get('mpesa.reversal.timeout_url');
         $initiator  = $this->engine->config->get('mpesa.reversal.initiator_name');
-        $commandId  = $this->engine->config->get('mpesa.reversal.default_command_id');
+        $commandId  = $this->engine->config->get('mpesa.reversal.default_command_id', 'TransactionReversal');
         $pass = $this->engine->config->get('mpesa.reversal.security_credential');
         $securityCredential  = $this->engine->computeSecurityCredential($pass);
-        // TODO: Compute
+        
+        // RecieverIdentifierType should be '11' for organization short codes (as per documentation)
         $receiverIdentifierType = '11';
 
         $configParams = [
             'Initiator'              => $initiator,
             'SecurityCredential'     => $securityCredential,
             'CommandID'              => $commandId,
-            'PartyA'                 => $shortCode,
+            'ReceiverParty'          => $shortCode,
             'RecieverIdentifierType' => $receiverIdentifierType,
             'QueueTimeOutURL'        => $timeoutCallback,
             'ResultURL'              => $successCallback
         ];
 
         // This gives precedence to params coming from user allowing them to override config params
-        $body = array_merge($configParams,$userParams);
+        $body = array_merge($configParams, $userParams);
 
         return $this->engine->makePostRequest([
             'endpoint' => $this->endpoint,
             'body' => $body
-        ],$appName);
+        ], $appName);
     }
 }
