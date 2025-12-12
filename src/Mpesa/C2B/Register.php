@@ -17,7 +17,7 @@ class Register
     /**
      * @var string
      */
-    protected $endpoint = 'mpesa/c2b/v1/registerurl';
+    protected $endpoint = 'mpesa/c2b/v2/registerurl';
 
     /**
      * @var Core
@@ -58,12 +58,12 @@ class Register
 
         $shortCode = $this->engine->config->get('mpesa.c2b.short_code');
         $confirmationURL   = $this->engine->config->get('mpesa.c2b.confirmation_url');
-        $onTimeout   = $this->engine->config->get('mpesa.c2b.on_timeout');
+        $responseType   = $this->engine->config->get('mpesa.c2b.responseType');
         $validationURL   = $this->engine->config->get('mpesa.c2b.validation_url');
 
         $configParams = [
             'ShortCode'       => $shortCode,
-            'ResponseType'    => $onTimeout,
+            'ResponseType'    => $responseType,
             'ConfirmationURL' => $confirmationURL,
             'ValidationURL'   => $validationURL
         ];

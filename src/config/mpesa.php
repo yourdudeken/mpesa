@@ -140,7 +140,7 @@ return [
 
         'validation_url' => '',
 
-        'on_timeout' => 'Completed',
+        'responseType' => 'Completed', 'Cancelled',
 
         'short_code' => '600256',
 

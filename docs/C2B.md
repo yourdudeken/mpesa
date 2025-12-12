@@ -18,7 +18,7 @@ Update the C2B configuration in `src/config/mpesa.php`:
 'c2b' => [
     'confirmation_url' => 'https://yourdomain.com/api/mpesa/c2b/confirmation',
     'validation_url' => 'https://yourdomain.com/api/mpesa/c2b/validation',
-    'on_timeout' => 'Completed',  // or 'Cancelled'
+    'responseType' => 'Completed',  // or 'Cancelled'
     'short_code' => 'YOUR_SHORTCODE',
     'test_phone_number' => '254708374149',
     'default_command_id' => 'CustomerPayBillOnline'
@@ -29,7 +29,7 @@ Update the C2B configuration in `src/config/mpesa.php`:
 
 - **confirmation_url**: URL to receive payment confirmation notifications
 - **validation_url**: URL to validate payments before processing (optional)
-- **on_timeout**: Action to take when validation times out
+- **responseType**: Action to take when validation times out
   - `Completed` - Accept the payment (default)
   - `Cancelled` - Reject the payment
 - **short_code**: Your business paybill or till number
