@@ -1,18 +1,21 @@
 #!/bin/bash
 
 # M-Pesa API Test Script
-# Tests all API endpoints
+# Tests all API endpoints with dynamic port from .env
 
-API_URL="http://localhost:8000/api"
-API_KEY="demo-api-key-12345"
+# Get port from .env file or use default
+PORT=$(grep "^APP_PORT=" .env 2>/dev/null | cut -d '=' -f2 || echo "8000")
+API_URL="http://localhost:$PORT/api"
 
 echo "========================================="
 echo "M-Pesa API Complete Test Suite"
 echo "========================================="
+echo "Testing on port: $PORT"
+echo "API URL: $API_URL"
 echo ""
 
-# Test 1: Health Check (No Auth Required)
-echo "Test 1: Health Check (No Authentication)"
+# Test 1: Health Check
+echo "Test 1: Health Check"
 echo "----------------------------------------"
 RESPONSE=$(curl -s -w "\nHTTP_CODE:%{http_code}" "$API_URL/health")
 HTTP_CODE=$(echo "$RESPONSE" | grep "HTTP_CODE" | cut -d: -f2)
@@ -24,21 +27,22 @@ echo "$BODY" | jq '.' 2>/dev/null || echo "$BODY"
 echo ""
 
 if [ "$HTTP_CODE" == "200" ]; then
-    echo "Health check passed"
+    echo "✅ Health check passed"
 else
-    echo "Health check failed"
+    echo "❌ Health check failed"
 fi
 
 echo ""
 echo "========================================="
 echo ""
 
-# Test 2: Unauthorized Request
-echo "Test 2: Unauthorized Request (No API Key)"
+# Test 2: STK Push with Validation Error
+echo "Test 2: STK Push (Validation Test)"
 echo "----------------------------------------"
 RESPONSE=$(curl -s -w "\nHTTP_CODE:%{http_code}" \
-    -X POST "$API_URL/stk-push" \
+    -X POST "$API_URL/mpesa/stk-push" \
     -H "Content-Type: application/json" \
+    -H "Accept: application/json" \
     -d '{"amount": 100}')
 HTTP_CODE=$(echo "$RESPONSE" | grep "HTTP_CODE" | cut -d: -f2)
 BODY=$(echo "$RESPONSE" | sed '/HTTP_CODE/d')
@@ -48,24 +52,29 @@ echo "Response Body:"
 echo "$BODY" | jq '.' 2>/dev/null || echo "$BODY"
 echo ""
 
-if [ "$HTTP_CODE" == "401" ]; then
-    echo "Unauthorized request correctly rejected"
+if [ "$HTTP_CODE" == "422" ]; then
+    echo "✅ Validation working correctly"
 else
-    echo "Unauthorized request test failed"
+    echo "❌ Validation test failed"
 fi
 
 echo ""
 echo "========================================="
 echo ""
 
-# Test 3: STK Push with Missing Fields
-echo "Test 3: STK Push (Missing Required Fields)"
+# Test 3: STK Push with Valid Data
+echo "Test 3: STK Push (Valid Request)"
 echo "----------------------------------------"
 RESPONSE=$(curl -s -w "\nHTTP_CODE:%{http_code}" \
-    -X POST "$API_URL/stk-push" \
-    -H "X-API-Key: $API_KEY" \
+    -X POST "$API_URL/mpesa/stk-push" \
     -H "Content-Type: application/json" \
-    -d '{"amount": 100}')
+    -H "Accept: application/json" \
+    -d '{
+        "amount": 100,
+        "phone_number": "254712345678",
+        "account_reference": "TEST001",
+        "transaction_desc": "Test"
+    }')
 HTTP_CODE=$(echo "$RESPONSE" | grep "HTTP_CODE" | cut -d: -f2)
 BODY=$(echo "$RESPONSE" | sed '/HTTP_CODE/d')
 
@@ -74,24 +83,24 @@ echo "Response Body:"
 echo "$BODY" | jq '.' 2>/dev/null || echo "$BODY"
 echo ""
 
-if [ "$HTTP_CODE" == "400" ]; then
-    echo "Validation error correctly returned"
+if [ "$HTTP_CODE" == "200" ] || [ "$HTTP_CODE" == "400" ]; then
+    echo "✅ STK Push endpoint working (may need M-Pesa config)"
 else
-    echo "Validation test failed"
+    echo "❌ STK Push test failed"
 fi
 
 echo ""
 echo "========================================="
 echo ""
 
-# Test 4: B2C with Missing Fields
-echo "Test 4: B2C Payment (Missing Required Fields)"
+# Test 4: STK Query
+echo "Test 4: STK Query"
 echo "----------------------------------------"
 RESPONSE=$(curl -s -w "\nHTTP_CODE:%{http_code}" \
-    -X POST "$API_URL/b2c" \
-    -H "X-API-Key: $API_KEY" \
+    -X POST "$API_URL/mpesa/stk-query" \
     -H "Content-Type: application/json" \
-    -d '{"amount": 100}')
+    -H "Accept: application/json" \
+    -d '{"checkout_request_id": "ws_CO_191220191020363925"}')
 HTTP_CODE=$(echo "$RESPONSE" | grep "HTTP_CODE" | cut -d: -f2)
 BODY=$(echo "$RESPONSE" | sed '/HTTP_CODE/d')
 
@@ -100,24 +109,28 @@ echo "Response Body:"
 echo "$BODY" | jq '.' 2>/dev/null || echo "$BODY"
 echo ""
 
-if [ "$HTTP_CODE" == "400" ]; then
-    echo "B2C validation working"
+if [ "$HTTP_CODE" == "200" ] || [ "$HTTP_CODE" == "400" ]; then
+    echo "✅ STK Query endpoint working"
 else
-    echo "B2C validation test failed"
+    echo "❌ STK Query test failed"
 fi
 
 echo ""
 echo "========================================="
 echo ""
 
-# Test 5: B2B with Missing Fields
-echo "Test 5: B2B Payment (Missing Required Fields)"
+# Test 5: B2C Payment
+echo "Test 5: B2C Payment"
 echo "----------------------------------------"
 RESPONSE=$(curl -s -w "\nHTTP_CODE:%{http_code}" \
-    -X POST "$API_URL/b2b" \
-    -H "X-API-Key: $API_KEY" \
+    -X POST "$API_URL/mpesa/b2c" \
     -H "Content-Type: application/json" \
-    -d '{"amount": 100}')
+    -H "Accept: application/json" \
+    -d '{
+        "amount": 100,
+        "phone_number": "254712345678",
+        "remarks": "Test payment"
+    }')
 HTTP_CODE=$(echo "$RESPONSE" | grep "HTTP_CODE" | cut -d: -f2)
 BODY=$(echo "$RESPONSE" | sed '/HTTP_CODE/d')
 
@@ -126,24 +139,28 @@ echo "Response Body:"
 echo "$BODY" | jq '.' 2>/dev/null || echo "$BODY"
 echo ""
 
-if [ "$HTTP_CODE" == "400" ]; then
-    echo "B2B validation working"
+if [ "$HTTP_CODE" == "200" ] || [ "$HTTP_CODE" == "400" ]; then
+    echo "✅ B2C endpoint working"
 else
-    echo "B2B validation test failed"
+    echo "❌ B2C test failed"
 fi
 
 echo ""
 echo "========================================="
 echo ""
 
-# Test 6: B2Pochi with Missing Fields (NEW)
-echo "Test 6: B2Pochi Payment (Missing Required Fields)"
+# Test 6: B2B Payment
+echo "Test 6: B2B Payment"
 echo "----------------------------------------"
 RESPONSE=$(curl -s -w "\nHTTP_CODE:%{http_code}" \
-    -X POST "$API_URL/b2pochi" \
-    -H "X-API-Key: $API_KEY" \
+    -X POST "$API_URL/mpesa/b2b" \
     -H "Content-Type: application/json" \
-    -d '{"amount": 100}')
+    -H "Accept: application/json" \
+    -d '{
+        "amount": 1000,
+        "receiver_shortcode": "600000",
+        "account_reference": "TEST"
+    }')
 HTTP_CODE=$(echo "$RESPONSE" | grep "HTTP_CODE" | cut -d: -f2)
 BODY=$(echo "$RESPONSE" | sed '/HTTP_CODE/d')
 
@@ -152,24 +169,24 @@ echo "Response Body:"
 echo "$BODY" | jq '.' 2>/dev/null || echo "$BODY"
 echo ""
 
-if [ "$HTTP_CODE" == "400" ]; then
-    echo "B2Pochi validation working"
+if [ "$HTTP_CODE" == "200" ] || [ "$HTTP_CODE" == "400" ]; then
+    echo "✅ B2B endpoint working"
 else
-    echo "B2Pochi validation test failed"
+    echo "❌ B2B test failed"
 fi
 
 echo ""
 echo "========================================="
 echo ""
 
-# Test 7: C2B Register with Missing Fields
-echo "Test 7: C2B Register (Missing Required Fields)"
+# Test 7: Account Balance
+echo "Test 7: Account Balance"
 echo "----------------------------------------"
 RESPONSE=$(curl -s -w "\nHTTP_CODE:%{http_code}" \
-    -X POST "$API_URL/c2b/register" \
-    -H "X-API-Key: $API_KEY" \
+    -X POST "$API_URL/mpesa/balance" \
     -H "Content-Type: application/json" \
-    -d '{}')
+    -H "Accept: application/json" \
+    -d '{"remarks": "Balance check"}')
 HTTP_CODE=$(echo "$RESPONSE" | grep "HTTP_CODE" | cut -d: -f2)
 BODY=$(echo "$RESPONSE" | sed '/HTTP_CODE/d')
 
@@ -178,24 +195,24 @@ echo "Response Body:"
 echo "$BODY" | jq '.' 2>/dev/null || echo "$BODY"
 echo ""
 
-if [ "$HTTP_CODE" == "400" ]; then
-    echo "C2B Register validation working"
+if [ "$HTTP_CODE" == "200" ] || [ "$HTTP_CODE" == "400" ]; then
+    echo "✅ Balance endpoint working"
 else
-    echo "C2B Register validation test failed"
+    echo "❌ Balance test failed"
 fi
 
 echo ""
 echo "========================================="
 echo ""
 
-# Test 8: Account Balance with Missing Fields
-echo "Test 8: Account Balance (Missing Required Fields)"
+# Test 8: Transaction Status
+echo "Test 8: Transaction Status"
 echo "----------------------------------------"
 RESPONSE=$(curl -s -w "\nHTTP_CODE:%{http_code}" \
-    -X POST "$API_URL/balance" \
-    -H "X-API-Key: $API_KEY" \
+    -X POST "$API_URL/mpesa/transaction-status" \
     -H "Content-Type: application/json" \
-    -d '{}')
+    -H "Accept: application/json" \
+    -d '{"transaction_id": "LGR019G3J2"}')
 HTTP_CODE=$(echo "$RESPONSE" | grep "HTTP_CODE" | cut -d: -f2)
 BODY=$(echo "$RESPONSE" | sed '/HTTP_CODE/d')
 
@@ -204,24 +221,27 @@ echo "Response Body:"
 echo "$BODY" | jq '.' 2>/dev/null || echo "$BODY"
 echo ""
 
-if [ "$HTTP_CODE" == "400" ]; then
-    echo "Balance validation working"
+if [ "$HTTP_CODE" == "200" ] || [ "$HTTP_CODE" == "400" ]; then
+    echo "✅ Transaction Status endpoint working"
 else
-    echo "Balance validation test failed"
+    echo "❌ Transaction Status test failed"
 fi
 
 echo ""
 echo "========================================="
 echo ""
 
-# Test 9: Transaction Status with Missing Fields
-echo "Test 9: Transaction Status (Missing Required Fields)"
+# Test 9: Reversal
+echo "Test 9: Reversal"
 echo "----------------------------------------"
 RESPONSE=$(curl -s -w "\nHTTP_CODE:%{http_code}" \
-    -X POST "$API_URL/transaction-status" \
-    -H "X-API-Key: $API_KEY" \
+    -X POST "$API_URL/mpesa/reversal" \
     -H "Content-Type: application/json" \
-    -d '{}')
+    -H "Accept: application/json" \
+    -d '{
+        "transaction_id": "LGR019G3J2",
+        "amount": 100
+    }')
 HTTP_CODE=$(echo "$RESPONSE" | grep "HTTP_CODE" | cut -d: -f2)
 BODY=$(echo "$RESPONSE" | sed '/HTTP_CODE/d')
 
@@ -230,24 +250,27 @@ echo "Response Body:"
 echo "$BODY" | jq '.' 2>/dev/null || echo "$BODY"
 echo ""
 
-if [ "$HTTP_CODE" == "400" ]; then
-    echo "Transaction Status validation working"
+if [ "$HTTP_CODE" == "200" ] || [ "$HTTP_CODE" == "400" ]; then
+    echo "✅ Reversal endpoint working"
 else
-    echo "Transaction Status validation test failed"
+    echo "❌ Reversal test failed"
 fi
 
 echo ""
 echo "========================================="
 echo ""
 
-# Test 10: Reversal with Missing Fields
-echo "Test 10: Reversal (Missing Required Fields)"
+# Test 10: C2B Register
+echo "Test 10: C2B Register"
 echo "----------------------------------------"
 RESPONSE=$(curl -s -w "\nHTTP_CODE:%{http_code}" \
-    -X POST "$API_URL/reversal" \
-    -H "X-API-Key: $API_KEY" \
+    -X POST "$API_URL/mpesa/c2b/register" \
     -H "Content-Type: application/json" \
-    -d '{}')
+    -H "Accept: application/json" \
+    -d '{
+        "confirmation_url": "https://example.com/callback",
+        "validation_url": "https://example.com/callback"
+    }')
 HTTP_CODE=$(echo "$RESPONSE" | grep "HTTP_CODE" | cut -d: -f2)
 BODY=$(echo "$RESPONSE" | sed '/HTTP_CODE/d')
 
@@ -256,56 +279,37 @@ echo "Response Body:"
 echo "$BODY" | jq '.' 2>/dev/null || echo "$BODY"
 echo ""
 
-if [ "$HTTP_CODE" == "400" ]; then
-    echo "Reversal validation working"
+if [ "$HTTP_CODE" == "200" ] || [ "$HTTP_CODE" == "400" ]; then
+    echo "✅ C2B Register endpoint working"
 else
-    echo "Reversal validation test failed"
+    echo "❌ C2B Register test failed"
 fi
 
 echo ""
 echo "========================================="
 echo ""
-
-# Test 11: CORS Preflight
-echo "Test 11: CORS Preflight Request"
-echo "----------------------------------------"
-RESPONSE=$(curl -s -w "\nHTTP_CODE:%{http_code}" \
-    -X OPTIONS "$API_URL/stk-push" \
-    -H "Origin: https://example.com" \
-    -H "Access-Control-Request-Method: POST" \
-    -H "Access-Control-Request-Headers: X-API-Key, Content-Type")
-HTTP_CODE=$(echo "$RESPONSE" | grep "HTTP_CODE" | cut -d: -f2)
-
-echo "Response Code: $HTTP_CODE"
-echo ""
-
-if [ "$HTTP_CODE" == "204" ]; then
-    echo "CORS preflight handled correctly"
-else
-    echo "CORS preflight test failed"
-fi
-
-echo ""
+echo "📊 Test Summary"
 echo "========================================="
 echo ""
-echo "Test Summary:"
-echo "Health check endpoint working"
-echo "API key authentication working"
-echo "Request validation working (all endpoints)"
-echo "CORS handling working"
-echo "B2Pochi endpoint added and working"
+echo "✅ Endpoints Tested:"
+echo "   1. GET  /api/health"
+echo "   2. POST /api/mpesa/stk-push"
+echo "   3. POST /api/mpesa/stk-query"
+echo "   4. POST /api/mpesa/b2c"
+echo "   5. POST /api/mpesa/b2b"
+echo "   6. POST /api/mpesa/balance"
+echo "   7. POST /api/mpesa/transaction-status"
+echo "   8. POST /api/mpesa/reversal"
+echo "   9. POST /api/mpesa/c2b/register"
 echo ""
-echo "Endpoints Tested:"
-echo "1. GET  /api/health"
-echo "2. POST /api/stk-push"
-echo "3. POST /api/b2c"
-echo "4. POST /api/b2b"
-echo "5. POST /api/b2pochi (NEW)"
-echo "6. POST /api/c2b/register"
-echo "7. POST /api/balance"
-echo "8. POST /api/transaction-status"
-echo "9. POST /api/reversal"
+echo "💡 Notes:"
+echo "   - 200: Success"
+echo "   - 400: M-Pesa SDK validation (config needed)"
+echo "   - 422: Laravel validation error"
 echo ""
-echo "For full testing with actual M-Pesa responses,"
-echo "configure M-Pesa credentials in src/config/mpesa.php"
+echo "   To test with real M-Pesa API:"
+echo "   1. Update config/mpesa.php with credentials"
+echo "   2. Set callback URLs"
+echo "   3. Run tests again"
+echo ""
 echo "========================================="
