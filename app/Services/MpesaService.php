@@ -183,7 +183,7 @@ class MpesaService
                 $params['ResultURL'] = $data['result_url'];
             }
             if (isset($data['timeout_url'])) {
-                $params['TimeoutURL'] = $data['timeout_url'];
+                $params['QueueTimeOutURL'] = $data['timeout_url'];
             }
             
             $response = $this->mpesa->B2C($params);
@@ -226,7 +226,7 @@ class MpesaService
                 $params['ResultURL'] = $data['result_url'];
             }
             if (isset($data['timeout_url'])) {
-                $params['TimeoutURL'] = $data['timeout_url'];
+                $params['QueueTimeOutURL'] = $data['timeout_url'];
             }
             
             $response = $this->mpesa->B2B($params);
@@ -266,7 +266,7 @@ class MpesaService
                 $params['ResultURL'] = $data['result_url'];
             }
             if (isset($data['timeout_url'])) {
-                $params['TimeoutURL'] = $data['timeout_url'];
+                $params['QueueTimeOutURL'] = $data['timeout_url'];
             }
             
             $response = $this->mpesa->accountBalance($params);
@@ -307,7 +307,7 @@ class MpesaService
                 $params['ResultURL'] = $data['result_url'];
             }
             if (isset($data['timeout_url'])) {
-                $params['TimeoutURL'] = $data['timeout_url'];
+                $params['QueueTimeOutURL'] = $data['timeout_url'];
             }
             
             $response = $this->mpesa->transactionStatus($params);
@@ -349,7 +349,7 @@ class MpesaService
                 $params['ResultURL'] = $data['result_url'];
             }
             if (isset($data['timeout_url'])) {
-                $params['TimeoutURL'] = $data['timeout_url'];
+                $params['QueueTimeOutURL'] = $data['timeout_url'];
             }
             
             $response = $this->mpesa->reversal($params);
