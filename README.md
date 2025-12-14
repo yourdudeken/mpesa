@@ -40,8 +40,20 @@ A comprehensive PHP package for integrating with Safaricom's M-Pesa DARAJA API. 
 
 ### Option 1: Using Composer (Recommended)
 
+Production
+
 ```bash
-composer require yourdudeken/lipanodee
+cd production
+
+composer require yourdudeken/production/mpesa
+```
+
+Sandbox
+
+```bash
+cd sandbox
+
+composer require yourdudeken/sandbox/mpesa
 ```
 
 ### Option 2: Without Composer
