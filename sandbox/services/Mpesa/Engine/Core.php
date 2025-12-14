@@ -207,12 +207,12 @@ class Core
      * 
      */
     public function computeSecurityCredential($initiatorPass){
-        $pubKeyFile =  __DIR__ . '/../../config/mpesa_public_cert.cer';
+        $pubKeyFile = __DIR__ . '/../../config/SandboxCertificate.cer';
         $pubKey = '';
         if(\is_file($pubKeyFile)){
             $pubKey = file_get_contents($pubKeyFile);
         }else{
-            throw new \Exception("Please provide a valid public key file");
+            throw new \Exception("Please provide a valid public key file at: " . $pubKeyFile);
         }
         openssl_public_encrypt($initiatorPass, $encrypted, $pubKey, OPENSSL_PKCS1_PADDING);
         return base64_encode($encrypted);

@@ -32,7 +32,7 @@
     "autoload": {
         "psr-4": {
             "App\\": "app/",
-            "Yourdudeken\\Mpesa\\": "src/Mpesa/",
+            "Yourdudeken\\Mpesa\\": "services/Mpesa/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
         }

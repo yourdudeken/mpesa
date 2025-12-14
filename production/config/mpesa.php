@@ -9,7 +9,7 @@ return [
     | This is the url where all the endpoints originates from. 
     */
 
-    'apiUrl' => 'https://sandbox.safaricom.co.ke/',
+    'apiUrl' => 'https://production.safaricom.co.ke/',
 
     /*
     |--------------------------------------------------------------------------
@@ -20,7 +20,7 @@ return [
     |
     */
 
-    'is_sandbox' => false,
+    'is_production' => true,
 
     /*
     |--------------------------------------------------------------------------

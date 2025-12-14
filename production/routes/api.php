@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\MpesaController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -14,77 +15,57 @@ Route::get('/health', function () {
         'status' => 'ok',
         'environment' => 'production',
         'timestamp' => now()->toISOString(),
+        'mpesa_config' => [
+            'is_sandbox' => config('mpesa.is_sandbox'),
+            'api_url' => config('mpesa.apiUrl'),
+        ]
     ]);
 });
 
 Route::prefix('mpesa')->group(function () {
     // STK Push
-    Route::post('/stk-push', function (Request $request) {
-        // TODO: Implement STK Push using Yourdudeken\Mpesa
-        return response()->json(['message' => 'STK Push endpoint']);
-    });
+    Route::post('/stk-push', [MpesaController::class, 'stkPush'])
+        ->name('mpesa.stk-push');
     
     // STK Query
-    Route::post('/stk-query', function (Request $request) {
-        // TODO: Implement STK Query
-        return response()->json(['message' => 'STK Query endpoint']);
-    });
+    Route::post('/stk-query', [MpesaController::class, 'stkQuery'])
+        ->name('mpesa.stk-query');
     
     // C2B Register
-    Route::post('/c2b/register', function (Request $request) {
-        // TODO: Implement C2B Register
-        return response()->json(['message' => 'C2B Register endpoint']);
-    });
+    Route::post('/c2b/register', [MpesaController::class, 'c2bRegister'])
+        ->name('mpesa.c2b.register');
     
     // C2B Simulate
-    Route::post('/c2b/simulate', function (Request $request) {
-        // TODO: Implement C2B Simulate
-        return response()->json(['message' => 'C2B Simulate endpoint']);
-    });
+    Route::post('/c2b/simulate', [MpesaController::class, 'c2bSimulate'])
+        ->name('mpesa.c2b.simulate');
     
     // B2C
-    Route::post('/b2c', function (Request $request) {
-        // TODO: Implement B2C
-        return response()->json(['message' => 'B2C endpoint']);
-    });
+    Route::post('/b2c', [MpesaController::class, 'b2c'])
+        ->name('mpesa.b2c');
     
     // B2B
-    Route::post('/b2b', function (Request $request) {
-        // TODO: Implement B2B
-        return response()->json(['message' => 'B2B endpoint']);
-    });
+    Route::post('/b2b', [MpesaController::class, 'b2b'])
+        ->name('mpesa.b2b');
     
     // Account Balance
-    Route::post('/balance', function (Request $request) {
-        // TODO: Implement Account Balance
-        return response()->json(['message' => 'Account Balance endpoint']);
-    });
+    Route::post('/balance', [MpesaController::class, 'accountBalance'])
+        ->name('mpesa.balance');
     
     // Transaction Status
-    Route::post('/transaction-status', function (Request $request) {
-        // TODO: Implement Transaction Status
-        return response()->json(['message' => 'Transaction Status endpoint']);
-    });
+    Route::post('/transaction-status', [MpesaController::class, 'transactionStatus'])
+        ->name('mpesa.transaction-status');
     
     // Reversal
-    Route::post('/reversal', function (Request $request) {
-        // TODO: Implement Reversal
-        return response()->json(['message' => 'Reversal endpoint']);
-    });
+    Route::post('/reversal', [MpesaController::class, 'reversal'])
+        ->name('mpesa.reversal');
     
     // Callbacks
-    Route::post('/callback/stk', function (Request $request) {
-        // Handle STK Push callback
-        return response()->json(['ResultCode' => 0, 'ResultDesc' => 'Accepted']);
-    });
+    Route::post('/callback/stk', [MpesaController::class, 'stkCallback'])
+        ->name('mpesa.callback.stk');
     
-    Route::post('/callback/c2b', function (Request $request) {
-        // Handle C2B callback
-        return response()->json(['ResultCode' => 0, 'ResultDesc' => 'Accepted']);
-    });
+    Route::post('/callback/c2b', [MpesaController::class, 'c2bCallback'])
+        ->name('mpesa.callback.c2b');
     
-    Route::post('/callback/b2c', function (Request $request) {
-        // Handle B2C callback
-        return response()->json(['ResultCode' => 0, 'ResultDesc' => 'Accepted']);
-    });
+    Route::post('/callback/b2c', [MpesaController::class, 'b2cCallback'])
+        ->name('mpesa.callback.b2c');
 });
