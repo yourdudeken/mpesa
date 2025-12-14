@@ -27,6 +27,7 @@
     23 => 'Carbon\\Laravel\\ServiceProvider',
     24 => 'NunoMaduro\\Collision\\Adapters\\Laravel\\CollisionServiceProvider',
     25 => 'Termwind\\Laravel\\TermwindServiceProvider',
+    26 => 'App\\Providers\\MpesaServiceProvider',
   ),
   'eager' => 
   array (
@@ -43,6 +44,7 @@
     10 => 'Carbon\\Laravel\\ServiceProvider',
     11 => 'NunoMaduro\\Collision\\Adapters\\Laravel\\CollisionServiceProvider',
     12 => 'Termwind\\Laravel\\TermwindServiceProvider',
+    13 => 'App\\Providers\\MpesaServiceProvider',
   ),
   'deferred' => 
   array (
