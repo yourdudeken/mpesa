@@ -9,13 +9,14 @@ A comprehensive PHP package for integrating with Safaricom's M-Pesa DARAJA API. 
 
 ## Features
 
- **Complete API Coverage** - All M-Pesa DARAJA API endpoints including B2Pochi  
- **Easy Configuration** - Simple configuration file setup  
- **Composer Support** - Install via Composer or use standalone  
- **Sandbox & Production** - Works in both environments  
- **Well Documented** - Comprehensive documentation for each API  
- **Tested** - Includes PHPUnit tests  
- **REST API Wrapper** - Optional REST API with authentication and rate limiting  
+✅ **Complete API Coverage** - All M-Pesa DARAJA API endpoints including B2Pochi  
+✅ **Easy Configuration** - Simple configuration file setup  
+✅ **Composer Support** - Install via Composer or use standalone  
+✅ **Separate Environments** - Independent production and sandbox directories  
+✅ **Independent Testing** - Test each environment separately  
+✅ **Well Documented** - Comprehensive documentation for each API  
+✅ **Fully Tested** - Includes PHPUnit tests for all APIs  
+✅ **REST API Wrapper** - Optional REST API with authentication and rate limiting  
 
 ## Table of Contents
 
@@ -274,7 +275,9 @@ Comprehensive documentation is available for each API:
 ### Setup & Testing
 
 - **[SETUP.md](SETUP.md)** - Complete setup and installation guide
-- **[Testing Guide](SETUP.md#testing)** - How to run tests
+- **[TESTING.md](TESTING.md)** - Testing quick reference guide
+- **[production/README.md](production/README.md)** - Production environment guide
+- **[sandbox/README.md](sandbox/README.md)** - Sandbox environment guide
 
 Each documentation file includes:
 - Configuration instructions
@@ -286,17 +289,33 @@ Each documentation file includes:
 
 ## Testing
 
-### Running Tests
+This package includes **separate testing environments** for production and sandbox, each with independent dependencies and configurations.
+
+### Production Environment Testing
 
 ```bash
+cd production
+
 # Install dependencies
 composer install
 
 # Run all tests
 vendor/bin/phpunit
 
-# Run with verbose output
-vendor/bin/phpunit --verbose
+# Run specific test
+vendor/bin/phpunit tests/Unit/STKPushTest.php
+```
+
+### Sandbox Environment Testing
+
+```bash
+cd sandbox
+
+# Install dependencies
+composer install
+
+# Run all tests
+vendor/bin/phpunit
 
 # Run specific test
 vendor/bin/phpunit tests/Unit/STKPushTest.php
@@ -304,16 +323,25 @@ vendor/bin/phpunit tests/Unit/STKPushTest.php
 
 ### Test Coverage
 
-The package includes unit tests for:
-- Authentication
-- STK Push
-- STK Status Query
-- C2B Registration
-- B2C Payments
-- B2B Payments
-- Account Balance
-- Transaction Status
-- Reversals
+Both environments include comprehensive unit tests for:
+- **Authentication** - OAuth token generation and validation
+- **STK Push** - Lipa Na M-Pesa Online payment requests
+- **STK Status Query** - Payment status verification
+- **C2B Registration** - Customer to Business URL registration
+- **B2C Payments** - Business to Customer transactions
+- **B2B Payments** - Business to Business transfers
+- **Account Balance** - Balance inquiry
+- **Transaction Status** - Transaction verification
+- **Reversals** - Transaction reversal operations
+
+### Benefits of Separate Test Environments
+
+- ✅ **Isolation** - Each environment has its own dependencies
+- ✅ **Independent Testing** - Test sandbox and production separately
+- ✅ **No Conflicts** - Avoid configuration conflicts
+- ✅ **Easy Switching** - Simply change directories
+
+For detailed testing instructions, see [TESTING.md](TESTING.md)
 
 ## Callback Handling
 
@@ -348,20 +376,49 @@ echo json_encode(['ResultCode' => 0, 'ResultDesc' => 'Accepted']);
 
 ## Environment-Specific Notes
 
-### Sandbox Environment
+This package provides **separate directories** for production and sandbox environments, each with independent configurations and testing.
 
-- Set `'is_sandbox' => true` in config
-- Use sandbox credentials from Safaricom Developer Portal
+### Sandbox Environment (`/sandbox`)
+
+The sandbox directory is a complete, isolated environment for testing:
+
+```bash
+cd sandbox
+composer install
+vendor/bin/phpunit
+```
+
+**Configuration:**
+- Set `'is_sandbox' => true` in `src/config/mpesa.php`
+- Use sandbox credentials from [Safaricom Developer Portal](https://developer.safaricom.co.ke/)
 - API URL: `https://sandbox.safaricom.co.ke/`
 - Use test phone numbers provided by Safaricom
+- See [sandbox/README.md](sandbox/README.md) for details
 
-### Production Environment
+### Production Environment (`/production`)
 
-- Set `'is_sandbox' => false` in config
+The production directory is a complete, isolated environment for live operations:
+
+```bash
+cd production
+composer install
+vendor/bin/phpunit
+```
+
+**Configuration:**
+- Set `'is_sandbox' => false` in `src/config/mpesa.php`
 - Use production credentials
 - API URL: `https://api.safaricom.co.ke/`
-- Ensure your server IP is whitelisted
+- Ensure your server IP is whitelisted by Safaricom
 - Use HTTPS for all callback URLs
+- See [production/README.md](production/README.md) for details
+
+### Why Separate Environments?
+
+- **No Configuration Conflicts** - Each environment has its own settings
+- **Independent Dependencies** - Separate vendor directories
+- **Easy Testing** - Test each environment independently
+- **Production Safety** - Sandbox changes don't affect production
 
 ## Best Practices
 
