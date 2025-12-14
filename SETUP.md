@@ -430,17 +430,62 @@ The project uses PHP-CS-Fixer for code styling. Configuration is in `.php_cs`.
 
 ## Environment-Specific Notes
 
-### Sandbox Environment
-- Use sandbox credentials from Safaricom Developer Portal
-- Set `'is_sandbox' => true` in config
-- API URL: `https://sandbox.safaricom.co.ke/`
+This package includes separate directories for **production** and **sandbox** environments, each with their own independent testing setup.
 
-### Production Environment
+### Sandbox Environment (`/sandbox`)
+
+The sandbox directory contains a complete, isolated environment for testing:
+
+```bash
+cd sandbox
+
+# Install dependencies
+composer install
+
+# Run all tests
+vendor/bin/phpunit
+
+# Run specific test
+vendor/bin/phpunit tests/Unit/STKPushTest.php
+```
+
+**Configuration:**
+- Use sandbox credentials from Safaricom Developer Portal
+- Set `'is_sandbox' => true` in `src/config/mpesa.php`
+- API URL: `https://sandbox.safaricom.co.ke/`
+- See [sandbox/README.md](sandbox/README.md) for more details
+
+### Production Environment (`/production`)
+
+The production directory contains a complete, isolated environment for production use:
+
+```bash
+cd production
+
+# Install dependencies
+composer install
+
+# Run all tests
+vendor/bin/phpunit
+
+# Run specific test
+vendor/bin/phpunit tests/Unit/STKPushTest.php
+```
+
+**Configuration:**
 - Use production credentials
-- Set `'is_sandbox' => false` in config
+- Set `'is_sandbox' => false` in `src/config/mpesa.php`
 - API URL: `https://api.safaricom.co.ke/`
 - Ensure your server IP is whitelisted
 - Use HTTPS for all callback URLs
+- See [production/README.md](production/README.md) for more details
+
+### Benefits of Separate Environments
+
+- **Isolation**: Each environment has its own dependencies and configuration
+- **Independent Testing**: Run tests separately for sandbox and production
+- **Easy Switching**: Simply change directories to switch environments
+- **No Conflicts**: Avoid configuration conflicts between environments
 
 ## Next Steps
 
