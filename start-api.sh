@@ -83,7 +83,7 @@ echo ""
 
 # Start Production API on port 8000
 echo "🚀 Starting Production API on port 8000..."
-(cd production/api && php -S localhost:8000 > ../logs/api-production.log 2>&1) &
+(cd production/public && php -S localhost:8000 > ../logs/api-production.log 2>&1) &
 PROD_PID=$!
 echo "   Production API PID: $PROD_PID"
 
@@ -92,7 +92,7 @@ sleep 1
 
 # Start Sandbox API on port 8001
 echo "🚀 Starting Sandbox API on port 8001..."
-(cd sandbox/api && php -S localhost:8001 > ../logs/api-sandbox.log 2>&1) &
+(cd sandbox/public && php -S localhost:8001 > ../logs/api-sandbox.log 2>&1) &
 SANDBOX_PID=$!
 echo "   Sandbox API PID: $SANDBOX_PID"
 
@@ -102,16 +102,16 @@ echo "✅ Both Servers Running!"
 echo "========================================="
 echo ""
 echo "📍 Production API:"
-echo "   Base URL:     http://localhost:8000/api"
+echo "   Base URL:     http://localhost:8000"
 echo "   Health Check: http://localhost:8000/api/health"
+echo "   M-Pesa API:   http://localhost:8000/api/mpesa"
 echo "   Logs:         production/logs/api-production.log"
 echo ""
 echo "📍 Sandbox API:"
-echo "   Base URL:     http://localhost:8001/api"
+echo "   Base URL:     http://localhost:8001"
 echo "   Health Check: http://localhost:8001/api/health"
+echo "   M-Pesa API:   http://localhost:8001/api/mpesa"
 echo "   Logs:         sandbox/logs/api-sandbox.log"
-echo ""
-echo "🔑 Default API Key: demo-api-key-12345"
 echo ""
 echo "💡 Tips:"
 echo "   - Use port 8000 for production testing"
