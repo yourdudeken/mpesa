@@ -1,6 +1,5 @@
 # Composer dependencies
-production/vendor/
-sandbox/vendor/
+/vendor/
 
 # Laravel & Framework Generated Files
 /node_modules/
