@@ -6,24 +6,30 @@ use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
-| API Routes - Sandbox Environment
+| API Routes
 |--------------------------------------------------------------------------
+|
+| M-Pesa Gateway API Routes
+| All routes are prefixed with /api
+|
 */
 
+// Health Check
 Route::get('/health', function () {
     return response()->json([
         'status' => 'ok',
-        'environment' => 'sandbox',
+        'service' => 'M-Pesa Gateway API',
+        'environment' => config('app.env'),
+        'mpesa_env' => config('mpesa.is_sandbox') ? 'sandbox' : 'production',
         'timestamp' => now()->toISOString(),
-        'mpesa_config' => [
-            'is_sandbox' => config('mpesa.is_sandbox'),
-            'api_url' => config('mpesa.apiUrl'),
-        ]
+        'version' => '1.0.0'
     ]);
 });
 
+// M-Pesa API Endpoints
 Route::prefix('mpesa')->group(function () {
-    // STK Push
+    
+    // STK Push (Lipa Na M-Pesa Online)
     Route::post('/stk-push', [MpesaController::class, 'stkPush'])
         ->name('mpesa.stk-push');
     
@@ -31,19 +37,18 @@ Route::prefix('mpesa')->group(function () {
     Route::post('/stk-query', [MpesaController::class, 'stkQuery'])
         ->name('mpesa.stk-query');
     
-    // C2B Register
+    // C2B (Customer to Business)
     Route::post('/c2b/register', [MpesaController::class, 'c2bRegister'])
         ->name('mpesa.c2b.register');
     
-    // C2B Simulate
     Route::post('/c2b/simulate', [MpesaController::class, 'c2bSimulate'])
         ->name('mpesa.c2b.simulate');
     
-    // B2C
+    // B2C (Business to Customer)
     Route::post('/b2c', [MpesaController::class, 'b2c'])
         ->name('mpesa.b2c');
     
-    // B2B
+    // B2B (Business to Business)
     Route::post('/b2b', [MpesaController::class, 'b2b'])
         ->name('mpesa.b2b');
     
@@ -59,7 +64,7 @@ Route::prefix('mpesa')->group(function () {
     Route::post('/reversal', [MpesaController::class, 'reversal'])
         ->name('mpesa.reversal');
     
-    // Callbacks
+    // Callbacks (M-Pesa will call these endpoints)
     Route::post('/callback/stk', [MpesaController::class, 'stkCallback'])
         ->name('mpesa.callback.stk');
     

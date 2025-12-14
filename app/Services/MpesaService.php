@@ -3,24 +3,39 @@
 namespace App\Services;
 
 use Yourdudeken\Mpesa\Init as MpesaSDK;
+use Yourdudeken\Mpesa\Exceptions\MpesaException;
+use Yourdudeken\Mpesa\Exceptions\ConfigurationException;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 
+/**
+ * M-Pesa Service
+ * 
+ * Gateway service to interact with the official M-Pesa API
+ * Handles all M-Pesa operations with proper error handling and logging
+ */
 class MpesaService
 {
     protected $mpesa;
+    protected $config;
     
     public function __construct()
     {
-        // Initialize M-Pesa SDK with config from Laravel config
-        $config = config('mpesa');
-        $this->mpesa = new MpesaSDK($config);
+        $this->config = config('mpesa');
+        $this->mpesa = new MpesaSDK($this->config);
     }
     
     /**
-     * Initiate STK Push
+     * Initiate STK Push (Lipa Na M-Pesa Online)
+     * 
+     * @param array $data
+     * @return array
      */
-    public function stkPush(array $data)
+    public function stkPush(array $data): array
     {
         try {
+            Log::info('STK Push Request', ['data' => $this->sanitizeLogData($data)]);
+            
             $response = $this->mpesa->STKPush([
                 'amount' => $data['amount'],
                 'phoneNumber' => $data['phone_number'],
@@ -28,98 +43,126 @@ class MpesaService
                 'transactionDesc' => $data['transaction_desc'] ?? 'Payment',
             ]);
             
-            return [
-                'success' => true,
-                'data' => $response
-            ];
+            Log::info('STK Push Response', ['response' => $response]);
+            
+            return $this->successResponse($response);
+            
+        } catch (ConfigurationException $e) {
+            Log::error('STK Push Configuration Error', ['error' => $e->getMessage()]);
+            return $this->errorResponse($e->getMessage(), 422);
+            
+        } catch (MpesaException $e) {
+            Log::error('STK Push M-Pesa Error', ['error' => $e->getMessage()]);
+            return $this->errorResponse($e->getMessage(), $e->getCode());
+            
         } catch (\Exception $e) {
-            return [
-                'success' => false,
-                'message' => $e->getMessage(),
-                'error' => json_decode($e->getMessage(), true)
-            ];
+            Log::error('STK Push Error', ['error' => $e->getMessage()]);
+            return $this->errorResponse('An error occurred while processing your request', 500);
         }
     }
     
     /**
      * Query STK Push Status
+     * 
+     * @param array $data
+     * @return array
      */
-    public function stkQuery(array $data)
+    public function stkQuery(array $data): array
     {
         try {
+            Log::info('STK Query Request', ['checkout_request_id' => $data['checkout_request_id']]);
+            
             $response = $this->mpesa->STKStatus([
                 'checkoutRequestID' => $data['checkout_request_id']
             ]);
             
-            return [
-                'success' => true,
-                'data' => $response
-            ];
+            Log::info('STK Query Response', ['response' => $response]);
+            
+            return $this->successResponse($response);
+            
+        } catch (MpesaException $e) {
+            Log::error('STK Query Error', ['error' => $e->getMessage()]);
+            return $this->errorResponse($e->getMessage(), $e->getCode());
+            
         } catch (\Exception $e) {
-            return [
-                'success' => false,
-                'message' => $e->getMessage(),
-                'error' => json_decode($e->getMessage(), true)
-            ];
+            Log::error('STK Query Error', ['error' => $e->getMessage()]);
+            return $this->errorResponse('An error occurred while querying transaction status', 500);
         }
     }
     
     /**
      * Register C2B URLs
+     * 
+     * @param array $data
+     * @return array
      */
-    public function c2bRegister(array $data)
+    public function c2bRegister(array $data): array
     {
         try {
+            Log::info('C2B Register Request', ['urls' => $this->sanitizeLogData($data)]);
+            
             $response = $this->mpesa->C2BRegister([
                 'confirmationURL' => $data['confirmation_url'],
                 'validationURL' => $data['validation_url'],
                 'responseType' => $data['response_type'] ?? 'Completed'
             ]);
             
-            return [
-                'success' => true,
-                'data' => $response
-            ];
+            Log::info('C2B Register Response', ['response' => $response]);
+            
+            return $this->successResponse($response);
+            
+        } catch (MpesaException $e) {
+            Log::error('C2B Register Error', ['error' => $e->getMessage()]);
+            return $this->errorResponse($e->getMessage(), $e->getCode());
+            
         } catch (\Exception $e) {
-            return [
-                'success' => false,
-                'message' => $e->getMessage(),
-                'error' => json_decode($e->getMessage(), true)
-            ];
+            Log::error('C2B Register Error', ['error' => $e->getMessage()]);
+            return $this->errorResponse('An error occurred while registering C2B URLs', 500);
         }
     }
     
     /**
      * Simulate C2B Payment
+     * 
+     * @param array $data
+     * @return array
      */
-    public function c2bSimulate(array $data)
+    public function c2bSimulate(array $data): array
     {
         try {
+            Log::info('C2B Simulate Request', ['data' => $this->sanitizeLogData($data)]);
+            
             $response = $this->mpesa->C2BSimulate([
                 'amount' => $data['amount'],
                 'phoneNumber' => $data['phone_number'],
                 'billRefNumber' => $data['bill_ref_number'] ?? 'TEST'
             ]);
             
-            return [
-                'success' => true,
-                'data' => $response
-            ];
+            Log::info('C2B Simulate Response', ['response' => $response]);
+            
+            return $this->successResponse($response);
+            
+        } catch (MpesaException $e) {
+            Log::error('C2B Simulate Error', ['error' => $e->getMessage()]);
+            return $this->errorResponse($e->getMessage(), $e->getCode());
+            
         } catch (\Exception $e) {
-            return [
-                'success' => false,
-                'message' => $e->getMessage(),
-                'error' => json_decode($e->getMessage(), true)
-            ];
+            Log::error('C2B Simulate Error', ['error' => $e->getMessage()]);
+            return $this->errorResponse('An error occurred while simulating C2B payment', 500);
         }
     }
     
     /**
-     * B2C Payment
+     * B2C Payment (Business to Customer)
+     * 
+     * @param array $data
+     * @return array
      */
-    public function b2c(array $data)
+    public function b2c(array $data): array
     {
         try {
+            Log::info('B2C Request', ['data' => $this->sanitizeLogData($data)]);
+            
             $response = $this->mpesa->B2C([
                 'amount' => $data['amount'],
                 'partyB' => $data['phone_number'],
@@ -128,25 +171,31 @@ class MpesaService
                 'commandID' => $data['command_id'] ?? 'BusinessPayment'
             ]);
             
-            return [
-                'success' => true,
-                'data' => $response
-            ];
+            Log::info('B2C Response', ['response' => $response]);
+            
+            return $this->successResponse($response);
+            
+        } catch (MpesaException $e) {
+            Log::error('B2C Error', ['error' => $e->getMessage()]);
+            return $this->errorResponse($e->getMessage(), $e->getCode());
+            
         } catch (\Exception $e) {
-            return [
-                'success' => false,
-                'message' => $e->getMessage(),
-                'error' => json_decode($e->getMessage(), true)
-            ];
+            Log::error('B2C Error', ['error' => $e->getMessage()]);
+            return $this->errorResponse('An error occurred while processing B2C payment', 500);
         }
     }
     
     /**
-     * B2B Payment
+     * B2B Payment (Business to Business)
+     * 
+     * @param array $data
+     * @return array
      */
-    public function b2b(array $data)
+    public function b2b(array $data): array
     {
         try {
+            Log::info('B2B Request', ['data' => $this->sanitizeLogData($data)]);
+            
             $response = $this->mpesa->B2B([
                 'amount' => $data['amount'],
                 'partyB' => $data['receiver_shortcode'],
@@ -155,74 +204,92 @@ class MpesaService
                 'commandID' => $data['command_id'] ?? 'BusinessPayBill'
             ]);
             
-            return [
-                'success' => true,
-                'data' => $response
-            ];
+            Log::info('B2B Response', ['response' => $response]);
+            
+            return $this->successResponse($response);
+            
+        } catch (MpesaException $e) {
+            Log::error('B2B Error', ['error' => $e->getMessage()]);
+            return $this->errorResponse($e->getMessage(), $e->getCode());
+            
         } catch (\Exception $e) {
-            return [
-                'success' => false,
-                'message' => $e->getMessage(),
-                'error' => json_decode($e->getMessage(), true)
-            ];
+            Log::error('B2B Error', ['error' => $e->getMessage()]);
+            return $this->errorResponse('An error occurred while processing B2B payment', 500);
         }
     }
     
     /**
-     * Account Balance
+     * Query Account Balance
+     * 
+     * @param array $data
+     * @return array
      */
-    public function accountBalance(array $data)
+    public function accountBalance(array $data): array
     {
         try {
+            Log::info('Account Balance Request', ['data' => $data]);
+            
             $response = $this->mpesa->accountBalance([
                 'remarks' => $data['remarks'] ?? 'Balance Query',
                 'identifierType' => $data['identifier_type'] ?? 4
             ]);
             
-            return [
-                'success' => true,
-                'data' => $response
-            ];
+            Log::info('Account Balance Response', ['response' => $response]);
+            
+            return $this->successResponse($response);
+            
+        } catch (MpesaException $e) {
+            Log::error('Account Balance Error', ['error' => $e->getMessage()]);
+            return $this->errorResponse($e->getMessage(), $e->getCode());
+            
         } catch (\Exception $e) {
-            return [
-                'success' => false,
-                'message' => $e->getMessage(),
-                'error' => json_decode($e->getMessage(), true)
-            ];
+            Log::error('Account Balance Error', ['error' => $e->getMessage()]);
+            return $this->errorResponse('An error occurred while querying account balance', 500);
         }
     }
     
     /**
-     * Transaction Status
+     * Query Transaction Status
+     * 
+     * @param array $data
+     * @return array
      */
-    public function transactionStatus(array $data)
+    public function transactionStatus(array $data): array
     {
         try {
+            Log::info('Transaction Status Request', ['transaction_id' => $data['transaction_id']]);
+            
             $response = $this->mpesa->transactionStatus([
                 'transactionID' => $data['transaction_id'],
                 'identifierType' => $data['identifier_type'] ?? 4,
                 'remarks' => $data['remarks'] ?? 'Status Query'
             ]);
             
-            return [
-                'success' => true,
-                'data' => $response
-            ];
+            Log::info('Transaction Status Response', ['response' => $response]);
+            
+            return $this->successResponse($response);
+            
+        } catch (MpesaException $e) {
+            Log::error('Transaction Status Error', ['error' => $e->getMessage()]);
+            return $this->errorResponse($e->getMessage(), $e->getCode());
+            
         } catch (\Exception $e) {
-            return [
-                'success' => false,
-                'message' => $e->getMessage(),
-                'error' => json_decode($e->getMessage(), true)
-            ];
+            Log::error('Transaction Status Error', ['error' => $e->getMessage()]);
+            return $this->errorResponse('An error occurred while querying transaction status', 500);
         }
     }
     
     /**
-     * Reversal
+     * Reverse Transaction
+     * 
+     * @param array $data
+     * @return array
      */
-    public function reversal(array $data)
+    public function reversal(array $data): array
     {
         try {
+            Log::info('Reversal Request', ['data' => $this->sanitizeLogData($data)]);
+            
             $response = $this->mpesa->reversal([
                 'transactionID' => $data['transaction_id'],
                 'amount' => $data['amount'],
@@ -230,16 +297,74 @@ class MpesaService
                 'remarks' => $data['remarks'] ?? 'Reversal'
             ]);
             
-            return [
-                'success' => true,
-                'data' => $response
-            ];
+            Log::info('Reversal Response', ['response' => $response]);
+            
+            return $this->successResponse($response);
+            
+        } catch (MpesaException $e) {
+            Log::error('Reversal Error', ['error' => $e->getMessage()]);
+            return $this->errorResponse($e->getMessage(), $e->getCode());
+            
         } catch (\Exception $e) {
-            return [
-                'success' => false,
-                'message' => $e->getMessage(),
-                'error' => json_decode($e->getMessage(), true)
-            ];
+            Log::error('Reversal Error', ['error' => $e->getMessage()]);
+            return $this->errorResponse('An error occurred while reversing transaction', 500);
         }
+    }
+    
+    /**
+     * Format success response
+     * 
+     * @param mixed $data
+     * @return array
+     */
+    private function successResponse($data): array
+    {
+        return [
+            'success' => true,
+            'data' => $data,
+            'timestamp' => now()->toISOString()
+        ];
+    }
+    
+    /**
+     * Format error response
+     * 
+     * @param string $message
+     * @param int $code
+     * @return array
+     */
+    private function errorResponse(string $message, int $code = 400): array
+    {
+        $error = json_decode($message, true);
+        
+        return [
+            'success' => false,
+            'message' => is_array($error) ? ($error[0] ?? $message) : $message,
+            'error' => $error ?? $message,
+            'code' => $code,
+            'timestamp' => now()->toISOString()
+        ];
+    }
+    
+    /**
+     * Sanitize sensitive data for logging
+     * 
+     * @param array $data
+     * @return array
+     */
+    private function sanitizeLogData(array $data): array
+    {
+        $sanitized = $data;
+        
+        // Remove or mask sensitive fields
+        $sensitiveFields = ['password', 'pin', 'secret'];
+        
+        foreach ($sensitiveFields as $field) {
+            if (isset($sanitized[$field])) {
+                $sanitized[$field] = '***REDACTED***';
+            }
+        }
+        
+        return $sanitized;
     }
 }

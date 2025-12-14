@@ -9,7 +9,9 @@ return [
     | This is the url where all the endpoints originates from. 
     */
 
-    'apiUrl' => 'https://sandbox.safaricom.co.ke/',
+    'apiUrl' => env('MPESA_ENV', 'sandbox') === 'production' 
+        ? 'https://api.safaricom.co.ke/'
+        : 'https://sandbox.safaricom.co.ke/',
 
     /*
     |--------------------------------------------------------------------------
@@ -20,7 +22,7 @@ return [
     |
     */
 
-    'is_sandbox' => true,
+    'is_sandbox' => env('MPESA_ENV', 'sandbox') !== 'production',
 
     /*
     |--------------------------------------------------------------------------
@@ -32,16 +34,14 @@ return [
 
     'apps' => [
         'default' => [
-            'consumer_key' => 'fduEAZl8XCBAA5dXsoMK4d0EI278jGpcZSDGslWNAuVAGvRP',
-    
-            'consumer_secret' => 'of2dQDr3TaQKT6PWKClb5jpu5ooigb9AIcOLStzF2lR8EMM9SOYzfj4XIS0lbH0o',
+            'consumer_key' => env('MPESA_CONSUMER_KEY'),
+            'consumer_secret' => env('MPESA_CONSUMER_SECRET'),
         ],
         'bulk' => [
-            'consumer_key' => '',
-            'consumer_secret' => '',
+            'consumer_key' => env('MPESA_BULK_CONSUMER_KEY', ''),
+            'consumer_secret' => env('MPESA_BULK_CONSUMER_SECRET', ''),
         ],
     ],
-
 
     /*
     |--------------------------------------------------------------------------
@@ -52,8 +52,7 @@ return [
     |
     */
 
-    'cache_location' => 'cache',
-
+    'cache_location' => storage_path('framework/cache/mpesa'),
 
     /*
     |--------------------------------------------------------------------------
@@ -87,10 +86,8 @@ return [
         | This is a registered Paybill Number that will be used as the Merchant ID
         | on every transaction. This is also the account to be debited.
         |
-        |
-        |
         */
-        'short_code' => 174379,
+        'short_code' => env('MPESA_SHORTCODE', 174379),
 
         /*
         | STK Push callback URL
@@ -100,7 +97,7 @@ return [
         | API on completion or failure of a push transaction.
         |
         */
-        'callback' => null,
+        'callback' => env('MPESA_STK_CALLBACK_URL'),
         
         /*
         |--------------------------------------------------------------------------
@@ -111,7 +108,7 @@ return [
         | of the Merchant's Paybill Number.
         |
         */
-        'passkey' => 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919',
+        'passkey' => env('MPESA_PASSKEY', 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919'),
 
         /*
         |--------------------------------------------------------------------------
@@ -122,7 +119,6 @@ return [
         |
         */
         'default_transaction_type' => 'CustomerPayBillOnline'
-
     ],
 
     /*
@@ -136,16 +132,11 @@ return [
     */
 
     'c2b' => [
-        'confirmation_url' => '',
-
-        'validation_url' => '',
-
-        'responseType' => 'Completed', 'Cancelled',
-
-        'short_code' => '600256',
-
-        'test_phone_number' => '254708374149',
-
+        'confirmation_url' => env('MPESA_C2B_CONFIRMATION_URL'),
+        'validation_url' => env('MPESA_C2B_VALIDATION_URL'),
+        'responseType' => 'Completed',
+        'short_code' => env('MPESA_C2B_SHORTCODE', '600256'),
+        'test_phone_number' => env('MPESA_TEST_PHONE', '254708374149'),
         'default_command_id' => 'CustomerPayBillOnline'
     ],
 
@@ -160,19 +151,13 @@ return [
     */
 
     'b2c' => [
-        'initiator_name' => 'apiop59',
-
+        'initiator_name' => env('MPESA_B2C_INITIATOR_NAME', 'apiop59'),
         'default_command_id' => 'BusinessPayment',
-
-        'initiator_password' => 'YAL2yKrn',
-
-        'short_code' => '602973',
-
-        'test_phone_number' => '254708374149',
-
-        'result_url' => '',
-
-        'timeout_url' => ''
+        'initiator_password' => env('MPESA_B2C_INITIATOR_PASSWORD', 'YAL2yKrn'),
+        'short_code' => env('MPESA_B2C_SHORTCODE', '602973'),
+        'test_phone_number' => env('MPESA_TEST_PHONE', '254708374149'),
+        'result_url' => env('MPESA_B2C_RESULT_URL'),
+        'timeout_url' => env('MPESA_B2C_TIMEOUT_URL')
     ],
 
     /*
@@ -186,44 +171,13 @@ return [
     */
 
     'b2b' => [
-        'initiator_name' => 'testapi0297',
-
+        'initiator_name' => env('MPESA_B2B_INITIATOR_NAME', 'testapi0297'),
         'default_command_id' => 'BusinessPayBill',
-
-        'initiator_password' => 'YAL2yKrn',
-
-        'short_code' => '600256',
-
-        'test_phone_number' => '254708374149',
-
-        'result_url' => '',
-
-        'timeout_url' => ''
-    ],
-
-    /*
-    |--------------------------------------------------------------------------
-    | B2Pochi API Config
-    |--------------------------------------------------------------------------
-    |
-    | This is a fully qualified endpoint that will be be queried by Safaricom's
-    | API on completion or failure of the transaction.
-    | B2Pochi sends money to M-Pesa Pochi savings accounts.
-    |
-    */
-
-    'b2pochi' => [
-        'initiator_name' => 'testapi',
-
-        'default_command_id' => 'BusinessPayToPochi',
-
-        'initiator_password' => 'Safaricom999!*!',
-
-        'short_code' => '600000',
-
-        'result_url' => '',
-
-        'timeout_url' => ''
+        'initiator_password' => env('MPESA_B2B_INITIATOR_PASSWORD', 'YAL2yKrn'),
+        'short_code' => env('MPESA_B2B_SHORTCODE', '600256'),
+        'test_phone_number' => env('MPESA_TEST_PHONE', '254708374149'),
+        'result_url' => env('MPESA_B2B_RESULT_URL'),
+        'timeout_url' => env('MPESA_B2B_TIMEOUT_URL')
     ],
 
     /*
@@ -237,17 +191,12 @@ return [
     */
 
     'account_balance' => [
-        'initiator_name' => 'testapi0297',
-
-        'initiator_password' => 'YAL2yKrn',
-
+        'initiator_name' => env('MPESA_BALANCE_INITIATOR_NAME', 'testapi0297'),
+        'initiator_password' => env('MPESA_BALANCE_INITIATOR_PASSWORD', 'YAL2yKrn'),
         'default_command_id' => 'AccountBalance',
-
-        'short_code' => '600256',
-
-        'result_url' => '',
-
-        'timeout_url' => ''
+        'short_code' => env('MPESA_BALANCE_SHORTCODE', '600256'),
+        'result_url' => env('MPESA_BALANCE_RESULT_URL'),
+        'timeout_url' => env('MPESA_BALANCE_TIMEOUT_URL')
     ],
 
     /*
@@ -261,17 +210,12 @@ return [
     */
 
     'transaction_status' => [
-        'initiator_name' => 'testapi0297',
-
-        'initiator_password' => 'YAL2yKrn',
-
+        'initiator_name' => env('MPESA_STATUS_INITIATOR_NAME', 'testapi0297'),
+        'initiator_password' => env('MPESA_STATUS_INITIATOR_PASSWORD', 'YAL2yKrn'),
         'default_command_id' => 'TransactionStatusQuery',
-
-        'short_code' => '600256',
-
-        'result_url' => '',
-
-        'timeout_url' => ''
+        'short_code' => env('MPESA_STATUS_SHORTCODE', '600256'),
+        'result_url' => env('MPESA_STATUS_RESULT_URL'),
+        'timeout_url' => env('MPESA_STATUS_TIMEOUT_URL')
     ],
 
     /*
@@ -279,23 +223,31 @@ return [
     | Reversal API Config
     |--------------------------------------------------------------------------
     |
-    | This is configurations that is required by Safaricom's Transaction Status Api
+    | This is configurations that is required by Safaricom's Reversal Api
     | 
     |
     */
 
     'reversal' => [
-        'initiator_name' => 'testapi0297',
-
-        'initiator_password' => 'YAL2yKrn',
-
+        'initiator_name' => env('MPESA_REVERSAL_INITIATOR_NAME', 'testapi0297'),
+        'initiator_password' => env('MPESA_REVERSAL_INITIATOR_PASSWORD', 'YAL2yKrn'),
         'default_command_id' => 'TransactionReversal',
-
-        'short_code' => '600256',
-
-        'result_url' => '',
-
-        'timeout_url' => ''
+        'short_code' => env('MPESA_REVERSAL_SHORTCODE', '600256'),
+        'result_url' => env('MPESA_REVERSAL_RESULT_URL'),
+        'timeout_url' => env('MPESA_REVERSAL_TIMEOUT_URL')
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Certificate Path
+    |--------------------------------------------------------------------------
+    |
+    | Path to the certificate file used for encryption
+    | Automatically selects based on environment
+    |
+    */
+
+    'certificate_path' => env('MPESA_ENV', 'sandbox') === 'production'
+        ? base_path('config/ProductionCertificate.cer')
+        : base_path('config/SandboxCertificate.cer'),
 ];

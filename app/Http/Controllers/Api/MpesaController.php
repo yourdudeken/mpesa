@@ -6,7 +6,13 @@ use App\Services\MpesaService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Log;
 
+/**
+ * M-Pesa API Controller
+ * 
+ * Handles all M-Pesa API requests with validation and proper HTTP responses
+ */
 class MpesaController extends Controller
 {
     protected $mpesaService;
@@ -18,6 +24,9 @@ class MpesaController extends Controller
     
     /**
      * Initiate STK Push
+     * 
+     * @param Request $request
+     * @return JsonResponse
      */
     public function stkPush(Request $request): JsonResponse
     {
@@ -30,11 +39,14 @@ class MpesaController extends Controller
         
         $result = $this->mpesaService->stkPush($validated);
         
-        return response()->json($result, $result['success'] ? 200 : 400);
+        return response()->json($result, $result['success'] ? 200 : ($result['code'] ?? 400));
     }
     
     /**
      * Query STK Push Status
+     * 
+     * @param Request $request
+     * @return JsonResponse
      */
     public function stkQuery(Request $request): JsonResponse
     {
@@ -44,11 +56,14 @@ class MpesaController extends Controller
         
         $result = $this->mpesaService->stkQuery($validated);
         
-        return response()->json($result, $result['success'] ? 200 : 400);
+        return response()->json($result, $result['success'] ? 200 : ($result['code'] ?? 400));
     }
     
     /**
      * Register C2B URLs
+     * 
+     * @param Request $request
+     * @return JsonResponse
      */
     public function c2bRegister(Request $request): JsonResponse
     {
@@ -60,11 +75,14 @@ class MpesaController extends Controller
         
         $result = $this->mpesaService->c2bRegister($validated);
         
-        return response()->json($result, $result['success'] ? 200 : 400);
+        return response()->json($result, $result['success'] ? 200 : ($result['code'] ?? 400));
     }
     
     /**
      * Simulate C2B Payment
+     * 
+     * @param Request $request
+     * @return JsonResponse
      */
     public function c2bSimulate(Request $request): JsonResponse
     {
@@ -76,11 +94,14 @@ class MpesaController extends Controller
         
         $result = $this->mpesaService->c2bSimulate($validated);
         
-        return response()->json($result, $result['success'] ? 200 : 400);
+        return response()->json($result, $result['success'] ? 200 : ($result['code'] ?? 400));
     }
     
     /**
      * B2C Payment
+     * 
+     * @param Request $request
+     * @return JsonResponse
      */
     public function b2c(Request $request): JsonResponse
     {
@@ -94,11 +115,14 @@ class MpesaController extends Controller
         
         $result = $this->mpesaService->b2c($validated);
         
-        return response()->json($result, $result['success'] ? 200 : 400);
+        return response()->json($result, $result['success'] ? 200 : ($result['code'] ?? 400));
     }
     
     /**
      * B2B Payment
+     * 
+     * @param Request $request
+     * @return JsonResponse
      */
     public function b2b(Request $request): JsonResponse
     {
@@ -112,11 +136,14 @@ class MpesaController extends Controller
         
         $result = $this->mpesaService->b2b($validated);
         
-        return response()->json($result, $result['success'] ? 200 : 400);
+        return response()->json($result, $result['success'] ? 200 : ($result['code'] ?? 400));
     }
     
     /**
      * Account Balance
+     * 
+     * @param Request $request
+     * @return JsonResponse
      */
     public function accountBalance(Request $request): JsonResponse
     {
@@ -127,11 +154,14 @@ class MpesaController extends Controller
         
         $result = $this->mpesaService->accountBalance($validated);
         
-        return response()->json($result, $result['success'] ? 200 : 400);
+        return response()->json($result, $result['success'] ? 200 : ($result['code'] ?? 400));
     }
     
     /**
      * Transaction Status
+     * 
+     * @param Request $request
+     * @return JsonResponse
      */
     public function transactionStatus(Request $request): JsonResponse
     {
@@ -143,11 +173,14 @@ class MpesaController extends Controller
         
         $result = $this->mpesaService->transactionStatus($validated);
         
-        return response()->json($result, $result['success'] ? 200 : 400);
+        return response()->json($result, $result['success'] ? 200 : ($result['code'] ?? 400));
     }
     
     /**
      * Reversal
+     * 
+     * @param Request $request
+     * @return JsonResponse
      */
     public function reversal(Request $request): JsonResponse
     {
@@ -160,21 +193,23 @@ class MpesaController extends Controller
         
         $result = $this->mpesaService->reversal($validated);
         
-        return response()->json($result, $result['success'] ? 200 : 400);
+        return response()->json($result, $result['success'] ? 200 : ($result['code'] ?? 400));
     }
     
     /**
      * Handle STK Push Callback
+     * 
+     * @param Request $request
+     * @return JsonResponse
      */
     public function stkCallback(Request $request): JsonResponse
     {
-        // Log the callback
-        \Log::info('STK Push Callback', $request->all());
+        Log::info('STK Push Callback Received', $request->all());
         
-        // Process the callback data
-        $data = $request->all();
-        
-        // TODO: Store in database, trigger events, etc.
+        // TODO: Process callback data
+        // - Store in database
+        // - Trigger events
+        // - Send notifications
         
         return response()->json([
             'ResultCode' => 0,
@@ -184,16 +219,15 @@ class MpesaController extends Controller
     
     /**
      * Handle C2B Callback
+     * 
+     * @param Request $request
+     * @return JsonResponse
      */
     public function c2bCallback(Request $request): JsonResponse
     {
-        // Log the callback
-        \Log::info('C2B Callback', $request->all());
+        Log::info('C2B Callback Received', $request->all());
         
-        // Process the callback data
-        $data = $request->all();
-        
-        // TODO: Store in database, trigger events, etc.
+        // TODO: Process callback data
         
         return response()->json([
             'ResultCode' => 0,
@@ -203,16 +237,15 @@ class MpesaController extends Controller
     
     /**
      * Handle B2C Callback
+     * 
+     * @param Request $request
+     * @return JsonResponse
      */
     public function b2cCallback(Request $request): JsonResponse
     {
-        // Log the callback
-        \Log::info('B2C Callback', $request->all());
+        Log::info('B2C Callback Received', $request->all());
         
-        // Process the callback data
-        $data = $request->all();
-        
-        // TODO: Store in database, trigger events, etc.
+        // TODO: Process callback data
         
         return response()->json([
             'ResultCode' => 0,

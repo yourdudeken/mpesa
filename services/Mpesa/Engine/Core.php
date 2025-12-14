@@ -207,7 +207,17 @@ class Core
      * 
      */
     public function computeSecurityCredential($initiatorPass){
-        $pubKeyFile = __DIR__ . '/../../config/SandboxCertificate.cer';
+        // Get certificate path from config
+        $pubKeyFile = $this->config->get('mpesa.certificate_path');
+        
+        // Fallback to environment-based path if not in config
+        if (empty($pubKeyFile)) {
+            $isSandbox = $this->config->get('mpesa.is_sandbox', true);
+            $pubKeyFile = $isSandbox 
+                ? __DIR__ . '/../../../config/SandboxCertificate.cer'
+                : __DIR__ . '/../../../config/ProductionCertificate.cer';
+        }
+        
         $pubKey = '';
         if(\is_file($pubKeyFile)){
             $pubKey = file_get_contents($pubKeyFile);
