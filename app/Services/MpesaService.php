@@ -36,12 +36,19 @@ class MpesaService
         try {
             Log::info('STK Push Request', ['data' => $this->sanitizeLogData($data)]);
             
-            $response = $this->mpesa->STKPush([
+            $params = [
                 'amount' => $data['amount'],
                 'phoneNumber' => $data['phone_number'],
                 'accountReference' => $data['account_reference'] ?? 'Payment',
                 'transactionDesc' => $data['transaction_desc'] ?? 'Payment',
-            ]);
+            ];
+            
+            // Add callback URL if provided
+            if (isset($data['callback_url'])) {
+                $params['CallBackURL'] = $data['callback_url'];
+            }
+            
+            $response = $this->mpesa->STKPush($params);
             
             Log::info('STK Push Response', ['response' => $response]);
             
@@ -163,13 +170,23 @@ class MpesaService
         try {
             Log::info('B2C Request', ['data' => $this->sanitizeLogData($data)]);
             
-            $response = $this->mpesa->B2C([
+            $params = [
                 'amount' => $data['amount'],
                 'partyB' => $data['phone_number'],
                 'remarks' => $data['remarks'] ?? 'Payment',
                 'occasion' => $data['occasion'] ?? 'Payment',
                 'commandID' => $data['command_id'] ?? 'BusinessPayment'
-            ]);
+            ];
+            
+            // Add result and timeout URLs if provided
+            if (isset($data['result_url'])) {
+                $params['ResultURL'] = $data['result_url'];
+            }
+            if (isset($data['timeout_url'])) {
+                $params['TimeoutURL'] = $data['timeout_url'];
+            }
+            
+            $response = $this->mpesa->B2C($params);
             
             Log::info('B2C Response', ['response' => $response]);
             
@@ -196,13 +213,23 @@ class MpesaService
         try {
             Log::info('B2B Request', ['data' => $this->sanitizeLogData($data)]);
             
-            $response = $this->mpesa->B2B([
+            $params = [
                 'amount' => $data['amount'],
                 'partyB' => $data['receiver_shortcode'],
                 'accountReference' => $data['account_reference'] ?? 'Payment',
                 'remarks' => $data['remarks'] ?? 'Payment',
                 'commandID' => $data['command_id'] ?? 'BusinessPayBill'
-            ]);
+            ];
+            
+            // Add result and timeout URLs if provided
+            if (isset($data['result_url'])) {
+                $params['ResultURL'] = $data['result_url'];
+            }
+            if (isset($data['timeout_url'])) {
+                $params['TimeoutURL'] = $data['timeout_url'];
+            }
+            
+            $response = $this->mpesa->B2B($params);
             
             Log::info('B2B Response', ['response' => $response]);
             
@@ -229,10 +256,20 @@ class MpesaService
         try {
             Log::info('Account Balance Request', ['data' => $data]);
             
-            $response = $this->mpesa->accountBalance([
+            $params = [
                 'remarks' => $data['remarks'] ?? 'Balance Query',
                 'identifierType' => $data['identifier_type'] ?? 4
-            ]);
+            ];
+            
+            // Add result and timeout URLs if provided
+            if (isset($data['result_url'])) {
+                $params['ResultURL'] = $data['result_url'];
+            }
+            if (isset($data['timeout_url'])) {
+                $params['TimeoutURL'] = $data['timeout_url'];
+            }
+            
+            $response = $this->mpesa->accountBalance($params);
             
             Log::info('Account Balance Response', ['response' => $response]);
             
@@ -259,11 +296,21 @@ class MpesaService
         try {
             Log::info('Transaction Status Request', ['transaction_id' => $data['transaction_id']]);
             
-            $response = $this->mpesa->transactionStatus([
+            $params = [
                 'transactionID' => $data['transaction_id'],
                 'identifierType' => $data['identifier_type'] ?? 4,
                 'remarks' => $data['remarks'] ?? 'Status Query'
-            ]);
+            ];
+            
+            // Add result and timeout URLs if provided
+            if (isset($data['result_url'])) {
+                $params['ResultURL'] = $data['result_url'];
+            }
+            if (isset($data['timeout_url'])) {
+                $params['TimeoutURL'] = $data['timeout_url'];
+            }
+            
+            $response = $this->mpesa->transactionStatus($params);
             
             Log::info('Transaction Status Response', ['response' => $response]);
             
@@ -290,12 +337,22 @@ class MpesaService
         try {
             Log::info('Reversal Request', ['data' => $this->sanitizeLogData($data)]);
             
-            $response = $this->mpesa->reversal([
+            $params = [
                 'transactionID' => $data['transaction_id'],
                 'amount' => $data['amount'],
                 'recieverIdentifierType' => $data['receiver_identifier_type'] ?? 4,
                 'remarks' => $data['remarks'] ?? 'Reversal'
-            ]);
+            ];
+            
+            // Add result and timeout URLs if provided
+            if (isset($data['result_url'])) {
+                $params['ResultURL'] = $data['result_url'];
+            }
+            if (isset($data['timeout_url'])) {
+                $params['TimeoutURL'] = $data['timeout_url'];
+            }
+            
+            $response = $this->mpesa->reversal($params);
             
             Log::info('Reversal Response', ['response' => $response]);
             

@@ -35,6 +35,7 @@ class MpesaController extends Controller
             'phone_number' => 'required|string|regex:/^254[0-9]{9}$/',
             'account_reference' => 'nullable|string|max:12',
             'transaction_desc' => 'nullable|string|max:13',
+            'callback_url' => 'nullable|url',
         ]);
         
         $result = $this->mpesaService->stkPush($validated);
@@ -111,6 +112,8 @@ class MpesaController extends Controller
             'remarks' => 'nullable|string',
             'occasion' => 'nullable|string',
             'command_id' => 'nullable|in:BusinessPayment,SalaryPayment,PromotionPayment',
+            'result_url' => 'nullable|url',
+            'timeout_url' => 'nullable|url',
         ]);
         
         $result = $this->mpesaService->b2c($validated);
@@ -132,6 +135,8 @@ class MpesaController extends Controller
             'account_reference' => 'nullable|string',
             'remarks' => 'nullable|string',
             'command_id' => 'nullable|in:BusinessPayBill,BusinessBuyGoods,DisburseFundsToBusiness,BusinessToBusinessTransfer,MerchantToMerchantTransfer',
+            'result_url' => 'nullable|url',
+            'timeout_url' => 'nullable|url',
         ]);
         
         $result = $this->mpesaService->b2b($validated);
@@ -150,6 +155,8 @@ class MpesaController extends Controller
         $validated = $request->validate([
             'remarks' => 'nullable|string',
             'identifier_type' => 'nullable|in:1,2,4',
+            'result_url' => 'nullable|url',
+            'timeout_url' => 'nullable|url',
         ]);
         
         $result = $this->mpesaService->accountBalance($validated);
@@ -169,6 +176,8 @@ class MpesaController extends Controller
             'transaction_id' => 'required|string',
             'identifier_type' => 'nullable|in:1,2,4',
             'remarks' => 'nullable|string',
+            'result_url' => 'nullable|url',
+            'timeout_url' => 'nullable|url',
         ]);
         
         $result = $this->mpesaService->transactionStatus($validated);
@@ -189,6 +198,8 @@ class MpesaController extends Controller
             'amount' => 'required|numeric|min:1',
             'receiver_identifier_type' => 'nullable|in:1,2,4,11',
             'remarks' => 'nullable|string',
+            'result_url' => 'nullable|url',
+            'timeout_url' => 'nullable|url',
         ]);
         
         $result = $this->mpesaService->reversal($validated);
