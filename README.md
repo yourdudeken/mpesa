@@ -9,14 +9,14 @@ A comprehensive PHP package for integrating with Safaricom's M-Pesa DARAJA API. 
 
 ## Features
 
-✅ **Complete API Coverage** - All M-Pesa DARAJA API endpoints including B2Pochi  
-✅ **Easy Configuration** - Simple configuration file setup  
-✅ **Composer Support** - Install via Composer or use standalone  
-✅ **Separate Environments** - Independent production and sandbox directories  
-✅ **Independent Testing** - Test each environment separately  
-✅ **Well Documented** - Comprehensive documentation for each API  
-✅ **Fully Tested** - Includes PHPUnit tests for all APIs  
-✅ **REST API Wrapper** - Optional REST API with authentication and rate limiting  
+ **Complete API Coverage** - All M-Pesa DARAJA API endpoints including B2Pochi  
+ **Easy Configuration** - Simple configuration file setup  
+ **Composer Support** - Install via Composer or use standalone  
+ **Separate Environments** - Independent production and sandbox directories  
+ **Independent Testing** - Test each environment separately  
+ **Well Documented** - Comprehensive documentation for each API  
+ **Fully Tested** - Includes PHPUnit tests for all APIs  
+ **REST API Wrapper** - Optional REST API with authentication and rate limiting  
 
 ## Table of Contents
 
@@ -348,10 +348,10 @@ Both environments include comprehensive unit tests for:
 
 ### Benefits of Separate Test Environments
 
-- ✅ **Isolation** - Each environment has its own dependencies
-- ✅ **Independent Testing** - Test sandbox and production separately
-- ✅ **No Conflicts** - Avoid configuration conflicts
-- ✅ **Easy Switching** - Simply change directories
+-  **Isolation** - Each environment has its own dependencies
+-  **Independent Testing** - Test sandbox and production separately
+-  **No Conflicts** - Avoid configuration conflicts
+-  **Easy Switching** - Simply change directories
 
 For detailed testing instructions, see [TESTING.md](TESTING.md)
 
