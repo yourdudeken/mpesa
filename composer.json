@@ -1,14 +1,13 @@
 {
-    "name": "yourdudeken/mpesa-sandbox",
-    "description": "M-Pesa API implementation - Sandbox Environment (Laravel API)",
+    "name": "yourdudeken/mpesa-gateway",
+    "description": "M-Pesa API Gateway - RESTful API for M-Pesa integration",
     "type": "project",
     "keywords": [
         "mpesa",
-        "safaricom",
-        "transactions",
         "api",
-        "sandbox",
-        "laravel"
+        "gateway",
+        "safaricom",
+        "payment"
     ],
     "license": "MIT",
     "authors": [
@@ -18,58 +17,23 @@
         }
     ],
     "require": {
-        "php": "^8.1|^8.2|^8.3",
-        "laravel/framework": "^11.0",
-        "guzzlehttp/guzzle": "^7.2"
-    },
-    "require-dev": {
-        "mockery/mockery": "^1.6",
-        "phpunit/phpunit": "^10.5",
-        "fakerphp/faker": "^1.23",
-        "laravel/pint": "^1.13",
-        "nunomaduro/collision": "^8.1"
+        "php": ">=7.4",
+        "vlucas/phpdotenv": "^5.5"
     },
     "autoload": {
         "psr-4": {
-            "App\\": "app/",
-            "Yourdudeken\\Mpesa\\": "services/Mpesa/",
-            "Database\\Factories\\": "database/factories/",
-            "Database\\Seeders\\": "database/seeders/"
-        }
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "Tests\\": "tests/",
-            "Yourdudeken\\Mpesa\\Tests\\": "tests/"
+            "Yourdudeken\\Mpesa\\": "Mpesa/",
+            "Gateway\\": "gateway/"
         }
     },
     "scripts": {
-        "post-autoload-dump": [
-            "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
-            "@php artisan package:discover --ansi"
-        ],
-        "post-update-cmd": [
-            "@php artisan vendor:publish --tag=laravel-assets --ansi --force"
-        ],
-        "post-root-package-install": [
-            "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
-        ],
-        "post-create-project-cmd": [
-            "@php artisan key:generate --ansi"
-        ]
-    },
-    "extra": {
-        "laravel": {
-            "dont-discover": []
-        }
+        "test": "cd gateway && ./test.sh",
+        "serve": "cd gateway && php -S localhost:8000"
     },
     "config": {
         "optimize-autoloader": true,
         "preferred-install": "dist",
-        "sort-packages": true,
-        "allow-plugins": {
-            "php-http/discovery": true
-        }
+        "sort-packages": true
     },
     "minimum-stability": "stable",
     "prefer-stable": true
