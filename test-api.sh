@@ -27,9 +27,9 @@ echo "$BODY" | jq '.' 2>/dev/null || echo "$BODY"
 echo ""
 
 if [ "$HTTP_CODE" == "200" ]; then
-    echo "✅ Health check passed"
+    echo " Health check passed"
 else
-    echo "❌ Health check failed"
+    echo " Health check failed"
 fi
 
 echo ""
@@ -53,9 +53,9 @@ echo "$BODY" | jq '.' 2>/dev/null || echo "$BODY"
 echo ""
 
 if [ "$HTTP_CODE" == "422" ]; then
-    echo "✅ Validation working correctly"
+    echo " Validation working correctly"
 else
-    echo "❌ Validation test failed"
+    echo " Validation test failed"
 fi
 
 echo ""
@@ -84,9 +84,9 @@ echo "$BODY" | jq '.' 2>/dev/null || echo "$BODY"
 echo ""
 
 if [ "$HTTP_CODE" == "200" ] || [ "$HTTP_CODE" == "400" ]; then
-    echo "✅ STK Push endpoint working (may need M-Pesa config)"
+    echo " STK Push endpoint working (may need M-Pesa config)"
 else
-    echo "❌ STK Push test failed"
+    echo " STK Push test failed"
 fi
 
 echo ""
@@ -110,9 +110,9 @@ echo "$BODY" | jq '.' 2>/dev/null || echo "$BODY"
 echo ""
 
 if [ "$HTTP_CODE" == "200" ] || [ "$HTTP_CODE" == "400" ]; then
-    echo "✅ STK Query endpoint working"
+    echo " STK Query endpoint working"
 else
-    echo "❌ STK Query test failed"
+    echo " STK Query test failed"
 fi
 
 echo ""
@@ -140,9 +140,9 @@ echo "$BODY" | jq '.' 2>/dev/null || echo "$BODY"
 echo ""
 
 if [ "$HTTP_CODE" == "200" ] || [ "$HTTP_CODE" == "400" ]; then
-    echo "✅ B2C endpoint working"
+    echo " B2C endpoint working"
 else
-    echo "❌ B2C test failed"
+    echo " B2C test failed"
 fi
 
 echo ""
@@ -170,9 +170,9 @@ echo "$BODY" | jq '.' 2>/dev/null || echo "$BODY"
 echo ""
 
 if [ "$HTTP_CODE" == "200" ] || [ "$HTTP_CODE" == "400" ]; then
-    echo "✅ B2B endpoint working"
+    echo " B2B endpoint working"
 else
-    echo "❌ B2B test failed"
+    echo " B2B test failed"
 fi
 
 echo ""
@@ -196,9 +196,9 @@ echo "$BODY" | jq '.' 2>/dev/null || echo "$BODY"
 echo ""
 
 if [ "$HTTP_CODE" == "200" ] || [ "$HTTP_CODE" == "400" ]; then
-    echo "✅ Balance endpoint working"
+    echo " Balance endpoint working"
 else
-    echo "❌ Balance test failed"
+    echo " Balance test failed"
 fi
 
 echo ""
@@ -222,9 +222,9 @@ echo "$BODY" | jq '.' 2>/dev/null || echo "$BODY"
 echo ""
 
 if [ "$HTTP_CODE" == "200" ] || [ "$HTTP_CODE" == "400" ]; then
-    echo "✅ Transaction Status endpoint working"
+    echo " Transaction Status endpoint working"
 else
-    echo "❌ Transaction Status test failed"
+    echo " Transaction Status test failed"
 fi
 
 echo ""
@@ -251,9 +251,9 @@ echo "$BODY" | jq '.' 2>/dev/null || echo "$BODY"
 echo ""
 
 if [ "$HTTP_CODE" == "200" ] || [ "$HTTP_CODE" == "400" ]; then
-    echo "✅ Reversal endpoint working"
+    echo " Reversal endpoint working"
 else
-    echo "❌ Reversal test failed"
+    echo " Reversal test failed"
 fi
 
 echo ""
@@ -280,18 +280,18 @@ echo "$BODY" | jq '.' 2>/dev/null || echo "$BODY"
 echo ""
 
 if [ "$HTTP_CODE" == "200" ] || [ "$HTTP_CODE" == "400" ]; then
-    echo "✅ C2B Register endpoint working"
+    echo " C2B Register endpoint working"
 else
-    echo "❌ C2B Register test failed"
+    echo " C2B Register test failed"
 fi
 
 echo ""
 echo "========================================="
 echo ""
-echo "📊 Test Summary"
+echo " Test Summary"
 echo "========================================="
 echo ""
-echo "✅ Endpoints Tested:"
+echo " Endpoints Tested:"
 echo "   1. GET  /api/health"
 echo "   2. POST /api/mpesa/stk-push"
 echo "   3. POST /api/mpesa/stk-query"
@@ -302,7 +302,7 @@ echo "   7. POST /api/mpesa/transaction-status"
 echo "   8. POST /api/mpesa/reversal"
 echo "   9. POST /api/mpesa/c2b/register"
 echo ""
-echo "💡 Notes:"
+echo " Notes:"
 echo "   - 200: Success"
 echo "   - 400: M-Pesa SDK validation (config needed)"
 echo "   - 422: Laravel validation error"
