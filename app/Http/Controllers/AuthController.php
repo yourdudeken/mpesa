@@ -15,7 +15,7 @@ class AuthController extends Controller
     public function showLogin()
     {
         if (Session::has('authenticated')) {
-            return redirect('/');
+            return redirect('/merchants');
         }
         
         return view('auth.login');
@@ -83,7 +83,7 @@ class AuthController extends Controller
                 'user_agent' => $request->userAgent()
             ]);
             
-            return redirect('/')->with('success', 'Login successful');
+            return redirect('/merchants')->with('success', 'Login successful');
         }
         
         // Log failed login attempt
@@ -135,7 +135,7 @@ class AuthController extends Controller
                 'user_agent' => $request->userAgent()
             ]);
             
-            return redirect('/')->with('success', 'Account created successfully')
+            return redirect('/merchants')->with('success', 'Account created successfully')
                                ->with('api_key', $merchant->api_key);
         } catch (\Exception $e) {
             \Log::error('Signup failed', [

@@ -16,7 +16,6 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'merchant.auth' => \App\Http\Middleware\MerchantAuth::class,
             'throttle.login' => \App\Http\Middleware\ThrottleLogin::class,
-            'api.key' => \App\Http\Middleware\ApiKeyAuth::class,
         ]);
         
         // Add global security headers
