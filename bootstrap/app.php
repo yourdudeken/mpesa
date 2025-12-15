@@ -12,9 +12,15 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        // Register middleware aliases
         $middleware->alias([
             'merchant.auth' => \App\Http\Middleware\MerchantAuth::class,
+            'throttle.login' => \App\Http\Middleware\ThrottleLogin::class,
+            'api.key' => \App\Http\Middleware\ApiKeyAuth::class,
         ]);
+        
+        // Add global security headers
+        $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

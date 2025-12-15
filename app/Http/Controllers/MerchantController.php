@@ -121,6 +121,61 @@ class MerchantController extends Controller
     }
 
     /**
+     * Show edit form for a merchant
+     */
+    public function edit($id)
+    {
+        $merchant = Merchant::findOrFail($id);
+        return view('merchants.edit', compact('merchant'));
+    }
+
+    /**
+     * Update a merchant
+     */
+    public function update(Request $request, $id)
+    {
+        try {
+            $merchant = Merchant::findOrFail($id);
+            
+            $validated = $request->validate([
+                'merchant_name' => [
+                    'required',
+                    'string',
+                    'max:255',
+                    Rule::unique('merchants', 'merchant_name')->ignore($merchant->id)
+                ],
+                'mpesa_shortcode' => 'required|string|max:20',
+                'mpesa_passkey' => 'required|string',
+                'mpesa_initiator_name' => 'required|string|max:255',
+                'mpesa_initiator_password' => 'required|string',
+                'mpesa_consumer_key' => 'required|string',
+                'mpesa_consumer_secret' => 'required|string',
+                'environment' => 'required|in:sandbox,production',
+            ]);
+
+            $merchant->update($validated);
+
+            Log::info('Merchant updated successfully', [
+                'merchant_id' => $merchant->id,
+                'merchant_name' => $merchant->merchant_name,
+            ]);
+
+            return redirect('/merchants')->with('success', 'Merchant updated successfully');
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return back()->withErrors($e->errors())->withInput();
+
+        } catch (\Exception $e) {
+            Log::error('Failed to update merchant', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return back()->with('error', 'Failed to update merchant: ' . $e->getMessage())->withInput();
+        }
+    }
+
+    /**
      * Regenerate API key for a merchant
      */
     public function regenerateApiKey(Request $request, $id): JsonResponse

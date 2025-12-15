@@ -261,14 +261,22 @@
 
     <div class="card">
         <div class="card-header">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
                 <div>
                     <h2>All Merchants</h2>
                     <p>View and manage your merchant accounts</p>
                 </div>
-                <a href="/" class="btn btn-primary">
-                    Add New Merchant
-                </a>
+                <div style="display: flex; gap: 0.5rem;">
+                    <a href="/" class="btn btn-primary">
+                        Add New Merchant
+                    </a>
+                    <form method="POST" action="{{ route('logout') }}" style="display: inline;">
+                        @csrf
+                        <button type="submit" class="btn btn-secondary">
+                            Logout
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
 
@@ -321,9 +329,16 @@
                     </div>
 
                     <div class="merchant-actions">
+                        <a 
+                            href="{{ route('merchants.edit', $merchant->id) }}" 
+                            class="btn btn-sm btn-primary"
+                            style="text-decoration: none; text-align: center;"
+                        >
+                            Edit
+                        </a>
                         <button 
                             onclick="toggleStatus({{ $merchant->id }}, {{ $merchant->is_active ? 'true' : 'false' }})" 
-                            class="btn btn-sm {{ $merchant->is_active ? 'btn-warning' : 'btn-primary' }}"
+                            class="btn btn-sm {{ $merchant->is_active ? 'btn-warning' : 'btn-secondary' }}"
                         >
                             {{ $merchant->is_active ? 'Deactivate' : 'Activate' }}
                         </button>
@@ -336,9 +351,8 @@
                         <button 
                             onclick="deleteMerchant({{ $merchant->id }}, '{{ $merchant->merchant_name }}')" 
                             class="btn btn-sm btn-danger"
-                            style="grid-column: span 2;"
                         >
-                            Delete Merchant
+                            Delete
                         </button>
                     </div>
 

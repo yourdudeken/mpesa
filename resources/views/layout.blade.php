@@ -211,6 +211,13 @@
             box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
         }
 
+        .error-text {
+            display: block;
+            color: var(--danger);
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+        }
+
         /* Buttons */
         .btn {
             display: inline-flex;

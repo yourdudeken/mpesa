@@ -12,10 +12,21 @@
         <p>Create your merchant account and start accepting payments</p>
     </div>
 
+
     <div class="card">
         <div class="card-header">
-            <h2>Register New Merchant</h2>
-            <p>Enter your M-Pesa credentials to create a merchant account. All sensitive data is encrypted.</p>
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                <div>
+                    <h2>Register New Merchant</h2>
+                    <p>Enter your M-Pesa credentials to create a merchant account. All sensitive data is encrypted.</p>
+                </div>
+                <form method="POST" action="{{ route('logout') }}" style="display: inline;">
+                    @csrf
+                    <button type="submit" class="btn btn-secondary" style="padding: 0.75rem 1.5rem;">
+                        Logout
+                    </button>
+                </form>
+            </div>
         </div>
 
         <div id="alertContainer"></div>

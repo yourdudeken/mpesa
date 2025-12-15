@@ -99,7 +99,7 @@ return [
         'validation_url' => null, // Passed with request
         'responseType' => 'Completed',
         'short_code' => env('MPESA_SHORTCODE'),
-        'test_phone_number' => env('MPESA_TEST_PHONE', '254708374149'),
+        'test_phone_number' => null, // Passed with request
         'default_command_id' => 'CustomerPayBillOnline'
     ],
 
@@ -114,7 +114,7 @@ return [
         'default_command_id' => 'BusinessPayment',
         'initiator_password' => env('MPESA_INITIATOR_PASSWORD'),
         'short_code' => env('MPESA_SHORTCODE'),
-        'test_phone_number' => env('MPESA_TEST_PHONE', '254708374149'),
+        'test_phone_number' => null, // Passed with request
         'result_url' => null, // Passed with request
         'timeout_url' => null // Passed with request
     ],
@@ -130,7 +130,7 @@ return [
         'default_command_id' => 'BusinessPayBill',
         'initiator_password' => env('MPESA_INITIATOR_PASSWORD'),
         'short_code' => env('MPESA_SHORTCODE'),
-        'test_phone_number' => env('MPESA_TEST_PHONE', '254708374149'),
+        'test_phone_number' => null, // Passed with request
         'result_url' => null, // Passed with request
         'timeout_url' => null // Passed with request
     ],
