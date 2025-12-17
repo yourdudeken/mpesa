@@ -273,4 +273,30 @@ return [
         'timeout_url' => ''
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | B2Pochi API Config
+    |--------------------------------------------------------------------------
+    |
+    | This is configurations that is required by Safaricom's B2Pochi Api
+    | 
+    |
+    */
+
+    'b2pochi' => [
+        'initiator_name' => 'testapi0297',
+
+        'initiator_password' => 'YAL2yKrn',
+
+        'default_command_id' => 'BusinessPayToPochi',
+
+        'short_code' => '600256',
+
+        'test_phone_number' => '254708374149',
+
+        'result_url' => '',
+
+        'timeout_url' => ''
+    ],
+
 ];

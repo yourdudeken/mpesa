@@ -82,6 +82,8 @@ try {
     // $mpesa->B2C([])
     
     // $mpesa->B2B([]);
+
+    // $mpesa->B2Pochi([]);
     
     // $mpesa->accountBalance([])
     
@@ -136,19 +138,25 @@ This endpoint allows merchants to transfer funds from business to business accou
 #### &nbsp; &nbsp; How to implement it?
 [Read docs here](docs/B2B.md).
 
-### 6. [Transaction Status](https://developer.safaricom.co.ke/docs#transaction-status)
+### 6. [B2Pochi](https://developer.safaricom.co.ke/docs)
+#### &nbsp; &nbsp; What it is?
+This endpoint enables businesses to send money directly to customers' M-Pesa Pochi accounts. Pochi is a virtual wallet within M-Pesa that allows users to save money separately from their main M-Pesa balance. Use cases include savings programs, rewards, and targeted payments to customer savings accounts.
+#### &nbsp; &nbsp; How to implement it?
+[Read docs here](docs/B2Pochi.md).
+
+### 7. [Transaction Status](https://developer.safaricom.co.ke/docs#transaction-status)
 #### &nbsp; &nbsp; What it is?
 This endpoint enables developers to initiate status check of a B2B, B2C and C2B transactions. It really comes in handy where one party in a transactions fails/claims not to have received an acknowledgment for a transaction.
 #### &nbsp; &nbsp; How to implement it?
 [Read docs here](docs/TransactionStatus.md).
 
-### 7. [Reverse API](https://developer.safaricom.co.ke/docs#reversal)
+### 8. [Reverse API](https://developer.safaricom.co.ke/docs#reversal)
 #### &nbsp; &nbsp; What it is?
 This endpoint enables merchants to reverse a B2B, B2C or C2B transaction. It allows automation of reversal of erronous payment to a merchant's paybill/till number or payments to goods never delivered.
 #### &nbsp; &nbsp; How to implement it?
 [Read docs here](docs/Reversal.md).
 
-### 8. [Account Balance](https://developer.safaricom.co.ke/docs#account-balance-api)
+### 9. [Account Balance](https://developer.safaricom.co.ke/docs#account-balance-api)
 #### &nbsp; &nbsp; What it is?
 This endpoint enables merchants to query their Till/Paybill numbers account balance on demand.
 #### &nbsp; &nbsp; How to implement it?

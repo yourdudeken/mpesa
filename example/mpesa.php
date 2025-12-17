@@ -18,6 +18,7 @@ try {
     ]);
 
 
+
     // $mpesa->STKStatus([]);
     
     // $mpesa->C2BRegister([]);
@@ -29,6 +30,8 @@ try {
     // $mpesa->B2C([])
     
     // $mpesa->B2B([]);
+
+    // $mpesa->B2Pochi([]);
     
     // $mpesa->accountBalance([])
     
