@@ -12,7 +12,7 @@ use Mpesa\Exceptions\MpesaException;
 
 class C2BRegisterTest extends TestCase{
 
-    public function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         $this->cleanCache();
@@ -45,8 +45,8 @@ class C2BRegisterTest extends TestCase{
         $this->httpClient->method('getInfo')
         ->will($this->returnValue(500));
 
-        $this->expectException(MpesaException::class);
-        // Test with null params should throw an error.
+        // Test should throw ConfigurationException because ResponseType is required but not provided
+        $this->expectException(ConfigurationException::class);
         $results = $b2c->submit([
             'confirmationURL' => "https://example.com/v1/payments/callback",
             'validationURL' => "https://example.com/v1/payments/callback"

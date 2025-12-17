@@ -90,7 +90,7 @@ class Config implements ArrayAccess,ConfigurationStore
         }
 
         if (strpos($key, '.') === false) {
-            return $array[$key] ?: $this->value($default);
+            return isset($array[$key]) ? $array[$key] : $this->value($default);
         }
  
         foreach (explode('.', $key) as $segment) {

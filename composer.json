@@ -1,12 +1,20 @@
 {
     "name": "yourdudeken/mpesa",
-    "description": "M-Pesa API implementation",
+    "description": "A comprehensive PHP package for Safaricom M-Pesa DARAJA API integration",
     "type": "library",
     "keywords": [
         "mpesa",
         "safaricom",
+        "daraja",
+        "stk-push",
+        "b2c",
+        "b2b",
+        "c2b",
+        "b2pochi",
         "transactions",
-        "api"
+        "api",
+        "payment",
+        "kenya"
     ],
     "license": "MIT",
     "authors": [
@@ -15,10 +23,15 @@
             "email": "smodavprivate@gmail.com"
         },
         {
-            "name": "Yourdudeken",
-            "email": "yourdudeken@gmail.com"
+            "name": "Kennedy Muthengi",
+            "email": "kenmwendwamuthengi@gmail.com"
         }
     ],
+    "homepage": "https://github.com/yourdudeken/mpesa",
+    "support": {
+        "issues": "https://github.com/yourdudeken/mpesa/issues",
+        "source": "https://github.com/yourdudeken/mpesa"
+    },
     "autoload": {
         "psr-4": {
             "Mpesa\\": "src/Mpesa/"
@@ -30,12 +43,23 @@
         }
     },
     "require": {
-        "php": ">=5.6.0"
+        "php": ">=7.0.0",
+        "ext-curl": "*",
+        "ext-json": "*",
+        "ext-openssl": "*"
     },
     "require-dev": {
-        "mockery/mockery": "dev-master",
-        "phpunit/phpunit": "~5.7|~6.2",
-        "jesseschalken/autoload-generator": "^0.2.3"
+        "mockery/mockery": "^1.5",
+        "phpunit/phpunit": "^9.0"
     },
-    "minimum-stability": "stable"
+    "scripts": {
+        "test": "phpunit",
+        "test-coverage": "phpunit --coverage-html coverage"
+    },
+    "config": {
+        "sort-packages": true,
+        "optimize-autoloader": true
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
 }

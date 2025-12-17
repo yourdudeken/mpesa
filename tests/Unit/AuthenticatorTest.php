@@ -10,7 +10,7 @@ use Mpesa\Exceptions\ConfigurationException;
 
 class AuthenticatorTest extends TestCase{
 
-    public function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         $this->cleanCache();
@@ -40,6 +40,6 @@ class AuthenticatorTest extends TestCase{
         $auth->setEngine($this->engine);
         
         $token  = $auth->authenticate();
-        $this->assertInternalType('string', $token);
+        $this->assertIsString($token);
     }
 }
