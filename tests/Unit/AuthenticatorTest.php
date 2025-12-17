@@ -40,6 +40,6 @@ class AuthenticatorTest extends TestCase{
         $auth->setEngine($this->engine);
         
         $token  = $auth->authenticate();
-        $this->assertInternalType('string', $token);
+        $this->assertIsString($token);
     }
 }
