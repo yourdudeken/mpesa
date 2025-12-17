@@ -214,8 +214,8 @@ class Core
         if (empty($pubKeyFile)) {
             $isSandbox = $this->config->get('mpesa.is_sandbox', true);
             $pubKeyFile = $isSandbox 
-                ? __DIR__ . '/../config/SandboxCertificate.cer'
-                : __DIR__ . '/../config/ProductionCertificate.cer';
+                ? __DIR__ . '/../../config/SandboxCertificate.cer'
+                : __DIR__ . '/../../config/ProductionCertificate.cer';
         }
         
         $pubKey = '';

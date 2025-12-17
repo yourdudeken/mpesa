@@ -3,16 +3,16 @@
 namespace Mpesa\Tests\Unit;
 
 use Mpesa\Tests\TestCase;
-use Mpesa\B2C\Pay;
+use Mpesa\LipaNaMpesaOnline\STKStatusQuery;
 use Mpesa\Auth\Authenticator;
 use Mpesa\Engine\Core;
 use Mpesa\Contracts\ConfigurationStore;
 use Mpesa\Exceptions\ConfigurationException;
 use Mpesa\Exceptions\MpesaException;
 
-class B2CTest extends TestCase{
+class STKStatusQueryTest extends TestCase{
 
-    public function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         $this->cleanCache();
@@ -30,7 +30,7 @@ class B2CTest extends TestCase{
      * 
      */
     public function testSubmitWithoutParams(){
-        $b2c = new Pay($this->engine);
+        $b2c = new STKStatusQuery($this->engine);
         $this->expectException(ConfigurationException::class);
         $results = $b2c->submit();
     }
@@ -40,18 +40,15 @@ class B2CTest extends TestCase{
      * 
      */
     public function testSubmitWithParams(){
-        $b2c = new Pay($this->engine);
+        $b2c = new STKStatusQuery($this->engine);
+        
         $this->httpClient->method('getInfo')
         ->will($this->returnValue(500));
-        
+
         $this->expectException(MpesaException::class);
         // Test with null params should throw an error.
         $results = $b2c->submit([
-            'amount' => 20,
-            'partyB' => '254723731241',
-            'remarks' => "User X consultation fee",
-            'resultURL' => "https://example.com/v1/payments/callback",
-            'queueTimeOutURL' => "https://example.com/v1/payments/callback"
+            'CheckoutRequestID' => '254723731241',
         ]);
         fwrite(STDERR, print_r($results, TRUE));
     }
