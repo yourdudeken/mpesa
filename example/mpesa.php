@@ -1,7 +1,7 @@
 <?php
 require "../src/autoload.php";
 
-use Yourdudeken\Mpesa\Init as Mpesa;
+use Mpesa\Init as Mpesa;
 
 // You can also pass your own config here.
 // Check the folder ./config/mpesa.php for reference
@@ -30,8 +30,6 @@ try {
     
     // $mpesa->B2B([]);
     
-    // $mpesa->B2Pochi([]);  // NEW: Send to Pochi savings
-    
     // $mpesa->accountBalance([])
     
     // $mpesa->reversal([]);
@@ -45,4 +43,3 @@ try {
 
 header('Content-Type: application/json');
 echo json_encode($response);
-

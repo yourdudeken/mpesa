@@ -139,7 +139,7 @@ return [
 
         'validation_url' => '',
 
-        'responseType' => 'Completed',
+        'on_timeout' => 'Completed',
 
         'short_code' => '600256',
 
@@ -163,7 +163,7 @@ return [
 
         'default_command_id' => 'BusinessPayment',
 
-        'initiator_password' => 'YAL2yKrn',
+        'security_credential' => 'YAL2yKrn',
 
         'short_code' => '602973',
 
@@ -189,7 +189,7 @@ return [
 
         'default_command_id' => 'BusinessPayBill',
 
-        'initiator_password' => 'YAL2yKrn',
+        'security_credential' => 'YAL2yKrn',
 
         'short_code' => '600256',
 
@@ -213,7 +213,7 @@ return [
     'account_balance' => [
         'initiator_name' => 'testapi0297',
 
-        'initiator_password' => 'YAL2yKrn',
+        'security_credential' => 'YAL2yKrn',
 
         'default_command_id' => 'AccountBalance',
 
@@ -237,7 +237,7 @@ return [
     'transaction_status' => [
         'initiator_name' => 'testapi0297',
 
-        'initiator_password' => 'YAL2yKrn',
+        'security_credential' => 'YAL2yKrn',
 
         'default_command_id' => 'TransactionStatusQuery',
 
@@ -261,7 +261,7 @@ return [
     'reversal' => [
         'initiator_name' => 'testapi0297',
 
-        'initiator_password' => 'YAL2yKrn',
+        'security_credential' => 'YAL2yKrn',
 
         'default_command_id' => 'TransactionReversal',
 
