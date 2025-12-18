@@ -12,30 +12,30 @@ echo ""
 
 # Check if GitHub CLI is installed
 if ! command -v gh &> /dev/null; then
-    echo " GitHub CLI (gh) is not installed."
+    echo "[ERROR] GitHub CLI (gh) is not installed."
     echo "Please install it from: https://cli.github.com/"
     echo ""
     echo "Alternatively, you can manually add secrets via:"
-    echo "GitHub Repository → Settings → Secrets and variables → Actions"
+    echo "GitHub Repository -> Settings -> Secrets and variables -> Actions"
     exit 1
 fi
 
-echo " GitHub CLI found"
+echo "[OK] GitHub CLI found"
 echo ""
 
 # Check if user is authenticated
 if ! gh auth status &> /dev/null; then
-    echo " Not authenticated with GitHub CLI"
+    echo "[ERROR] Not authenticated with GitHub CLI"
     echo "Please run: gh auth login"
     exit 1
 fi
 
-echo " Authenticated with GitHub"
+echo "[OK] Authenticated with GitHub"
 echo ""
 
 # Get repository information
 REPO=$(gh repo view --json nameWithOwner -q .nameWithOwner)
-echo " Repository: $REPO"
+echo "[INFO] Repository: $REPO"
 echo ""
 
 # Packagist setup
@@ -61,9 +61,9 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     echo "$PACKAGIST_USERNAME" | gh secret set PACKAGIST_USERNAME
     echo "$PACKAGIST_TOKEN" | gh secret set PACKAGIST_TOKEN
     
-    echo " Packagist secrets configured"
+    echo "[OK] Packagist secrets configured"
 else
-    echo "  Skipping Packagist configuration"
+    echo "[SKIP] Skipping Packagist configuration"
     echo "You can add these secrets later via:"
     echo "  gh secret set PACKAGIST_USERNAME"
     echo "  gh secret set PACKAGIST_TOKEN"
@@ -84,5 +84,5 @@ echo "  git add ."
 echo "  git commit -m 'feat: add GitHub Actions CI/CD pipeline'"
 echo "  git push origin main"
 echo ""
-echo "For more information, see .github/CICD_SETUP.md"
+echo "For more information, see .github/README.md"
 echo ""
