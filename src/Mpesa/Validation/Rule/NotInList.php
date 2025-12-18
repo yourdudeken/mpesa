@@ -1,5 +1,5 @@
 <?php
-namespace Mpesa\Validation\Rule;
+namespace Yourdudeken\Mpesa\Validation\Rule;
 
 class NotInList extends InList
 {

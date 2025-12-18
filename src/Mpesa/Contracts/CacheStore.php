@@ -1,6 +1,6 @@
 <?php
 
-namespace Mpesa\Contracts;
+namespace Yourdudeken\Mpesa\Contracts;
 
 /**
  * Interface CacheStore

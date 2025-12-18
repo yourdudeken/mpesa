@@ -34,12 +34,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Mpesa\\": "src/Mpesa/"
+            "Yourdudeken\\Mpesa\\": "src/Mpesa/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Mpesa\\Tests\\": "tests/"
+            "Yourdudeken\\Mpesa\\Tests\\": "tests/"
         }
     },
     "require": {

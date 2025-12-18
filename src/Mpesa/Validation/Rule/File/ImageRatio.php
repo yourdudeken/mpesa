@@ -1,7 +1,7 @@
 <?php
-namespace Mpesa\Validation\Rule\File;
+namespace Yourdudeken\Mpesa\Validation\Rule\File;
 
-use Mpesa\Validation\Rule\AbstractRule;
+use Yourdudeken\Mpesa\Validation\Rule\AbstractRule;
 
 class ImageRatio extends AbstractRule
 {

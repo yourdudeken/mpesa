@@ -1,7 +1,7 @@
 <?php
 require "../src/autoload.php";
 
-use Mpesa\Init as Mpesa;
+use Yourdudeken\Mpesa\Init as Mpesa;
 
 // You can also pass your own config here.
 // Check the folder ./config/mpesa.php for reference

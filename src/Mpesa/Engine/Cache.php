@@ -1,8 +1,8 @@
 <?php
 
-namespace Mpesa\Engine;
+namespace Yourdudeken\Mpesa\Engine;
 
-use Mpesa\Contracts\CacheStore;
+use Yourdudeken\Mpesa\Contracts\CacheStore;
 
 /**
  * Class Cache

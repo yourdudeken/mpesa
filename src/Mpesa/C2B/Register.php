@@ -1,9 +1,9 @@
 <?php
 
-namespace Mpesa\C2B;
+namespace Yourdudeken\Mpesa\C2B;
 
 use InvalidArgumentException;
-use Mpesa\Engine\Core;
+use Yourdudeken\Mpesa\Engine\Core;
 
 /**
  * Class Register.

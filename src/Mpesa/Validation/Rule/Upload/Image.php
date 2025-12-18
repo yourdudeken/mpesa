@@ -1,8 +1,8 @@
 <?php
 
-namespace Mpesa\Validation\Rule\Upload;
+namespace Yourdudeken\Mpesa\Validation\Rule\Upload;
 
-use Mpesa\Validation\Rule\AbstractRule;
+use Yourdudeken\Mpesa\Validation\Rule\AbstractRule;
 
 class Image extends AbstractRule
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace Mpesa\Exceptions;
+namespace Yourdudeken\Mpesa\Exceptions;
 
 use Exception;
 

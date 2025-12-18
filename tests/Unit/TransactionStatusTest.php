@@ -1,11 +1,11 @@
 <?php
 
-namespace Mpesa\Tests\Unit;
+namespace Yourdudeken\Mpesa\Tests\Unit;
 
-use Mpesa\Tests\TestCase;
-use Mpesa\TransactionStatus\TransactionStatus;
-use Mpesa\Exceptions\ConfigurationException;
-use Mpesa\Exceptions\MpesaException;
+use Yourdudeken\Mpesa\Tests\TestCase;
+use Yourdudeken\Mpesa\TransactionStatus\TransactionStatus;
+use Yourdudeken\Mpesa\Exceptions\ConfigurationException;
+use Yourdudeken\Mpesa\Exceptions\MpesaException;
 
 class TransactionStatusTest extends TestCase{
 

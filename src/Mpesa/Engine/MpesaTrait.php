@@ -1,17 +1,17 @@
 <?php
 
-namespace Mpesa\Engine;
+namespace Yourdudeken\Mpesa\Engine;
 
-use Mpesa\AccountBalance\Balance;
-use Mpesa\B2B\Pay;
-use Mpesa\B2C\Pay as B2CPay;
-use Mpesa\B2Pochi\Pay as B2PochiPay;
-use Mpesa\C2B\Register;
-use Mpesa\C2B\Simulate;
-use Mpesa\Reversal\Reversal;
-use Mpesa\TransactionStatus\TransactionStatus;
-use Mpesa\LipaNaMpesaOnline\STKPush;
-use Mpesa\LipaNaMpesaOnline\STKStatusQuery;
+use Yourdudeken\Mpesa\AccountBalance\Balance;
+use Yourdudeken\Mpesa\B2B\Pay;
+use Yourdudeken\Mpesa\B2C\Pay as B2CPay;
+use Yourdudeken\Mpesa\B2Pochi\Pay as B2PochiPay;
+use Yourdudeken\Mpesa\C2B\Register;
+use Yourdudeken\Mpesa\C2B\Simulate;
+use Yourdudeken\Mpesa\Reversal\Reversal;
+use Yourdudeken\Mpesa\TransactionStatus\TransactionStatus;
+use Yourdudeken\Mpesa\LipaNaMpesaOnline\STKPush;
+use Yourdudeken\Mpesa\LipaNaMpesaOnline\STKStatusQuery;
 
 trait MpesaTrait{
     public function STKPush($params = [],$appName='default'){

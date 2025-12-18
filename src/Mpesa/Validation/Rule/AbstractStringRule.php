@@ -1,6 +1,6 @@
 <?php
 
-namespace Mpesa\Validation\Rule;
+namespace Yourdudeken\Mpesa\Validation\Rule;
 
 abstract class AbstractStringRule extends AbstractRule
 {

@@ -44,7 +44,7 @@ composer require yourdudeken/mpesa
 <?php
 require "{PATHTOTHISLIBFOLDER}/src/autoload.php";
 
-use Mpesa\Init as Mpesa;
+use Yourdudeken\Mpesa\Init as Mpesa;
 ```
 
 ### Laravel Users
@@ -60,7 +60,7 @@ For Laravel-specific implementation with facades and service providers, check ou
 <?php
 require "vendor/autoload.php";
 
-use Mpesa\Init as Mpesa;
+use Yourdudeken\Mpesa\Init as Mpesa;
 
 // Initialize with default config
 $mpesa = new Mpesa();
@@ -313,7 +313,7 @@ Query your business account balance on demand.
 <?php
 require "vendor/autoload.php";
 
-use Mpesa\Init as Mpesa;
+use Yourdudeken\Mpesa\Init as Mpesa;
 
 $mpesa = new Mpesa();
 
@@ -403,7 +403,7 @@ echo json_encode(['ResultCode' => 0, 'ResultDesc' => 'Success']);
 <?php
 require "vendor/autoload.php";
 
-use Mpesa\Init as Mpesa;
+use Yourdudeken\Mpesa\Init as Mpesa;
 
 $mpesa = new Mpesa();
 

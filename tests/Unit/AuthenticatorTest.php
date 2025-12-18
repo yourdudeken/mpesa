@@ -1,12 +1,11 @@
 <?php
 
-namespace Mpesa\Tests\Unit;
+namespace Yourdudeken\Mpesa\Tests\Unit;
 
-use Mpesa\Auth\Authenticator;
-use Mpesa\Tests\TestCase;
-use Mpesa\Engine\Core;
-use Mpesa\Exceptions\ConfigurationException;
-
+use Yourdudeken\Mpesa\Auth\Authenticator;
+use Yourdudeken\Mpesa\Tests\TestCase;
+use Yourdudeken\Mpesa\Engine\Core;
+use Yourdudeken\Mpesa\Exceptions\ConfigurationException;
 
 class AuthenticatorTest extends TestCase{
 
