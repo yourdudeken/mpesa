@@ -1,24 +1,22 @@
-name: MPESA SDK CI
+name: MPESA SDK CI & Release
 
 on:
   push:
     branches: [ main ]
-    tags: [ 'v*.*.*' ]
   pull_request:
+    branches: [ main ]
 
 jobs:
   validate:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
-          coverage: none
 
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist
@@ -26,5 +24,28 @@ jobs:
       - name: Validate composer.json
         run: composer validate --strict
 
-      - name: Check PSR-4 autoloading
+      - name: Enforce PSR-4
         run: composer dump-autoload -o
+
+  release:
+    needs: validate
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node (for semantic-release)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install semantic-release
+        run: npm install -g semantic-release @semantic-release/git @semantic-release/github
+
+      - name: Run semantic release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: semantic-release
