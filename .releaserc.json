@@ -1,12 +1,154 @@
 {
-  "branches": [
-    "main"
-  ],
-  "tagFormat": "v${version}",
-  "plugins": [
-    "@semantic-release/commit-analyzer",
-    "@semantic-release/release-notes-generator",
-    "@semantic-release/git",
-    "@semantic-release/github"
-  ]
+    "branches": [
+        "main",
+        "master"
+    ],
+    "plugins": [
+        [
+            "@semantic-release/commit-analyzer",
+            {
+                "preset": "conventionalcommits",
+                "releaseRules": [
+                    {
+                        "type": "feat",
+                        "release": "minor"
+                    },
+                    {
+                        "type": "fix",
+                        "release": "patch"
+                    },
+                    {
+                        "type": "perf",
+                        "release": "patch"
+                    },
+                    {
+                        "type": "revert",
+                        "release": "patch"
+                    },
+                    {
+                        "type": "docs",
+                        "release": false
+                    },
+                    {
+                        "type": "style",
+                        "release": false
+                    },
+                    {
+                        "type": "refactor",
+                        "release": "patch"
+                    },
+                    {
+                        "type": "test",
+                        "release": false
+                    },
+                    {
+                        "type": "build",
+                        "release": false
+                    },
+                    {
+                        "type": "ci",
+                        "release": false
+                    },
+                    {
+                        "type": "chore",
+                        "release": false
+                    }
+                ],
+                "parserOpts": {
+                    "noteKeywords": [
+                        "BREAKING CHANGE",
+                        "BREAKING CHANGES"
+                    ]
+                }
+            }
+        ],
+        [
+            "@semantic-release/release-notes-generator",
+            {
+                "preset": "conventionalcommits",
+                "presetConfig": {
+                    "types": [
+                        {
+                            "type": "feat",
+                            "section": "✨ Features"
+                        },
+                        {
+                            "type": "fix",
+                            "section": "🐛 Bug Fixes"
+                        },
+                        {
+                            "type": "perf",
+                            "section": "⚡ Performance Improvements"
+                        },
+                        {
+                            "type": "revert",
+                            "section": "⏪ Reverts"
+                        },
+                        {
+                            "type": "docs",
+                            "section": "📚 Documentation",
+                            "hidden": false
+                        },
+                        {
+                            "type": "style",
+                            "section": "💎 Styles",
+                            "hidden": true
+                        },
+                        {
+                            "type": "refactor",
+                            "section": "♻️ Code Refactoring"
+                        },
+                        {
+                            "type": "test",
+                            "section": "✅ Tests",
+                            "hidden": true
+                        },
+                        {
+                            "type": "build",
+                            "section": "🏗️ Build System",
+                            "hidden": true
+                        },
+                        {
+                            "type": "ci",
+                            "section": "👷 CI/CD",
+                            "hidden": true
+                        },
+                        {
+                            "type": "chore",
+                            "section": "🔧 Chores",
+                            "hidden": true
+                        }
+                    ]
+                }
+            }
+        ],
+        [
+            "@semantic-release/changelog",
+            {
+                "changelogFile": "CHANGELOG.md",
+                "changelogTitle": "# Changelog\n\nAll notable changes to this project will be documented in this file.\n\nThe format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),\nand this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)."
+            }
+        ],
+        [
+            "@semantic-release/git",
+            {
+                "assets": [
+                    "CHANGELOG.md",
+                    "composer.json"
+                ],
+                "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
+            }
+        ],
+        [
+            "@semantic-release/github",
+            {
+                "successComment": "🎉 This ${issue.pull_request ? 'PR is included' : 'issue has been resolved'} in version ${nextRelease.version} 🎉\n\nThe release is available on:\n- [GitHub Releases](${releases.filter(r => r.name === 'GitHub release').map(r => r.url).join(', ')})\n- [Packagist](https://packagist.org/packages/yourdudeken/mpesa)\n\nThank you for your contribution! 🙏",
+                "failComment": false,
+                "labels": false,
+                "releasedLabels": [
+                    "released"
+                ]
+            }
+        ]
+    ]
 }

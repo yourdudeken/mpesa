@@ -1,0 +1,97 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+      - master
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        persist-credentials: false
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 'lts/*'
+    
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.3'
+        extensions: curl, json, openssl
+        tools: composer:v2
+    
+    - name: Install dependencies
+      run: composer install --prefer-dist --no-progress --no-dev --optimize-autoloader
+    
+    - name: Run tests
+      run: |
+        composer install --prefer-dist --no-progress
+        vendor/bin/phpunit
+    
+    - name: Install semantic-release
+      run: |
+        npm install -g \
+          semantic-release@latest \
+          @semantic-release/git@latest \
+          @semantic-release/changelog@latest \
+          @semantic-release/github@latest \
+          @semantic-release/commit-analyzer@latest \
+          @semantic-release/release-notes-generator@latest
+    
+    - name: Create .releaserc.json
+      run: |
+        cat > .releaserc.json << 'EOF'
+        {
+          "branches": ["main", "master"],
+          "plugins": [
+            "@semantic-release/commit-analyzer",
+            "@semantic-release/release-notes-generator",
+            "@semantic-release/changelog",
+            [
+              "@semantic-release/git",
+              {
+                "assets": ["CHANGELOG.md", "composer.json"],
+                "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
+              }
+            ],
+            "@semantic-release/github"
+          ]
+        }
+        EOF
+    
+    - name: Release
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GIT_AUTHOR_NAME: github-actions[bot]
+        GIT_AUTHOR_EMAIL: github-actions[bot]@users.noreply.github.com
+        GIT_COMMITTER_NAME: github-actions[bot]
+        GIT_COMMITTER_EMAIL: github-actions[bot]@users.noreply.github.com
+      run: npx semantic-release
+    
+    - name: Trigger Packagist update
+      if: success()
+      run: |
+        if [ -n "${{ secrets.PACKAGIST_USERNAME }}" ] && [ -n "${{ secrets.PACKAGIST_TOKEN }}" ]; then
+          curl -X POST -H "Content-Type: application/json" \
+            -d '{"username":"${{ secrets.PACKAGIST_USERNAME }}","apiToken":"${{ secrets.PACKAGIST_TOKEN }}"}' \
+            https://packagist.org/api/update-package?username=${{ secrets.PACKAGIST_USERNAME }}&apiToken=${{ secrets.PACKAGIST_TOKEN }}
+        else
+          echo "Packagist credentials not configured. Skipping Packagist update."
+        fi
+      continue-on-error: true
