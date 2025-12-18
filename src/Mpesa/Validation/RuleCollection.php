@@ -4,7 +4,14 @@ namespace Yourdudeken\Mpesa\Validation;
 
 class RuleCollection extends \SplObjectStorage
 {
-    public function attach(object $rule, mixed $data = null): void
+    /**
+     * Attach a rule to the collection
+     * 
+     * @param object $rule The rule to attach
+     * @param mixed $data Optional data
+     * @return void
+     */
+    public function attach($rule, $data = null): void
     {
         if ($this->contains($rule)) {
             return;
@@ -26,7 +33,13 @@ class RuleCollection extends \SplObjectStorage
         parent::attach($rule);
     }
 
-    public function getHash(object $rule): string
+    /**
+     * Get hash for a rule
+     * 
+     * @param object $rule The rule object
+     * @return string
+     */
+    public function getHash($rule): string
     {
         /* @var $rule Rule\AbstractValidator */
         return $rule->getUniqueId();
