@@ -50,6 +50,7 @@ jobs:
             @semantic-release/exec@^6
 
       - name: Release
+        id: semantic_release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GIT_AUTHOR_NAME: github-actions[bot]
@@ -57,6 +58,33 @@ jobs:
           GIT_COMMITTER_NAME: github-actions[bot]
           GIT_COMMITTER_EMAIL: github-actions[bot]@users.noreply.github.com
         run: npx semantic-release
+
+      - name: Create version branch
+        if: success()
+        run: |
+          # Get the latest tag (version)
+          VERSION=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          
+          if [ -n "$VERSION" ]; then
+            echo "Creating branch for version: $VERSION"
+            
+            # Check if branch already exists
+            if git ls-remote --heads origin "$VERSION" | grep -q "$VERSION"; then
+              echo "Branch $VERSION already exists, skipping creation"
+            else
+              # Create and push version branch
+              git checkout -b "$VERSION"
+              git push origin "$VERSION"
+              
+              # Switch back to main
+              git checkout main
+              
+              echo "Successfully created branch: $VERSION"
+            fi
+          else
+            echo "No version tag found, skipping branch creation"
+          fi
+
 
   packagist:
     name: Update Packagist
