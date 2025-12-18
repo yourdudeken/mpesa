@@ -4,7 +4,7 @@ namespace Yourdudeken\Mpesa\Validation;
 
 class RuleCollection extends \SplObjectStorage
 {
-    public function attach(object $rule, mixed $data = null): void
+    public function attach(object $rule, $data = null): void
     {
         if ($this->contains($rule)) {
             return;
