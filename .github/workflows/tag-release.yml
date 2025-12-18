@@ -1,0 +1,77 @@
+name: Tag Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build and Release
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.3'
+        extensions: curl, json, openssl
+        tools: composer:v2
+    
+    - name: Install dependencies
+      run: composer install --prefer-dist --no-progress --no-dev --optimize-autoloader
+    
+    - name: Run tests
+      run: |
+        composer install --prefer-dist --no-progress
+        vendor/bin/phpunit
+    
+    - name: Create release archive
+      run: |
+        mkdir -p build
+        rsync -av --exclude='.git' --exclude='tests' --exclude='.github' \
+          --exclude='phpunit.xml' --exclude='.gitignore' --exclude='build' \
+          --exclude='.phpunit.cache' --exclude='vendor' . build/mpesa/
+        cd build
+        zip -r mpesa-${{ github.ref_name }}.zip mpesa/
+    
+    - name: Extract release notes
+      id: extract_notes
+      run: |
+        if [ -f CHANGELOG.md ]; then
+          # Extract the latest version's notes from CHANGELOG
+          NOTES=$(awk '/^## \[/{if(p)exit;p=1;next} p' CHANGELOG.md | sed '/^$/d' || echo "Release ${{ github.ref_name }}")
+          echo "notes<<EOF" >> $GITHUB_OUTPUT
+          echo "$NOTES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+        else
+          echo "notes=Release ${{ github.ref_name }}" >> $GITHUB_OUTPUT
+        fi
+    
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        body: ${{ steps.extract_notes.outputs.notes }}
+        files: build/mpesa-${{ github.ref_name }}.zip
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Trigger Packagist update
+      if: success()
+      run: |
+        if [ -n "${{ secrets.PACKAGIST_USERNAME }}" ] && [ -n "${{ secrets.PACKAGIST_TOKEN }}" ]; then
+          curl -X POST -H "Content-Type: application/json" \
+            -d '{"username":"${{ secrets.PACKAGIST_USERNAME }}","apiToken":"${{ secrets.PACKAGIST_TOKEN }}"}' \
+            https://packagist.org/api/update-package?username=${{ secrets.PACKAGIST_USERNAME }}&apiToken=${{ secrets.PACKAGIST_TOKEN }}
+        else
+          echo "Packagist credentials not configured. Skipping Packagist update."
+        fi
+      continue-on-error: true

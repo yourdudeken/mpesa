@@ -1,9 +1,12 @@
 # M-PESA API Package
 
-[![Build Status](https://travis-ci.org/yourdudeken/mpesa.svg?branch=main)](https://travis-ci.org/yourdudeken/mpesa)
+[![CI](https://github.com/yourdudeken/mpesa/actions/workflows/ci.yml/badge.svg)](https://github.com/yourdudeken/mpesa/actions/workflows/ci.yml)
+[![Release](https://github.com/yourdudeken/mpesa/actions/workflows/release.yml/badge.svg)](https://github.com/yourdudeken/mpesa/actions/workflows/release.yml)
 [![Latest Stable Version](https://poser.pugx.org/yourdudeken/mpesa/v/stable.svg)](https://packagist.org/packages/yourdudeken/mpesa)
-[![Latest Unstable Version](https://poser.pugx.org/yourdudeken/mpesa/v/unstable.svg)](https://packagist.org/packages/yourdudeken/mpesa)
+[![Total Downloads](https://poser.pugx.org/yourdudeken/mpesa/downloads)](https://packagist.org/packages/yourdudeken/mpesa)
 [![License](https://poser.pugx.org/yourdudeken/mpesa/license.svg)](https://packagist.org/packages/yourdudeken/mpesa)
+[![PHP Version](https://img.shields.io/packagist/php-v/yourdudeken/mpesa.svg)](https://packagist.org/packages/yourdudeken/mpesa)
+[![codecov](https://codecov.io/gh/yourdudeken/mpesa/branch/main/graph/badge.svg)](https://codecov.io/gh/yourdudeken/mpesa)
 
 A comprehensive PHP package for integrating with Safaricom's M-Pesa DARAJA API. This package provides a simple, elegant interface for all M-Pesa API endpoints including STK Push, B2C, B2B, C2B, and more.
 
