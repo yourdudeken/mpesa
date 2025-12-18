@@ -26,7 +26,7 @@
   'Mpesa\\LipaNaMpesaOnline\\STKPush' => 'Mpesa/LipaNaMpesaOnline/STKPush.php',
   'Mpesa\\LipaNaMpesaOnline\\STKStatusQuery' => 'Mpesa/LipaNaMpesaOnline/STKStatusQuery.php',
   'Mpesa\\Reversal\\Reversal' => 'Mpesa/Reversal/Reversal.php',
-  'Mpesa\\Support\\Installer' => 'Mpesa/Packagist/Installer.php',
+  'Mpesa\\Support\\Installer' => 'Mpesa/Support/Installer.php',
   'Mpesa\\TransactionStatus\\TransactionStatus' => 'Mpesa/TransactionStatus/TransactionStatus.php',
   'Mpesa\\Validation\\DataWrapper\\ArrayWrapper' => 'Mpesa/Validation/DataWrapper/ArrayWrapper.php',
   'Mpesa\\Validation\\DataWrapper\\WrapperInterface' => 'Mpesa/Validation/DataWrapper/WrapperInterface.php',
