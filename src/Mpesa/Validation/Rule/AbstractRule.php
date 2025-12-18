@@ -1,9 +1,9 @@
 <?php
-namespace Mpesa\Validation\Rule;
+namespace Yourdudeken\Mpesa\Validation\Rule;
 
-use Mpesa\Validation\DataWrapper\ArrayWrapper;
-use Mpesa\Validation\DataWrapper\WrapperInterface;
-use Mpesa\Validation\ErrorMessage;
+use Yourdudeken\Mpesa\Validation\DataWrapper\ArrayWrapper;
+use Yourdudeken\Mpesa\Validation\DataWrapper\WrapperInterface;
+use Yourdudeken\Mpesa\Validation\ErrorMessage;
 
 abstract class AbstractRule
 {
@@ -16,7 +16,7 @@ abstract class AbstractRule
     /**
      * The validation context
      * This is the data set that the data being validated belongs to
-     * @var \Mpesa\Validation\DataWrapper\WrapperInterface
+     * @var \Yourdudeken\Mpesa\Validation\DataWrapper\WrapperInterface
      */
     protected $context;
 
@@ -218,7 +218,7 @@ abstract class AbstractRule
      * @param string $name
      * @param mixed $value
      *
-     * @return \Mpesa\Validation\Rule\AbstractRule
+     * @return \Yourdudeken\Mpesa\Validation\Rule\AbstractRule
      */
     public function setOption($name, $value)
     {
@@ -252,7 +252,7 @@ abstract class AbstractRule
      * @param array|object $context
      *
      * @throws \InvalidArgumentException
-     * @return \Mpesa\Validation\Rule\AbstractRule
+     * @return \Yourdudeken\Mpesa\Validation\Rule\AbstractRule
      */
     public function setContext($context = null)
     {
@@ -265,7 +265,7 @@ abstract class AbstractRule
         if (! is_object($context) || ! $context instanceof WrapperInterface) {
             throw new \InvalidArgumentException(
                 'Validator context must be either an array or an instance 
-                of Mpesa\Validator\DataWrapper\WrapperInterface'
+                of Yourdudeken\Mpesa\Validator\DataWrapper\WrapperInterface'
             );
         }
         $this->context = $context;
@@ -278,7 +278,7 @@ abstract class AbstractRule
      *
      * @param string $messageTemplate
      *
-     * @return \Mpesa\Validation\Rule\AbstractRule
+     * @return \Yourdudeken\Mpesa\Validation\Rule\AbstractRule
      */
     public function setMessageTemplate($messageTemplate)
     {
@@ -322,7 +322,7 @@ abstract class AbstractRule
      * @param ErrorMessage $errorMessagePrototype
      *
      * @throws \InvalidArgumentException
-     * @return \Mpesa\Validation\Rule\AbstractRule
+     * @return \Yourdudeken\Mpesa\Validation\Rule\AbstractRule
      */
     public function setErrorMessagePrototype(ErrorMessage $errorMessagePrototype)
     {
@@ -349,7 +349,7 @@ abstract class AbstractRule
     /**
      * Retrieve the error message if validation failed
      *
-     * @return NULL|\Mpesa\Validation\ErrorMessage
+     * @return NULL|\Yourdudeken\Mpesa\Validation\ErrorMessage
      */
     public function getMessage()
     {

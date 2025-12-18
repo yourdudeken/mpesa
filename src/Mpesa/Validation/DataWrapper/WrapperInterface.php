@@ -1,6 +1,6 @@
 <?php
 
-namespace Mpesa\Validation\DataWrapper;
+namespace Yourdudeken\Mpesa\Validation\DataWrapper;
 
 interface WrapperInterface
 {

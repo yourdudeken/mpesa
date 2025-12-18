@@ -1,7 +1,7 @@
 <?php
-namespace Mpesa\Validation;
+namespace Yourdudeken\Mpesa\Validation;
 
-use Mpesa\Validation\ValidatorInterface;
+use Yourdudeken\Mpesa\Validation\ValidatorInterface;
 
 class Validator implements ValidatorInterface
 {
@@ -109,7 +109,7 @@ class Validator implements ValidatorInterface
     protected $messages = array();
 
     /**
-     * @var \Mpesa\Validation\RuleFactory
+     * @var \Yourdudeken\Mpesa\Validation\RuleFactory
      */
     protected $ruleFactory;
 
@@ -121,7 +121,7 @@ class Validator implements ValidatorInterface
     /**
      * The object that will contain the data
      *
-     * @var \Mpesa\Validation\DataWrapper\WrapperInterface
+     * @var \Yourdudeken\Mpesa\Validation\DataWrapper\WrapperInterface
      */
     protected $dataWrapper;
 
@@ -140,7 +140,7 @@ class Validator implements ValidatorInterface
     /**
      * Retrieve the rule factory
      *
-     * @return \Mpesa\Validation\RuleFactory
+     * @return \Yourdudeken\Mpesa\Validation\RuleFactory
      */
     public function getRuleFactory()
     {
@@ -152,7 +152,7 @@ class Validator implements ValidatorInterface
      *
      * @throws \InvalidArgumentException
      *
-     * @return \Mpesa\Validation\Rule\AbstractValidator
+     * @return \Yourdudeken\Mpesa\Validation\Rule\AbstractValidator
      */
     public function setErrorMessagePrototype(ErrorMessage $errorMessagePrototype)
     {
@@ -277,7 +277,7 @@ class Validator implements ValidatorInterface
         if (!array_key_exists($selector, $this->rules)) {
             return $this;
         }
-        /* @var $collection \Mpesa\Validation\ValueValidator */
+        /* @var $collection \Yourdudeken\Mpesa\Validation\ValueValidator */
         $collection = $this->rules[$selector];
         $collection->remove($name, $options);
 
@@ -290,7 +290,7 @@ class Validator implements ValidatorInterface
      *
      * @param mixed $data
      *
-     * @return \Mpesa\Validation\DataWrapper\WrapperInterface
+     * @return \Yourdudeken\Mpesa\Validation\DataWrapper\WrapperInterface
      */
     public function getDataWrapper($data = null)
     {
@@ -331,7 +331,7 @@ class Validator implements ValidatorInterface
         }
         foreach ($this->rules as $selector => $valueValidator) {
             foreach ($this->getDataWrapper()->getItemsBySelector($selector) as $valueIdentifier => $value) {
-                /* @var $valueValidator \Mpesa\Validation\ValueValidator */
+                /* @var $valueValidator \Yourdudeken\Mpesa\Validation\ValueValidator */
                 if (!$valueValidator->validate($value, $valueIdentifier, $this->getDataWrapper())) {
                     foreach ($valueValidator->getMessages() as $message) {
                         $this->addMessage($valueIdentifier, $message);

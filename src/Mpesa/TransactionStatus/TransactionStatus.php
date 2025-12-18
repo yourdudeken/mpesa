@@ -1,8 +1,8 @@
 <?php
 
-namespace Mpesa\TransactionStatus;
+namespace Yourdudeken\Mpesa\TransactionStatus;
 
-use Mpesa\Engine\Core;
+use Yourdudeken\Mpesa\Engine\Core;
 
 class TransactionStatus {
 

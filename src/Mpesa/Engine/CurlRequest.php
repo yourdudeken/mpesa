@@ -1,7 +1,7 @@
 <?php
-namespace Mpesa\Engine;
+namespace Yourdudeken\Mpesa\Engine;
 
-use Mpesa\Contracts\HttpRequest;
+use Yourdudeken\Mpesa\Contracts\HttpRequest;
 
 class CurlRequest implements HttpRequest
 {

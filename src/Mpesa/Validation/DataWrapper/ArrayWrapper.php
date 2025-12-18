@@ -1,9 +1,9 @@
 <?php
 
-namespace Mpesa\Validation\DataWrapper;
+namespace Yourdudeken\Mpesa\Validation\DataWrapper;
 
-use Mpesa\Validation\Util\Arr;
-use Mpesa\Validation\DataWrapper\WrapperInterface;
+use Yourdudeken\Mpesa\Validation\Util\Arr;
+use Yourdudeken\Mpesa\Validation\DataWrapper\WrapperInterface;
 
 class ArrayWrapper implements WrapperInterface
 {

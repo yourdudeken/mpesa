@@ -1,8 +1,8 @@
 <?php
 
-namespace Mpesa\Validation;
+namespace Yourdudeken\Mpesa\Validation;
 
-use Mpesa\Validation\Rule\AbstractRule;
+use Yourdudeken\Mpesa\Validation\Rule\AbstractRule;
 
 class ValueValidator
 {
@@ -17,21 +17,21 @@ class ValueValidator
     /**
      * Will be used to construct the rules
      *
-     * @var \Mpesa\Validation\RuleFactory
+     * @var \Yourdudeken\Mpesa\Validation\RuleFactory
      */
     protected $ruleFactory;
 
     /**
      * The prototype that will be used to generate the error message
      *
-     * @var \Mpesa\Validation\ErrorMessage
+     * @var \Yourdudeken\Mpesa\Validation\ErrorMessage
      */
     protected $errorMessagePrototype;
 
     /**
      * The rule collections for the validation
      *
-     * @var \Mpesa\Validation\RuleCollection
+     * @var \Yourdudeken\Mpesa\Validation\RuleCollection
      */
     protected $rules;
 
@@ -252,7 +252,7 @@ class ValueValidator
             return true;
         }
 
-        /* @var $rule \Mpesa\Validation\Rule\AbstractValidator */
+        /* @var $rule \Yourdudeken\Mpesa\Validation\Rule\AbstractValidator */
         foreach ($this->rules as $rule) {
             $rule->setContext($context);
             if (!$rule->validate($value, $valueIdentifier)) {

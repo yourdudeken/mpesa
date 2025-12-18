@@ -1,8 +1,8 @@
 <?php
 
-namespace Mpesa\B2C;
+namespace Yourdudeken\Mpesa\B2C;
 
-use Mpesa\Engine\Core;
+use Yourdudeken\Mpesa\Engine\Core;
 
 class Pay {
 

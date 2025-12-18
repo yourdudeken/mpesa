@@ -1,5 +1,5 @@
 <?php
-namespace Mpesa\Validation\Rule;
+namespace Yourdudeken\Mpesa\Validation\Rule;
 
 class RequiredWhen extends Required
 {
@@ -22,8 +22,8 @@ class RequiredWhen extends Required
             $ruleClass = $this->options[self::OPTION_RULE];
             if (class_exists($ruleClass)) {
                 $rule = new $ruleClass($ruleOptions);
-            } elseif (class_exists('Mpesa\\Validation\\Rule\\' . $ruleClass)) {
-                $ruleClass = 'Mpesa\\Validation\\Rule\\' . $ruleClass;
+            } elseif (class_exists('Yourdudeken\\Mpesa\\Validation\\Rule\\' . $ruleClass)) {
+                $ruleClass = 'Yourdudeken\\Mpesa\\Validation\\Rule\\' . $ruleClass;
                 $rule      = new $ruleClass($ruleOptions);
             }
         } elseif (is_object($this->options[self::OPTION_RULE])

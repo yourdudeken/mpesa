@@ -1,11 +1,11 @@
 <?php
 
-namespace Mpesa\Tests\Unit;
+namespace Yourdudeken\Mpesa\Tests\Unit;
 
-use Mpesa\Tests\TestCase;
-use Mpesa\Auth\Authenticator;
-use Mpesa\Contracts\CacheStore;
-use Mpesa\Contracts\ConfigurationStore;
+use Yourdudeken\Mpesa\Tests\TestCase;
+use Yourdudeken\Mpesa\Auth\Authenticator;
+use Yourdudeken\Mpesa\Contracts\CacheStore;
+use Yourdudeken\Mpesa\Contracts\ConfigurationStore;
 
 class CoreTest extends TestCase
 {

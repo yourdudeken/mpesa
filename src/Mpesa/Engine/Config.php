@@ -1,9 +1,9 @@
 <?php
 
-namespace Mpesa\Engine;
+namespace Yourdudeken\Mpesa\Engine;
 
 use ArrayAccess;
-use Mpesa\Contracts\ConfigurationStore;
+use Yourdudeken\Mpesa\Contracts\ConfigurationStore;
 
 class Config implements ArrayAccess,ConfigurationStore
 {

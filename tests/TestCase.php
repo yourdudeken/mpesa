@@ -1,14 +1,14 @@
 <?php
 
-namespace Mpesa\Tests;
+namespace Yourdudeken\Mpesa\Tests;
 
 use Mockery;
 use PHPUnit\Framework\TestCase as PHPUnit;
-use Mpesa\Engine\Core;
-use Mpesa\Engine\Cache;
-use Mpesa\Engine\Config;
-use Mpesa\Auth\Authenticator;
-use Mpesa\Contracts\HttpRequest;
+use Yourdudeken\Mpesa\Engine\Core;
+use Yourdudeken\Mpesa\Engine\Cache;
+use Yourdudeken\Mpesa\Engine\Config;
+use Yourdudeken\Mpesa\Auth\Authenticator;
+use Yourdudeken\Mpesa\Contracts\HttpRequest;
 
 class TestCase extends PHPUnit
 {

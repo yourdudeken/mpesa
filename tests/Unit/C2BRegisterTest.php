@@ -1,14 +1,14 @@
 <?php
 
-namespace Mpesa\Tests\Unit;
+namespace Yourdudeken\Mpesa\Tests\Unit;
 
-use Mpesa\Tests\TestCase;
-use Mpesa\C2B\Register;
-use Mpesa\Auth\Authenticator;
-use Mpesa\Engine\Core;
-use Mpesa\Contracts\ConfigurationStore;
-use Mpesa\Exceptions\ConfigurationException;
-use Mpesa\Exceptions\MpesaException;
+use Yourdudeken\Mpesa\Tests\TestCase;
+use Yourdudeken\Mpesa\C2B\Register;
+use Yourdudeken\Mpesa\Auth\Authenticator;
+use Yourdudeken\Mpesa\Engine\Core;
+use Yourdudeken\Mpesa\Contracts\ConfigurationStore;
+use Yourdudeken\Mpesa\Exceptions\ConfigurationException;
+use Yourdudeken\Mpesa\Exceptions\MpesaException;
 
 class C2BRegisterTest extends TestCase{
 

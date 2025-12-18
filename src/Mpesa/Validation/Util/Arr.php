@@ -1,6 +1,6 @@
 <?php
 
-namespace Mpesa\Validation\Util;
+namespace Yourdudeken\Mpesa\Validation\Util;
 
 class Arr
 {

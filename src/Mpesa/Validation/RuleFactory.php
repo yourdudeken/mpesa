@@ -1,8 +1,8 @@
 <?php
 
-namespace Mpesa\Validation;
+namespace Yourdudeken\Mpesa\Validation;
 
-use Mpesa\Validation\Rule\Callback as CallbackRule;
+use Yourdudeken\Mpesa\Validation\Rule\Callback as CallbackRule;
 
 class RuleFactory
 {
@@ -103,11 +103,11 @@ class RuleFactory
      * @param string $name
      * @param string $class
      *
-     * @return \Mpesa\Validation\RuleFactory
+     * @return \Yourdudeken\Mpesa\Validation\RuleFactory
      */
     public function register($name, $class, $errorMessage = '', $labeledErrorMessage = '')
     {
-        if (is_subclass_of($class, '\Mpesa\Validation\Rule\AbstractRule')) {
+        if (is_subclass_of($class, '\Yourdudeken\Mpesa\Validation\Rule\AbstractRule')) {
             $this->validatorsMap[$name] = $class;
         }
         if ($errorMessage) {
@@ -133,7 +133,7 @@ class RuleFactory
      *            label of the form input field or model attribute
      *
      * @throws \InvalidArgumentException
-     * @return \Mpesa\Validation\Rule\AbstractValidator
+     * @return \Yourdudeken\Mpesa\Validation\Rule\AbstractValidator
      */
     public function createRule($name, $options = null, $messageTemplate = null, $label = null)
     {
@@ -218,11 +218,11 @@ class RuleFactory
                 $name = $this->validatorsMap[strtolower($name)];
             }
             // try if the validator is the name of a class in the package
-            if (class_exists('\Mpesa\Validation\Rule\\' . $name, false)) {
-                $name = '\Mpesa\Validation\Rule\\' . $name;
+            if (class_exists('\Yourdudeken\Mpesa\Validation\Rule\\' . $name, false)) {
+                $name = '\Yourdudeken\Mpesa\Validation\Rule\\' . $name;
             }
             // at this point we should have a class that can be instanciated
-            if (class_exists($name) && is_subclass_of($name, '\Mpesa\Validation\Rule\AbstractRule')) {
+            if (class_exists($name) && is_subclass_of($name, '\Yourdudeken\Mpesa\Validation\Rule\AbstractRule')) {
                 $validator = new $name($options);
             }
         }

@@ -1,14 +1,14 @@
 <?php
 
-namespace Mpesa\Engine;
+namespace Yourdudeken\Mpesa\Engine;
 
-use Mpesa\Validation\Validator;    
-use Mpesa\Auth\Authenticator;
-use Mpesa\Contracts\CacheStore;
-use Mpesa\Exceptions\ConfigurationException;
-use Mpesa\Exceptions\MpesaException;
-use Mpesa\Contracts\ConfigurationStore;
-use Mpesa\Contracts\HttpRequest;
+use Yourdudeken\Mpesa\Validation\Validator;    
+use Yourdudeken\Mpesa\Auth\Authenticator;
+use Yourdudeken\Mpesa\Contracts\CacheStore;
+use Yourdudeken\Mpesa\Exceptions\ConfigurationException;
+use Yourdudeken\Mpesa\Exceptions\MpesaException;
+use Yourdudeken\Mpesa\Contracts\ConfigurationStore;
+use Yourdudeken\Mpesa\Contracts\HttpRequest;
 
 /**
  * Class Core.

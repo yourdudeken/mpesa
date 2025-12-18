@@ -1,8 +1,8 @@
 <?php
 
-namespace Mpesa\LipaNaMpesaOnline;
+namespace Yourdudeken\Mpesa\LipaNaMpesaOnline;
 
-use Mpesa\Engine\Core;
+use Yourdudeken\Mpesa\Engine\Core;
 
 class STKPush{
 

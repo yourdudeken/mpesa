@@ -2,12 +2,12 @@
 
 namespace Mpesa;
 
-use Mpesa\Engine\Core;
-use Mpesa\Engine\Cache;
-use Mpesa\Engine\Config;
-use Mpesa\Engine\MpesaTrait;
-use Mpesa\Auth\Authenticator;
-use Mpesa\Engine\CurlRequest;
+use Yourdudeken\Mpesa\Engine\Core;
+use Yourdudeken\Mpesa\Engine\Cache;
+use Yourdudeken\Mpesa\Engine\Config;
+use Yourdudeken\Mpesa\Engine\MpesaTrait;
+use Yourdudeken\Mpesa\Auth\Authenticator;
+use Yourdudeken\Mpesa\Engine\CurlRequest;
 /**
  * Class Mpesa
  *

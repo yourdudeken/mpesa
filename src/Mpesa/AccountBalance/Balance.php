@@ -1,8 +1,8 @@
 <?php
 
-namespace Mpesa\AccountBalance;
+namespace Yourdudeken\Mpesa\AccountBalance;
 
-use Mpesa\Engine\Core;
+use Yourdudeken\Mpesa\Engine\Core;
 
 class Balance {
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace Mpesa\Validation;
+namespace Yourdudeken\Mpesa\Validation;
 
 class ErrorMessage
 {

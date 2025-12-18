@@ -1,5 +1,5 @@
 <?php
-namespace Mpesa\Validation\Rule;
+namespace Yourdudeken\Mpesa\Validation\Rule;
 
 class Required extends AbstractRule
 {

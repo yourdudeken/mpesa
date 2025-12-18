@@ -1,10 +1,10 @@
 <?php
 
-namespace Mpesa\Auth;
+namespace Yourdudeken\Mpesa\Auth;
 
-use Mpesa\Engine\Core;
-use Mpesa\Exceptions\ErrorException;
-use Mpesa\Exceptions\ConfigurationException;
+use Yourdudeken\Mpesa\Engine\Core;
+use Yourdudeken\Mpesa\Exceptions\ErrorException;
+use Yourdudeken\Mpesa\Exceptions\ConfigurationException;
 
 /**
  * Class Authenticator.

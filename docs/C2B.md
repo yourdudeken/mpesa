@@ -19,7 +19,7 @@ Before you can receive payment notifications, you need to register your validati
 <?php
 require "../src/autoload.php";
 
-use Mpesa\Init as Mpesa;
+use Yourdudeken\Mpesa\Init as Mpesa;
 
 $mpesa = new Mpesa();
 
@@ -40,7 +40,7 @@ try {
 
 ##### Using Laravel.
 ```php
-use Mpesa\Init as Mpesa;
+use Yourdudeken\Mpesa\Init as Mpesa;
 
 class MpesaController {
 
@@ -68,7 +68,7 @@ In sandbox mode, you can simulate customer payments to test your integration.
 <?php
 require "../src/autoload.php";
 
-use Mpesa\Init as Mpesa;
+use Yourdudeken\Mpesa\Init as Mpesa;
 
 $mpesa = new Mpesa();
 
@@ -89,7 +89,7 @@ try {
 
 ##### Using Laravel.
 ```php
-use Mpesa\Init as Mpesa;
+use Yourdudeken\Mpesa\Init as Mpesa;
 
 class MpesaController {
 

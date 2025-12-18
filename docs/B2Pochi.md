@@ -22,7 +22,7 @@ Note this package allows you to override preconfigured parameters for this endpo
 <?php
 require "../src/autoload.php";
 
-use Mpesa\Init as Mpesa;
+use Yourdudeken\Mpesa\Init as Mpesa;
 
 $mpesa = new Mpesa();
 
@@ -44,7 +44,7 @@ try {
 
 ##### Using Laravel.
 ```php
-use Mpesa\Init as Mpesa;
+use Yourdudeken\Mpesa\Init as Mpesa;
 
 class PaymentController {
 

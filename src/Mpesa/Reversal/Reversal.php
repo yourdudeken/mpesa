@@ -1,8 +1,8 @@
 <?php
 
-namespace Mpesa\Reversal;
+namespace Yourdudeken\Mpesa\Reversal;
 
-use Mpesa\Engine\Core;
+use Yourdudeken\Mpesa\Engine\Core;
 
 class Reversal {
 

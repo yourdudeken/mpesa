@@ -1,6 +1,6 @@
 <?php
 
-namespace Mpesa\Support;
+namespace Yourdudeken\Mpesa\Support;
 
 use Composer\Script\Event;
 
