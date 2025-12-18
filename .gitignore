@@ -25,9 +25,20 @@ phpunit.xml.local
 # PHP CS Fixer
 .php_cs.cache
 .php-cs-fixer.cache
+.php-cs-fixer.php
 
 # PHP CodeSniffer
 phpcs.xml
+
+# PHPStan
+.phpstan.cache/
+phpstan.neon.local
+.phpstan/
+
+# Psalm
+.psalm/
+psalm.xml.local
+.psalm.cache
 
 # Cache and Temporary Files
 /cache/
