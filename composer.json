@@ -53,6 +53,10 @@
         "phpunit/phpunit": "^9.0"
     },
     "scripts": {
+        "check": [
+            "composer validate --strict",
+            "composer dump-autoload -o"
+        ],
         "test": "phpunit",
         "test-coverage": "phpunit --coverage-html coverage"
     },
