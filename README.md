@@ -1,6 +1,6 @@
 # M-PESA API Package
 
-[![Build Status](https://travis-ci.org/yourdudeken/mpesa.svg?branch=master)](https://travis-ci.org/yourdudeken/mpesa)
+[![Build Status](https://travis-ci.org/yourdudeken/mpesa.svg?branch=main)](https://travis-ci.org/yourdudeken/mpesa)
 [![Latest Stable Version](https://poser.pugx.org/yourdudeken/mpesa/v/stable.svg)](https://packagist.org/packages/yourdudeken/mpesa)
 [![Latest Unstable Version](https://poser.pugx.org/yourdudeken/mpesa/v/unstable.svg)](https://packagist.org/packages/yourdudeken/mpesa)
 [![License](https://poser.pugx.org/yourdudeken/mpesa/license.svg)](https://packagist.org/packages/yourdudeken/mpesa)
