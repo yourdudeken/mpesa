@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/yourdudeken/mpesa/compare/v1.1.0...v1.2.0) (2025-12-20)
+
+
+### Features
+
+* Add bulk consumer credentials and rename security_credential to initiator_password. ([d019f2d](https://github.com/yourdudeken/mpesa/commit/d019f2d816df633f50cc6d9a32e0eab104d1d1e8))
+
 # [1.1.0](https://github.com/yourdudeken/mpesa/compare/v1.0.0...v1.1.0) (2025-12-18)
 
 
