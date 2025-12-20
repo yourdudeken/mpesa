@@ -1,6 +1,6 @@
 <?php
 
-namespace Mpesa;
+namespace Yourdudeken\Mpesa;
 
 use Yourdudeken\Mpesa\Engine\Core;
 use Yourdudeken\Mpesa\Engine\Cache;
