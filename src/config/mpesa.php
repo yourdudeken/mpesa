@@ -37,8 +37,8 @@ return [
             'consumer_secret' => 'cq1hvOrJMyQYtgHU',
         ],
         'bulk' => [
-            'consumer_key' => '',
-            'consumer_secret' => '',
+            'consumer_key' => 'uwd4VCfOjYcpawEsAYAkRyUYKRgCBdJ7',
+            'consumer_secret' => 'cq1hvOrJMyQYtgHU',
         ],
     ],
 
@@ -164,7 +164,7 @@ return [
 
         'default_command_id' => 'BusinessPayment',
 
-        'security_credential' => 'YAL2yKrn',
+        'initiator_password' => 'YAL2yKrn',
 
         'short_code' => '602973',
 
@@ -190,7 +190,7 @@ return [
 
         'default_command_id' => 'BusinessPayBill',
 
-        'security_credential' => 'YAL2yKrn',
+        'initiator_password' => 'YAL2yKrn',
 
         'short_code' => '600256',
 
@@ -214,7 +214,7 @@ return [
     'account_balance' => [
         'initiator_name' => 'testapi0297',
 
-        'security_credential' => 'YAL2yKrn',
+        'initiator_password' => 'YAL2yKrn',
 
         'default_command_id' => 'AccountBalance',
 
@@ -238,7 +238,7 @@ return [
     'transaction_status' => [
         'initiator_name' => 'testapi0297',
 
-        'security_credential' => 'YAL2yKrn',
+        'initiator_password' => 'YAL2yKrn',
 
         'default_command_id' => 'TransactionStatusQuery',
 
@@ -262,7 +262,7 @@ return [
     'reversal' => [
         'initiator_name' => 'testapi0297',
 
-        'security_credential' => 'YAL2yKrn',
+        'initiator_password' => 'YAL2yKrn',
 
         'default_command_id' => 'TransactionReversal',
 
