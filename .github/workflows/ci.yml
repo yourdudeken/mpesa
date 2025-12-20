@@ -3,8 +3,22 @@ name: CI
 on:
   push:
     branches: [ main, dev, develop ]
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'composer.json'
+      - 'composer.lock'
+      - 'phpunit.xml'
+      - '.github/workflows/ci.yml'
   pull_request:
     branches: [ main, dev, develop ]
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'composer.json'
+      - 'composer.lock'
+      - 'phpunit.xml'
+      - '.github/workflows/ci.yml'
 
 jobs:
   test:
