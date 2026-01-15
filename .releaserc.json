@@ -70,52 +70,52 @@
                     "types": [
                         {
                             "type": "feat",
-                            "section": "✨ Features"
+                            "section": " Features"
                         },
                         {
                             "type": "fix",
-                            "section": "🐛 Bug Fixes"
+                            "section": " Bug Fixes"
                         },
                         {
                             "type": "perf",
-                            "section": "⚡ Performance Improvements"
+                            "section": " Performance Improvements"
                         },
                         {
                             "type": "revert",
-                            "section": "⏪ Reverts"
+                            "section": " Reverts"
                         },
                         {
                             "type": "docs",
-                            "section": "📚 Documentation",
+                            "section": " Documentation",
                             "hidden": false
                         },
                         {
                             "type": "style",
-                            "section": "💎 Styles",
+                            "section": " Styles",
                             "hidden": true
                         },
                         {
                             "type": "refactor",
-                            "section": "♻️ Code Refactoring"
+                            "section": " Code Refactoring"
                         },
                         {
                             "type": "test",
-                            "section": "✅ Tests",
+                            "section": " Tests",
                             "hidden": true
                         },
                         {
                             "type": "build",
-                            "section": "🏗️ Build System",
+                            "section": " Build System",
                             "hidden": true
                         },
                         {
                             "type": "ci",
-                            "section": "👷 CI/CD",
+                            "section": " CI/CD",
                             "hidden": true
                         },
                         {
                             "type": "chore",
-                            "section": "🔧 Chores",
+                            "section": " Chores",
                             "hidden": true
                         }
                     ]
@@ -142,7 +142,7 @@
         [
             "@semantic-release/github",
             {
-                "successComment": "🎉 This ${issue.pull_request ? 'PR is included' : 'issue has been resolved'} in version ${nextRelease.version} 🎉\n\nThe release is available on:\n- [GitHub Releases](${releases.filter(r => r.name === 'GitHub release').map(r => r.url).join(', ')})\n- [Packagist](https://packagist.org/packages/yourdudeken/mpesa)\n\nThank you for your contribution! 🙏",
+                "successComment": " This ${issue.pull_request ? 'PR is included' : 'issue has been resolved'} in version ${nextRelease.version} 🎉\n\nThe release is available on:\n- [GitHub Releases](${releases.filter(r => r.name === 'GitHub release').map(r => r.url).join(', ')})\n- [Packagist](https://packagist.org/packages/yourdudeken/mpesa)\n\nThank you for your contribution! 🙏",
                 "failComment": false,
                 "labels": false,
                 "releasedLabels": [
