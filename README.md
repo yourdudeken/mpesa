@@ -49,12 +49,6 @@ require "{PATHTOTHISLIBFOLDER}/src/autoload.php";
 
 use Yourdudeken\Mpesa\Init as Mpesa;
 ```
-
-### Laravel Users
-
-For Laravel-specific implementation with facades and service providers, check out:  
-[Laravel M-Pesa Package](https://github.com/yourdudeken/mpesalaravel)
-
 ## Quick Start
 
 ### Basic Usage
