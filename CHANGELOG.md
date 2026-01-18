@@ -19,7 +19,6 @@
 ### Features
 
 * Implement comprehensive CI/CD pipeline with GitHub Actions, semantic-release, and development guidelines. ([2f087b8](https://github.com/yourdudeken/mpesa/commit/2f087b8dc74eb347ce1566b9d3e1d5c6cce4aeb2))
-* Implement comprehensive CI/CD pipeline with GitHub Actions, semantic-release, and development guidelines. (2f087b8)
 
 # [1.0.0](https://github.com/yourdudeken/mpesa/compare/v1.0.0) (2025-12-17)
 
