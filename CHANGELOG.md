@@ -1,3 +1,11 @@
+# [1.3.0](https://github.com/yourdudeken/mpesa/compare/v1.2.0...v1.3.0) (2026-01-18)
+
+
+### Features
+
+* Add M-Pesa API example interface with frontend, styling, JavaScript, and a PHP backend handler. ([439f947](https://github.com/yourdudeken/mpesa/commit/439f9478e542b4da0101360d59a25a6f46b60e4b))
+* Implement a callback log viewer with real-time polling and clear functionality. ([1046c6f](https://github.com/yourdudeken/mpesa/commit/1046c6f70dcbffe93fce9bb44ec49bc17cb671c7))
+
 # [1.2.0](https://github.com/yourdudeken/mpesa/compare/v1.1.0...v1.2.0) (2025-12-20)
 
 
