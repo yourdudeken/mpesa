@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>M-Pesa API Testing Dashboard</title>
+    <meta name="description" content="Comprehensive testing interface for all M-Pesa DARAJA API endpoints">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="static/css/main.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo-section">
+                    <div class="logo-icon">
+                        <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect width="40" height="40" rx="12" fill="url(#gradient1)"/>
+                            <path d="M20 10L28 15V25L20 30L12 25V15L20 10Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M20 20L28 15M20 20L12 15M20 20V30" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <defs>
+                                <linearGradient id="gradient1" x1="0" y1="0" x2="40" y2="40">
+                                    <stop offset="0%" stop-color="#00C853"/>
+                                    <stop offset="100%" stop-color="#00796B"/>
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1>M-Pesa API Tester</h1>
+                        <p class="subtitle">Test all DARAJA API endpoints in one place</p>
+                    </div>
+                </div>
+                <div class="environment-toggle">
+                    <label class="toggle-label">
+                        <input type="checkbox" id="environmentToggle" checked>
+                        <span class="toggle-slider"></span>
+                        <span class="toggle-text">Sandbox Mode</span>
+                    </label>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Sidebar Navigation -->
+            <aside class="sidebar">
+                <nav class="nav-menu">
+                    <button class="nav-item active" data-endpoint="stkpush">
+                        <span>STK Push</span>
+                    </button>
+                    <button class="nav-item" data-endpoint="stkstatus">
+                        <span>STK Status</span>
+                    </button>
+                    <button class="nav-item" data-endpoint="c2bregister">
+                        <span>C2B Register</span>
+                    </button>
+                    <button class="nav-item" data-endpoint="c2bsimulate">
+                        <span>C2B Simulate</span>
+                    </button>
+                    <button class="nav-item" data-endpoint="b2c">
+                        <span>B2C Payment</span>
+                    </button>
+                    <button class="nav-item" data-endpoint="b2b">
+                        <span>B2B Transfer</span>
+                    </button>
+                    <button class="nav-item" data-endpoint="b2pochi">
+                        <span>B2Pochi</span>
+                    </button>
+                    <button class="nav-item" data-endpoint="balance">
+                        <span>Account Balance</span>
+                    </button>
+                    <button class="nav-item" data-endpoint="status">
+                        <span>Transaction Status</span>
+                    </button>
+                    <button class="nav-item" data-endpoint="reversal">
+                        <span>Reversal</span>
+                    </button>
+                </nav>
+            </aside>
+
+            <!-- Content Area -->
+            <div class="content-area">
+                <!-- STK Push Form -->
+                <div class="endpoint-section active" id="stkpush">
+                    <div class="section-header">
+                        <h2>STK Push (Lipa na M-Pesa Online)</h2>
+                        <p class="section-description">Initiate payment requests directly to customer phones</p>
+                    </div>
+                    <form class="api-form" data-endpoint="STKPush">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="stk_amount">Amount (KES) *</label>
+                                <input type="number" id="stk_amount" name="amount" required min="1" placeholder="100">
+                            </div>
+                            <div class="form-group">
+                                <label for="stk_phone">Phone Number *</label>
+                                <input type="tel" id="stk_phone" name="phoneNumber" required placeholder="254722000000">
+                            </div>
+                            <div class="form-group">
+                                <label for="stk_reference">Account Reference *</label>
+                                <input type="text" id="stk_reference" name="accountReference" required placeholder="ORDER-12345">
+                            </div>
+                            <div class="form-group">
+                                <label for="stk_description">Transaction Description</label>
+                                <input type="text" id="stk_description" name="transactionDesc" placeholder="Payment for order">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <span class="btn-text">Send STK Push</span>
+                            <span class="btn-loader"></span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- STK Status Query Form -->
+                <div class="endpoint-section" id="stkstatus">
+                    <div class="section-header">
+                        <h2>STK Status Query</h2>
+                        <p class="section-description">Check the status of an STK Push request</p>
+                    </div>
+                    <form class="api-form" data-endpoint="STKStatus">
+                        <div class="form-grid">
+                            <div class="form-group full-width">
+                                <label for="stk_checkout_id">Checkout Request ID *</label>
+                                <input type="text" id="stk_checkout_id" name="checkoutRequestID" required placeholder="ws_CO_191220191020363925">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <span class="btn-text">Check Status</span>
+                            <span class="btn-loader"></span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- C2B Register Form -->
+                <div class="endpoint-section" id="c2bregister">
+                    <div class="section-header">
+                        <h2>C2B Register URLs</h2>
+                        <p class="section-description">Register validation and confirmation URLs for C2B payments</p>
+                    </div>
+                    <form class="api-form" data-endpoint="C2BRegister">
+                        <div class="form-grid">
+                            <div class="form-group full-width">
+                                <label for="c2b_validation">Validation URL *</label>
+                                <input type="url" id="c2b_validation" name="validationURL" required placeholder="https://yourdomain.com/validate">
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="c2b_confirmation">Confirmation URL *</label>
+                                <input type="url" id="c2b_confirmation" name="confirmationURL" required placeholder="https://yourdomain.com/confirm">
+                            </div>
+                            <div class="form-group">
+                                <label for="c2b_response_type">Response Type</label>
+                                <select id="c2b_response_type" name="responseType">
+                                    <option value="Completed">Completed</option>
+                                    <option value="Cancelled">Cancelled</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <span class="btn-text">Register URLs</span>
+                            <span class="btn-loader"></span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- C2B Simulate Form -->
+                <div class="endpoint-section" id="c2bsimulate">
+                    <div class="section-header">
+                        <h2>C2B Simulate Payment</h2>
+                        <p class="section-description">Simulate C2B payments (Sandbox only)</p>
+                    </div>
+                    <form class="api-form" data-endpoint="C2BSimulate">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="c2b_amount">Amount (KES) *</label>
+                                <input type="number" id="c2b_amount" name="amount" required min="1" placeholder="100">
+                            </div>
+                            <div class="form-group">
+                                <label for="c2b_msisdn">Phone Number (MSISDN) *</label>
+                                <input type="tel" id="c2b_msisdn" name="msisdn" required placeholder="254722000000">
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="c2b_bill_ref">Bill Reference Number *</label>
+                                <input type="text" id="c2b_bill_ref" name="billRefNumber" required placeholder="INV-001">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <span class="btn-text">Simulate Payment</span>
+                            <span class="btn-loader"></span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- B2C Form -->
+                <div class="endpoint-section" id="b2c">
+                    <div class="section-header">
+                        <h2>B2C Payment (Business to Customer)</h2>
+                        <p class="section-description">Send money from business account to customer M-Pesa</p>
+                    </div>
+                    <form class="api-form" data-endpoint="B2C">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="b2c_amount">Amount (KES) *</label>
+                                <input type="number" id="b2c_amount" name="amount" required min="1" placeholder="500">
+                            </div>
+                            <div class="form-group">
+                                <label for="b2c_party">Recipient Phone *</label>
+                                <input type="tel" id="b2c_party" name="partyB" required placeholder="254722000000">
+                            </div>
+                            <div class="form-group">
+                                <label for="b2c_command">Command ID</label>
+                                <select id="b2c_command" name="commandID">
+                                    <option value="BusinessPayment">Business Payment</option>
+                                    <option value="SalaryPayment">Salary Payment</option>
+                                    <option value="PromotionPayment">Promotion Payment</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="b2c_remarks">Remarks *</label>
+                                <input type="text" id="b2c_remarks" name="remarks" required placeholder="Payment description">
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="b2c_occasion">Occasion</label>
+                                <input type="text" id="b2c_occasion" name="occasion" placeholder="Salary, Bonus, etc.">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <span class="btn-text">Send Payment</span>
+                            <span class="btn-loader"></span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- B2B Form -->
+                <div class="endpoint-section" id="b2b">
+                    <div class="section-header">
+                        <h2>B2B Transfer (Business to Business)</h2>
+                        <p class="section-description">Transfer funds between business accounts</p>
+                    </div>
+                    <form class="api-form" data-endpoint="B2B">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="b2b_amount">Amount (KES) *</label>
+                                <input type="number" id="b2b_amount" name="amount" required min="1" placeholder="1000">
+                            </div>
+                            <div class="form-group">
+                                <label for="b2b_party">Recipient Shortcode *</label>
+                                <input type="text" id="b2b_party" name="partyB" required placeholder="600000">
+                            </div>
+                            <div class="form-group">
+                                <label for="b2b_command">Command ID</label>
+                                <select id="b2b_command" name="commandID">
+                                    <option value="BusinessPayBill">Business PayBill</option>
+                                    <option value="BusinessBuyGoods">Business Buy Goods</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="b2b_reference">Account Reference *</label>
+                                <input type="text" id="b2b_reference" name="accountReference" required placeholder="INV-001">
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="b2b_remarks">Remarks *</label>
+                                <input type="text" id="b2b_remarks" name="remarks" required placeholder="Payment for supplies">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <span class="btn-text">Transfer Funds</span>
+                            <span class="btn-loader"></span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- B2Pochi Form -->
+                <div class="endpoint-section" id="b2pochi">
+                    <div class="section-header">
+                        <h2>B2Pochi Payment</h2>
+                        <p class="section-description">Send money to customer Pochi savings accounts</p>
+                    </div>
+                    <form class="api-form" data-endpoint="B2Pochi">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="b2pochi_amount">Amount (KES) *</label>
+                                <input type="number" id="b2pochi_amount" name="amount" required min="1" placeholder="100">
+                            </div>
+                            <div class="form-group">
+                                <label for="b2pochi_party">Recipient Phone *</label>
+                                <input type="tel" id="b2pochi_party" name="partyB" required placeholder="254722000000">
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="b2pochi_remarks">Remarks *</label>
+                                <input type="text" id="b2pochi_remarks" name="remarks" required placeholder="Savings deposit">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <span class="btn-text">Send to Pochi</span>
+                            <span class="btn-loader"></span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Account Balance Form -->
+                <div class="endpoint-section" id="balance">
+                    <div class="section-header">
+                        <h2>Account Balance Query</h2>
+                        <p class="section-description">Check your business account balance</p>
+                    </div>
+                    <form class="api-form" data-endpoint="accountBalance">
+                        <div class="form-grid">
+                            <div class="form-group full-width">
+                                <label for="balance_remarks">Remarks</label>
+                                <input type="text" id="balance_remarks" name="remarks" placeholder="Balance query">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <span class="btn-text">Check Balance</span>
+                            <span class="btn-loader"></span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Transaction Status Form -->
+                <div class="endpoint-section" id="status">
+                    <div class="section-header">
+                        <h2>Transaction Status Query</h2>
+                        <p class="section-description">Check the status of any M-Pesa transaction</p>
+                    </div>
+                    <form class="api-form" data-endpoint="transactionStatus">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="status_transaction_id">Transaction ID *</label>
+                                <input type="text" id="status_transaction_id" name="transactionID" required placeholder="NLJ7RT61SV">
+                            </div>
+                            <div class="form-group">
+                                <label for="status_remarks">Remarks</label>
+                                <input type="text" id="status_remarks" name="remarks" placeholder="Status check">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <span class="btn-text">Check Status</span>
+                            <span class="btn-loader"></span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Reversal Form -->
+                <div class="endpoint-section" id="reversal">
+                    <div class="section-header">
+                        <h2>Transaction Reversal</h2>
+                        <p class="section-description">Reverse erroneous M-Pesa transactions</p>
+                    </div>
+                    <form class="api-form" data-endpoint="reversal">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="reversal_transaction_id">Transaction ID *</label>
+                                <input type="text" id="reversal_transaction_id" name="transactionID" required placeholder="NLJ7RT61SV">
+                            </div>
+                            <div class="form-group">
+                                <label for="reversal_amount">Amount (KES) *</label>
+                                <input type="number" id="reversal_amount" name="amount" required min="1" placeholder="100">
+                            </div>
+                            <div class="form-group">
+                                <label for="reversal_receiver">Receiver Party *</label>
+                                <input type="text" id="reversal_receiver" name="receiverParty" required placeholder="600000">
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="reversal_remarks">Remarks *</label>
+                                <input type="text" id="reversal_remarks" name="remarks" required placeholder="Reversing duplicate payment">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <span class="btn-text">Reverse Transaction</span>
+                            <span class="btn-loader"></span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Response Display -->
+                <div class="response-container" id="responseContainer">
+                    <div class="response-header">
+                        <h3>API Response</h3>
+                        <button class="btn-copy" id="copyResponse" title="Copy to clipboard">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    <pre id="responseContent"><code>No response yet. Submit a request to see the API response here.</code></pre>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="static/js/main.js"></script>
+</body>
+</html>
