@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,6 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="static/css/main.css">
 </head>
+
 <body>
     <div class="container">
         <!-- Header -->
@@ -18,13 +20,15 @@
                 <div class="logo-section">
                     <div class="logo-icon">
                         <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <rect width="40" height="40" rx="12" fill="url(#gradient1)"/>
-                            <path d="M20 10L28 15V25L20 30L12 25V15L20 10Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M20 20L28 15M20 20L12 15M20 20V30" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <rect width="40" height="40" rx="12" fill="url(#gradient1)" />
+                            <path d="M20 10L28 15V25L20 30L12 25V15L20 10Z" stroke="white" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round" />
+                            <path d="M20 20L28 15M20 20L12 15M20 20V30" stroke="white" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round" />
                             <defs>
                                 <linearGradient id="gradient1" x1="0" y1="0" x2="40" y2="40">
-                                    <stop offset="0%" stop-color="#00C853"/>
-                                    <stop offset="100%" stop-color="#00796B"/>
+                                    <stop offset="0%" stop-color="#00C853" />
+                                    <stop offset="100%" stop-color="#00796B" />
                                 </linearGradient>
                             </defs>
                         </svg>
@@ -79,6 +83,9 @@
                     <button class="nav-item" data-endpoint="reversal">
                         <span>Reversal</span>
                     </button>
+                    <button class="nav-item" data-endpoint="callbacks">
+                        <span>Callback Logs</span>
+                    </button>
                 </nav>
             </aside>
 
@@ -102,11 +109,19 @@
                             </div>
                             <div class="form-group">
                                 <label for="stk_reference">Account Reference *</label>
-                                <input type="text" id="stk_reference" name="accountReference" required placeholder="ORDER-12345">
+                                <input type="text" id="stk_reference" name="accountReference" required
+                                    placeholder="ORDER-12345">
                             </div>
                             <div class="form-group">
                                 <label for="stk_description">Transaction Description</label>
-                                <input type="text" id="stk_description" name="transactionDesc" placeholder="Payment for order">
+                                <input type="text" id="stk_description" name="transactionDesc"
+                                    placeholder="Payment for order">
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="stk_callback">Callback URL</label>
+                                <input type="url" id="stk_callback" name="callbackURL"
+                                    placeholder="http://your-domain.ngrok-free.app/mpesa/example/api/callback.php">
+                                <small style="color: var(--color-text-muted);">Leave empty to use default config</small>
                             </div>
                         </div>
                         <button type="submit" class="btn btn-primary">
@@ -126,7 +141,8 @@
                         <div class="form-grid">
                             <div class="form-group full-width">
                                 <label for="stk_checkout_id">Checkout Request ID *</label>
-                                <input type="text" id="stk_checkout_id" name="checkoutRequestID" required placeholder="ws_CO_191220191020363925">
+                                <input type="text" id="stk_checkout_id" name="checkoutRequestID" required
+                                    placeholder="ws_CO_191220191020363925">
                             </div>
                         </div>
                         <button type="submit" class="btn btn-primary">
@@ -146,11 +162,13 @@
                         <div class="form-grid">
                             <div class="form-group full-width">
                                 <label for="c2b_validation">Validation URL *</label>
-                                <input type="url" id="c2b_validation" name="validationURL" required placeholder="https://yourdomain.com/validate">
+                                <input type="url" id="c2b_validation" name="validationURL" required
+                                    placeholder="https://yourdomain.com/validate">
                             </div>
                             <div class="form-group full-width">
                                 <label for="c2b_confirmation">Confirmation URL *</label>
-                                <input type="url" id="c2b_confirmation" name="confirmationURL" required placeholder="https://yourdomain.com/confirm">
+                                <input type="url" id="c2b_confirmation" name="confirmationURL" required
+                                    placeholder="https://yourdomain.com/confirm">
                             </div>
                             <div class="form-group">
                                 <label for="c2b_response_type">Response Type</label>
@@ -185,7 +203,8 @@
                             </div>
                             <div class="form-group full-width">
                                 <label for="c2b_bill_ref">Bill Reference Number *</label>
-                                <input type="text" id="c2b_bill_ref" name="billRefNumber" required placeholder="INV-001">
+                                <input type="text" id="c2b_bill_ref" name="billRefNumber" required
+                                    placeholder="INV-001">
                             </div>
                         </div>
                         <button type="submit" class="btn btn-primary">
@@ -221,7 +240,8 @@
                             </div>
                             <div class="form-group">
                                 <label for="b2c_remarks">Remarks *</label>
-                                <input type="text" id="b2c_remarks" name="remarks" required placeholder="Payment description">
+                                <input type="text" id="b2c_remarks" name="remarks" required
+                                    placeholder="Payment description">
                             </div>
                             <div class="form-group full-width">
                                 <label for="b2c_occasion">Occasion</label>
@@ -260,11 +280,13 @@
                             </div>
                             <div class="form-group">
                                 <label for="b2b_reference">Account Reference *</label>
-                                <input type="text" id="b2b_reference" name="accountReference" required placeholder="INV-001">
+                                <input type="text" id="b2b_reference" name="accountReference" required
+                                    placeholder="INV-001">
                             </div>
                             <div class="form-group full-width">
                                 <label for="b2b_remarks">Remarks *</label>
-                                <input type="text" id="b2b_remarks" name="remarks" required placeholder="Payment for supplies">
+                                <input type="text" id="b2b_remarks" name="remarks" required
+                                    placeholder="Payment for supplies">
                             </div>
                         </div>
                         <button type="submit" class="btn btn-primary">
@@ -284,7 +306,8 @@
                         <div class="form-grid">
                             <div class="form-group">
                                 <label for="b2pochi_amount">Amount (KES) *</label>
-                                <input type="number" id="b2pochi_amount" name="amount" required min="1" placeholder="100">
+                                <input type="number" id="b2pochi_amount" name="amount" required min="1"
+                                    placeholder="100">
                             </div>
                             <div class="form-group">
                                 <label for="b2pochi_party">Recipient Phone *</label>
@@ -292,7 +315,8 @@
                             </div>
                             <div class="form-group full-width">
                                 <label for="b2pochi_remarks">Remarks *</label>
-                                <input type="text" id="b2pochi_remarks" name="remarks" required placeholder="Savings deposit">
+                                <input type="text" id="b2pochi_remarks" name="remarks" required
+                                    placeholder="Savings deposit">
                             </div>
                         </div>
                         <button type="submit" class="btn btn-primary">
@@ -332,7 +356,8 @@
                         <div class="form-grid">
                             <div class="form-group">
                                 <label for="status_transaction_id">Transaction ID *</label>
-                                <input type="text" id="status_transaction_id" name="transactionID" required placeholder="NLJ7RT61SV">
+                                <input type="text" id="status_transaction_id" name="transactionID" required
+                                    placeholder="NLJ7RT61SV">
                             </div>
                             <div class="form-group">
                                 <label for="status_remarks">Remarks</label>
@@ -356,19 +381,23 @@
                         <div class="form-grid">
                             <div class="form-group">
                                 <label for="reversal_transaction_id">Transaction ID *</label>
-                                <input type="text" id="reversal_transaction_id" name="transactionID" required placeholder="NLJ7RT61SV">
+                                <input type="text" id="reversal_transaction_id" name="transactionID" required
+                                    placeholder="NLJ7RT61SV">
                             </div>
                             <div class="form-group">
                                 <label for="reversal_amount">Amount (KES) *</label>
-                                <input type="number" id="reversal_amount" name="amount" required min="1" placeholder="100">
+                                <input type="number" id="reversal_amount" name="amount" required min="1"
+                                    placeholder="100">
                             </div>
                             <div class="form-group">
                                 <label for="reversal_receiver">Receiver Party *</label>
-                                <input type="text" id="reversal_receiver" name="receiverParty" required placeholder="600000">
+                                <input type="text" id="reversal_receiver" name="receiverParty" required
+                                    placeholder="600000">
                             </div>
                             <div class="form-group full-width">
                                 <label for="reversal_remarks">Remarks *</label>
-                                <input type="text" id="reversal_remarks" name="remarks" required placeholder="Reversing duplicate payment">
+                                <input type="text" id="reversal_remarks" name="remarks" required
+                                    placeholder="Reversing duplicate payment">
                             </div>
                         </div>
                         <button type="submit" class="btn btn-primary">
@@ -378,18 +407,44 @@
                     </form>
                 </div>
 
+                <!-- Callbacks Section -->
+                <div class="endpoint-section" id="callbacks">
+                    <div class="section-header">
+                        <h2>Callback Logs</h2>
+                        <p class="section-description">View incoming M-Pesa notifications in real-time</p>
+                    </div>
+                    <div class="actions-bar" style="display: flex; gap: 10px; margin-bottom: 20px;">
+                        <button id="refreshLogs" class="btn btn-primary">
+                            <span class="btn-text">Refresh Logs</span>
+                            <span class="btn-loader"></span>
+                        </button>
+                        <button id="clearLogs" class="btn"
+                            style="background: var(--color-bg-tertiary); color: var(--color-text-primary); border: 1px solid var(--color-border);">
+                            <span class="btn-text">Clear Logs</span>
+                        </button>
+                    </div>
+                    <div id="logsContainer">
+                        <div class="empty-state"
+                            style="text-align: center; color: var(--color-text-secondary); padding: 40px;">
+                            No callbacks received yet.
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Response Display -->
                 <div class="response-container" id="responseContainer">
                     <div class="response-header">
                         <h3>API Response</h3>
                         <button class="btn-copy" id="copyResponse" title="Copy to clipboard">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
                                 <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                                 <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
                             </svg>
                         </button>
                     </div>
-                    <pre id="responseContent"><code>No response yet. Submit a request to see the API response here.</code></pre>
+                    <pre
+                        id="responseContent"><code>No response yet. Submit a request to see the API response here.</code></pre>
                 </div>
             </div>
         </main>
@@ -397,4 +452,5 @@
 
     <script src="static/js/main.js"></script>
 </body>
+
 </html>

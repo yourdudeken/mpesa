@@ -4,7 +4,8 @@
 const state = {
     currentEndpoint: 'stkpush',
     isSandbox: true,
-    isLoading: false
+    isLoading: false,
+    logInterval: null
 };
 
 // ============================================
@@ -17,7 +18,10 @@ const elements = {
     responseContainer: document.getElementById('responseContainer'),
     responseContent: document.getElementById('responseContent'),
     copyButton: document.getElementById('copyResponse'),
-    environmentToggle: document.getElementById('environmentToggle')
+    environmentToggle: document.getElementById('environmentToggle'),
+    logsContainer: document.getElementById('logsContainer'),
+    refreshLogsBtn: document.getElementById('refreshLogs'),
+    clearLogsBtn: document.getElementById('clearLogs')
 };
 
 // ============================================
@@ -53,6 +57,17 @@ function switchEndpoint(endpoint) {
             section.classList.remove('active');
         }
     });
+
+    // Handle Callbacks Tab
+    if (endpoint === 'callbacks') {
+        fetchLogs();
+        startLogPolling();
+        // Hide response container for callbacks tab as it has its own view
+        elements.responseContainer.style.display = 'none';
+    } else {
+        stopLogPolling();
+        elements.responseContainer.style.display = 'block';
+    }
 }
 
 // ============================================
@@ -64,7 +79,6 @@ function initEnvironmentToggle() {
         const toggleText = e.target.parentElement.querySelector('.toggle-text');
         toggleText.textContent = state.isSandbox ? 'Sandbox Mode' : 'Production Mode';
 
-        // Show notification
         showNotification(
             state.isSandbox ? 'Switched to Sandbox Mode' : 'Switched to Production Mode',
             'info'
@@ -101,20 +115,15 @@ async function submitRequest(endpoint, data, form) {
     const submitButton = form.querySelector('button[type="submit"]');
 
     try {
-        // Set loading state
         state.isLoading = true;
         submitButton.classList.add('loading');
         submitButton.disabled = true;
 
-        // Clear previous response
         displayResponse({ message: 'Sending request...' }, 'info');
 
-        // Make API request with updated path
         const response = await fetch('api/handler.php', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 endpoint: endpoint,
                 data: data,
@@ -124,7 +133,6 @@ async function submitRequest(endpoint, data, form) {
 
         const result = await response.json();
 
-        // Display response
         if (response.ok) {
             displayResponse(result, 'success');
             showNotification('Request successful!', 'success');
@@ -138,11 +146,10 @@ async function submitRequest(endpoint, data, form) {
         displayResponse({
             error: 'Network error',
             message: error.message,
-            details: 'Failed to connect to the API. Please check your connection and try again.'
+            details: 'Failed to connect to the API.'
         }, 'error');
         showNotification('Network error occurred', 'error');
     } finally {
-        // Reset loading state
         state.isLoading = false;
         submitButton.classList.remove('loading');
         submitButton.disabled = false;
@@ -150,20 +157,100 @@ async function submitRequest(endpoint, data, form) {
 }
 
 // ============================================
+// Log Viewer Logic
+// ============================================
+function initLogViewer() {
+    if (elements.refreshLogsBtn) {
+        elements.refreshLogsBtn.addEventListener('click', () => {
+            fetchLogs();
+            showNotification('Refreshing logs...', 'info');
+        });
+    }
+
+    if (elements.clearLogsBtn) {
+        elements.clearLogsBtn.addEventListener('click', async () => {
+            if (!confirm('Are you sure you want to clear all logs?')) return;
+            await clearLogs();
+        });
+    }
+}
+
+async function fetchLogs() {
+    const btn = elements.refreshLogsBtn;
+    if (btn) btn.classList.add('loading');
+
+    try {
+        const response = await fetch('api/logs.php');
+        const logs = await response.json();
+        renderLogs(logs);
+    } catch (error) {
+        console.error('Failed to fetch logs', error);
+        elements.logsContainer.innerHTML = `<div class="error-state">Failed to load logs: ${error.message}</div>`;
+    } finally {
+        if (btn) btn.classList.remove('loading');
+    }
+}
+
+async function clearLogs() {
+    try {
+        await fetch('api/logs.php?action=clear');
+        renderLogs([]);
+        showNotification('Logs cleared', 'success');
+    } catch (error) {
+        showNotification('Failed to clear logs', 'error');
+    }
+}
+
+function renderLogs(logs) {
+    if (!logs || logs.length === 0) {
+        elements.logsContainer.innerHTML = `
+            <div class="empty-state" style="text-align: center; color: var(--color-text-secondary); padding: 40px;">
+                No callbacks received yet.
+            </div>
+        `;
+        return;
+    }
+
+    const html = logs.map((log, index) => {
+        return `
+            <div class="log-entry" style="background: var(--color-bg-tertiary); margin-bottom: 1rem; padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid var(--color-border);">
+                <div class="log-header" style="display: flex; justify-content: space-between; margin-bottom: 1rem; border-bottom: 1px solid var(--color-border); padding-bottom: 0.5rem;">
+                    <span style="color: var(--color-primary); font-weight: 600;">#${logs.length - index} Received</span>
+                    <span style="color: var(--color-text-secondary); font-family: monospace;">${log.timestamp}</span>
+                </div>
+                <div class="log-body">
+                    <h4 style="color: var(--color-text-secondary); font-size: 0.8rem; margin-bottom: 0.5rem;">PAYLOAD</h4>
+                    <div style="background: var(--color-bg-primary); padding: 1rem; border-radius: var(--radius-sm); overflow-x: auto;">
+                        <pre style="margin: 0; font-family: monospace; color: var(--color-text-primary); font-size: 0.85rem;"><code>${escapeHtml(JSON.stringify(log.body, null, 2))}</code></pre>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    elements.logsContainer.innerHTML = html;
+}
+
+function startLogPolling() {
+    if (state.logInterval) clearInterval(state.logInterval);
+    state.logInterval = setInterval(fetchLogs, 5000); // Poll every 5 seconds
+}
+
+function stopLogPolling() {
+    if (state.logInterval) {
+        clearInterval(state.logInterval);
+        state.logInterval = null;
+    }
+}
+
+// ============================================
 // Response Display
 // ============================================
 function displayResponse(data, type = 'info') {
-    // Format JSON with syntax highlighting
     const formattedJson = JSON.stringify(data, null, 2);
-
-    // Update response container
     elements.responseContent.innerHTML = `<code>${escapeHtml(formattedJson)}</code>`;
-
-    // Update container class for styling
     elements.responseContainer.classList.remove('success', 'error', 'info');
     elements.responseContainer.classList.add(type);
-
-    // Scroll to response
     elements.responseContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
@@ -173,23 +260,18 @@ function displayResponse(data, type = 'info') {
 function initCopyButton() {
     elements.copyButton.addEventListener('click', async () => {
         const text = elements.responseContent.textContent;
-
         try {
             await navigator.clipboard.writeText(text);
             showNotification('Response copied to clipboard!', 'success');
-
-            // Visual feedback
             const originalHTML = elements.copyButton.innerHTML;
             elements.copyButton.innerHTML = `
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <polyline points="20 6 9 17 4 12"></polyline>
                 </svg>
             `;
-
             setTimeout(() => {
                 elements.copyButton.innerHTML = originalHTML;
             }, 2000);
-
         } catch (error) {
             showNotification('Failed to copy to clipboard', 'error');
         }
@@ -200,18 +282,13 @@ function initCopyButton() {
 // Notification System
 // ============================================
 function showNotification(message, type = 'info') {
-    // Remove existing notifications
     const existing = document.querySelector('.notification');
-    if (existing) {
-        existing.remove();
-    }
+    if (existing) existing.remove();
 
-    // Create notification element
     const notification = document.createElement('div');
     notification.className = `notification notification-${type}`;
     notification.textContent = message;
 
-    // Add styles
     Object.assign(notification.style, {
         position: 'fixed',
         top: '20px',
@@ -231,39 +308,24 @@ function showNotification(message, type = 'info') {
         maxWidth: '400px'
     });
 
-    // Add to DOM
     document.body.appendChild(notification);
 
-    // Auto remove after 4 seconds
     setTimeout(() => {
         notification.style.animation = 'slideOutRight 0.3s ease-out';
         setTimeout(() => notification.remove(), 300);
     }, 4000);
 }
 
-// Add notification animations to CSS dynamically
+// Add notification animations
 const style = document.createElement('style');
 style.textContent = `
     @keyframes slideInRight {
-        from {
-            transform: translateX(400px);
-            opacity: 0;
-        }
-        to {
-            transform: translateX(0);
-            opacity: 1;
-        }
+        from { transform: translateX(400px); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
     }
-    
     @keyframes slideOutRight {
-        from {
-            transform: translateX(0);
-            opacity: 1;
-        }
-        to {
-            transform: translateX(400px);
-            opacity: 0;
-        }
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(400px); opacity: 0; }
     }
 `;
 document.head.appendChild(style);
@@ -272,21 +334,12 @@ document.head.appendChild(style);
 // Utility Functions
 // ============================================
 function escapeHtml(text) {
-    const map = {
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&#039;'
-    };
+    if (typeof text !== 'string') return text;
+    const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
     return text.replace(/[&<>"']/g, m => map[m]);
 }
 
-// ============================================
-// Form Auto-fill for Testing (Development Helper)
-// ============================================
 function initTestDataHelper() {
-    // Add keyboard shortcut: Ctrl/Cmd + Shift + T to fill test data
     document.addEventListener('keydown', (e) => {
         if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'T') {
             e.preventDefault();
@@ -351,34 +404,28 @@ function fillTestData() {
     };
 
     const currentData = testData[state.currentEndpoint];
-    if (!currentData) return;
+    const section = document.getElementById(state.currentEndpoint);
+    if (!currentData || !section) return;
 
-    const currentSection = document.getElementById(state.currentEndpoint);
-    const form = currentSection.querySelector('.api-form');
+    const form = section.querySelector('.api-form');
+    if (!form) return;
 
     Object.entries(currentData).forEach(([key, value]) => {
         const input = form.querySelector(`[name="${key}"]`);
         if (input) {
             input.value = value;
-            // Trigger input event for any listeners
             input.dispatchEvent(new Event('input', { bubbles: true }));
         }
     });
 
-    showNotification('Test data filled! Press Ctrl/Cmd+Shift+T to refill.', 'info');
+    showNotification('Test data filled!', 'info');
 }
 
-// ============================================
-// Phone Number Formatter
-// ============================================
 function initPhoneFormatters() {
     const phoneInputs = document.querySelectorAll('input[type="tel"]');
-
     phoneInputs.forEach(input => {
         input.addEventListener('blur', (e) => {
             let value = e.target.value.replace(/\D/g, '');
-
-            // Auto-add Kenya country code if missing
             if (value.length === 9 && value.startsWith('7')) {
                 value = '254' + value;
                 e.target.value = value;
@@ -387,60 +434,30 @@ function initPhoneFormatters() {
                 e.target.value = value;
             }
         });
-
-        // Add pattern validation
         input.setAttribute('pattern', '254[0-9]{9}');
         input.setAttribute('title', 'Enter phone number in format: 254722000000');
     });
 }
 
-// ============================================
-// Initialize Application
-// ============================================
 function init() {
     console.log('M-Pesa API Tester initialized');
-
     initNavigation();
     initEnvironmentToggle();
     initForms();
     initCopyButton();
     initTestDataHelper();
     initPhoneFormatters();
+    initLogViewer();
 
-    // Show welcome message
-    displayResponse({
-        message: 'Welcome to M-Pesa API Tester!',
-        instructions: [
-            'Select an endpoint from the sidebar',
-            'Fill in the required fields',
-            'Click the submit button to test the API',
-            'View the response below'
-        ],
-        tips: [
-            'Use Ctrl/Cmd + Shift + T to auto-fill test data',
-            'Toggle between Sandbox and Production modes using the switch above',
-            'All responses can be copied to clipboard'
-        ]
-    }, 'info');
-
-    console.log('Tip: Press Ctrl/Cmd + Shift + T to auto-fill test data');
+    // Check if we start on a different endpoint (optional)
+    const activeNav = document.querySelector('.nav-item.active');
+    if (activeNav) {
+        switchEndpoint(activeNav.dataset.endpoint);
+    }
 }
 
-// ============================================
-// Start Application
-// ============================================
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
 } else {
     init();
 }
-
-// ============================================
-// Export for debugging (optional)
-// ============================================
-window.mpesaTester = {
-    state,
-    switchEndpoint,
-    fillTestData,
-    displayResponse
-};

@@ -62,7 +62,7 @@
   'Yourdudeken\\Mpesa\\Validation\\Rule\\IpAddress' => 'Mpesa/Validation/Rule/IpAddress.php',
   'Yourdudeken\\Mpesa\\Validation\\Rule\\Length' => 'Mpesa/Validation/Rule/Length.php',
   'Yourdudeken\\Mpesa\\Validation\\Rule\\LessThan' => 'Mpesa/Validation/Rule/LessThan.php',
-  'Yourdudeken\\Mpesa\\Validation\\Rule\\Match' => 'Mpesa/Validation/Rule/Match.php',
+  'Yourdudeken\\Mpesa\\Validation\\Rule\\MatchField' => 'Mpesa/Validation/Rule/MatchField.php',
   'Yourdudeken\\Mpesa\\Validation\\Rule\\MaxLength' => 'Mpesa/Validation/Rule/MaxLength.php',
   'Yourdudeken\\Mpesa\\Validation\\Rule\\MinLength' => 'Mpesa/Validation/Rule/MinLength.php',
   'Yourdudeken\\Mpesa\\Validation\\Rule\\NotInList' => 'Mpesa/Validation/Rule/NotInList.php',

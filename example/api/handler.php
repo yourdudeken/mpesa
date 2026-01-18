@@ -145,12 +145,18 @@ function handleSTKPush($mpesa, $data)
 {
     validateRequired($data, ['amount', 'phoneNumber', 'accountReference']);
     
-    return $mpesa->STKPush([
+    $params = [
         'amount' => (float) $data['amount'],
         'phoneNumber' => $data['phoneNumber'],
         'accountReference' => $data['accountReference'],
         'transactionDesc' => $data['transactionDesc'] ?? 'Payment'
-    ]);
+    ];
+
+    if (!empty($data['callbackURL'])) {
+        $params['CallBackURL'] = $data['callbackURL'];
+    }
+    
+    return $mpesa->STKPush($params);
 }
 
 /**
