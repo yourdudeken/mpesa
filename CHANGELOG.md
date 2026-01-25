@@ -24,8 +24,6 @@
 
 ### Features
 
-## [1.1.0] - 2026-01-25
-
 ### Added
 - Hierarchical configuration system with intelligent fallbacks
 - Universal callback handler support for STK, C2B, B2C, and B2B
@@ -45,8 +43,6 @@
 ### Changed
 - Refactored all payment handlers to use smart defaults and optional callback URLs
 - Updated internal configuration with standard Safaricom defaults
-
-## [1.0.1] - 2025-12-18
 
 # [1.2.0](https://github.com/yourdudeken/mpesa/compare/v1.1.0...v1.2.0) (2025-12-20)
 
