@@ -293,11 +293,16 @@ function handleC2BRegister($request) {
     
     $mpesa = new Mpesa();
     
-    $response = $mpesa->C2BRegister([
+    $params = [
         'ValidationURL' => $data['validation_url'],
-        'ConfirmationURL' => $data['confirmation_url'],
-        'ResponseType' => $data['response_type'] ?? null
-    ]);
+        'ConfirmationURL' => $data['confirmation_url']
+    ];
+
+    if (!empty($data['response_type'])) {
+        $params['ResponseType'] = $data['response_type'];
+    }
+
+    $response = $mpesa->C2BRegister($params);
 
     echo json_encode([
         'success' => true,

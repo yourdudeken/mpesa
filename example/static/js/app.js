@@ -445,7 +445,14 @@ async function apiRequest(action, data = {}) {
     });
 
     if (!response.ok) {
-        throw new Error('Network error');
+        let errorMessage = 'Network error';
+        try {
+            const errorData = await response.json();
+            errorMessage = errorData.error || response.statusText;
+        } catch (e) {
+            errorMessage = response.statusText || 'Network error';
+        }
+        throw new Error(errorMessage);
     }
 
     return await response.json();
