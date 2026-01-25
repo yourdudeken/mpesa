@@ -1,5 +1,6 @@
 /**
  * M-Pesa Payment System - Frontend Application
+ * Supports all M-Pesa transaction types
  */
 
 // Application State
@@ -14,10 +15,25 @@ const App = {
 const API_BASE = 'api/payment.php';
 const LOGS_API = 'api/logs.php';
 
+// Page title mapping
+const PAGE_TITLES = {
+    'dashboard': 'Dashboard',
+    'stk-push': 'STK Push',
+    'b2c': 'B2C Payment',
+    'b2b': 'B2B Transfer',
+    'b2pochi': 'B2Pochi Payment',
+    'c2b': 'C2B Payments',
+    'balance': 'Account Balance',
+    'status': 'Transaction Status',
+    'reversal': 'Transaction Reversal',
+    'transactions': 'Transactions',
+    'callbacks': 'Callback Logs'
+};
+
 // Initialize Application
 document.addEventListener('DOMContentLoaded', () => {
     initNavigation();
-    initPaymentForm();
+    initAllForms();
     initFilters();
     initRefreshButton();
     loadDashboard();
@@ -50,13 +66,7 @@ function switchPage(page) {
     });
 
     // Update page title
-    const titles = {
-        dashboard: 'Dashboard',
-        payment: 'New Payment',
-        transactions: 'Transactions',
-        callbacks: 'Callback Logs'
-    };
-    document.getElementById('pageTitle').textContent = titles[page] || page;
+    document.getElementById('pageTitle').textContent = PAGE_TITLES[page] || page;
 
     // Load page data
     App.currentPage = page;
@@ -91,6 +101,7 @@ async function loadDashboard() {
         // Load recent transactions
         const transactionsResponse = await apiRequest('get_transactions', { limit: 10 });
         if (transactionsResponse.success) {
+            App.transactions = transactionsResponse.data;
             updateRecentTransactions(transactionsResponse.data);
         }
     } catch (error) {
@@ -118,7 +129,7 @@ function updateRecentTransactions(transactions) {
     }
 
     tbody.innerHTML = transactions.map(tx => `
-        <tr onclick="showTransactionDetails(${tx.id})">
+        <tr onclick="showTransactionDetails(${tx.id})" style="cursor: pointer;">
             <td>${formatDate(tx.created_at)}</td>
             <td>${formatPhone(tx.phone_number)}</td>
             <td>${tx.account_reference}</td>
@@ -129,63 +140,72 @@ function updateRecentTransactions(transactions) {
 }
 
 /**
- * Payment Form
+ * Form Handling
  */
-function initPaymentForm() {
-    const form = document.getElementById('paymentForm');
-    const phoneInput = document.getElementById('phoneNumber');
+function initAllForms() {
+    const forms = document.querySelectorAll('.form');
 
-    // Auto-format phone number
-    phoneInput.addEventListener('blur', () => {
-        phoneInput.value = formatPhoneInput(phoneInput.value);
-    });
+    forms.forEach(form => {
+        // Auto-format phone inputs
+        const phoneInputs = form.querySelectorAll('input[type="tel"]');
+        phoneInputs.forEach(input => {
+            input.addEventListener('blur', () => {
+                input.value = formatPhoneInput(input.value);
+            });
+        });
 
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        await handlePaymentSubmit(form);
+        // Handle form submission
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await handleFormSubmit(form);
+        });
     });
 }
 
-async function handlePaymentSubmit(form) {
+async function handleFormSubmit(form) {
     const submitBtn = form.querySelector('button[type="submit"]');
-    const resultDiv = document.getElementById('paymentResult');
+    const resultDiv = form.parentElement.querySelector('.payment-result');
+    const action = form.dataset.action;
+
+    if (!action) {
+        showToast('Form action not defined', 'error');
+        return;
+    }
 
     // Get form data
     const formData = new FormData(form);
     const data = Object.fromEntries(formData.entries());
 
-    // Validate
-    if (!data.phone_number || !data.amount || !data.account_reference) {
-        showToast('Please fill in all required fields', 'error');
-        return;
-    }
-
     try {
         // Show loading
         submitBtn.classList.add('loading');
         submitBtn.disabled = true;
-        resultDiv.style.display = 'none';
+        if (resultDiv) resultDiv.style.display = 'none';
 
-        // Submit payment
-        const response = await apiRequest('initiate_payment', data);
+        // Submit request
+        const response = await apiRequest(action, data);
 
         if (response.success) {
             // Show success
-            showPaymentResult(true, response.data);
+            if (resultDiv) {
+                showPaymentResult(resultDiv, true, response);
+            }
             form.reset();
-            showToast('Payment request sent successfully!', 'success');
+            showToast(response.message || 'Request successful!', 'success');
 
-            // Refresh dashboard
+            // Refresh dashboard if needed
             if (App.currentPage === 'dashboard') {
                 setTimeout(loadDashboard, 2000);
             }
         } else {
-            throw new Error(response.error || 'Payment failed');
+            throw new Error(response.error || 'Request failed');
         }
 
     } catch (error) {
-        console.error('Payment error:', error);
-        showPaymentResult(false, { message: error.message });
+        console.error('Request error:', error);
+        if (resultDiv) {
+            showPaymentResult(resultDiv, false, { message: error.message });
+        }
         showToast(error.message, 'error');
     } finally {
         submitBtn.classList.remove('loading');
@@ -193,8 +213,7 @@ async function handlePaymentSubmit(form) {
     }
 }
 
-function showPaymentResult(success, data) {
-    const resultDiv = document.getElementById('paymentResult');
+function showPaymentResult(resultDiv, success, data) {
     const iconDiv = resultDiv.querySelector('.result-icon');
     const titleDiv = resultDiv.querySelector('.result-title');
     const messageDiv = resultDiv.querySelector('.result-message');
@@ -204,32 +223,38 @@ function showPaymentResult(success, data) {
 
     if (success) {
         iconDiv.innerHTML = `
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--color-success);">
                 <polyline points="20 6 9 17 4 12"></polyline>
             </svg>
         `;
-        titleDiv.textContent = 'Payment Request Sent';
-        messageDiv.textContent = data.customer_message || 'Please check your phone to complete the payment';
+        titleDiv.textContent = 'Request Successful';
+        messageDiv.textContent = data.message || 'Your request has been processed successfully';
 
-        detailsDiv.innerHTML = `
-            <div style="margin-bottom: 0.5rem;"><strong>Checkout ID:</strong> ${data.checkout_request_id || 'N/A'}</div>
-            <div style="margin-bottom: 0.5rem;"><strong>Merchant ID:</strong> ${data.merchant_request_id || 'N/A'}</div>
-            <div><strong>Status:</strong> Pending confirmation</div>
-        `;
+        // Format response data
+        const responseData = data.data || {};
+        const details = Object.entries(responseData)
+            .map(([key, value]) => {
+                const label = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+                return `<div style="margin-bottom: 0.5rem;"><strong>${label}:</strong> ${value || 'N/A'}</div>`;
+            })
+            .join('');
+
+        detailsDiv.innerHTML = details || '<div>Request accepted and processing</div>';
     } else {
         iconDiv.innerHTML = `
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--color-error);">
                 <circle cx="12" cy="12" r="10"></circle>
                 <line x1="15" y1="9" x2="9" y2="15"></line>
                 <line x1="9" y1="9" x2="15" y2="15"></line>
             </svg>
         `;
-        titleDiv.textContent = 'Payment Failed';
-        messageDiv.textContent = data.message || 'An error occurred while processing your payment';
+        titleDiv.textContent = 'Request Failed';
+        messageDiv.textContent = data.message || 'An error occurred while processing your request';
         detailsDiv.innerHTML = '';
     }
 
     resultDiv.style.display = 'block';
+    resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
 /**
@@ -243,6 +268,7 @@ async function loadTransactions(status = null) {
         const response = await apiRequest('get_transactions', params);
 
         if (response.success) {
+            App.transactions = response.data;
             displayTransactions(response.data);
         }
     } catch (error) {
@@ -284,39 +310,17 @@ function showTransactionDetails(transactionId) {
 
     modalBody.innerHTML = `
         <div style="display: grid; gap: 1rem;">
-            <div>
-                <strong>Transaction ID:</strong> #${transaction.id}
-            </div>
-            <div>
-                <strong>Checkout Request ID:</strong> ${transaction.checkout_request_id || 'N/A'}
-            </div>
-            <div>
-                <strong>Phone Number:</strong> ${formatPhone(transaction.phone_number)}
-            </div>
-            <div>
-                <strong>Amount:</strong> KES ${formatCurrency(transaction.amount)}
-            </div>
-            <div>
-                <strong>Account Reference:</strong> ${transaction.account_reference}
-            </div>
-            <div>
-                <strong>Description:</strong> ${transaction.transaction_desc || 'N/A'}
-            </div>
-            <div>
-                <strong>M-Pesa Receipt:</strong> ${transaction.mpesa_receipt_number || 'N/A'}
-            </div>
-            <div>
-                <strong>Status:</strong> ${getStatusBadge(transaction.status)}
-            </div>
-            <div>
-                <strong>Result:</strong> ${transaction.result_desc || 'Pending'}
-            </div>
-            <div>
-                <strong>Created:</strong> ${formatDateTime(transaction.created_at)}
-            </div>
-            <div>
-                <strong>Updated:</strong> ${formatDateTime(transaction.updated_at)}
-            </div>
+            <div><strong>Transaction ID:</strong> #${transaction.id}</div>
+            <div><strong>Checkout Request ID:</strong> ${transaction.checkout_request_id || 'N/A'}</div>
+            <div><strong>Phone Number:</strong> ${formatPhone(transaction.phone_number)}</div>
+            <div><strong>Amount:</strong> KES ${formatCurrency(transaction.amount)}</div>
+            <div><strong>Account Reference:</strong> ${transaction.account_reference}</div>
+            <div><strong>Description:</strong> ${transaction.transaction_desc || 'N/A'}</div>
+            <div><strong>M-Pesa Receipt:</strong> ${transaction.mpesa_receipt_number || 'N/A'}</div>
+            <div><strong>Status:</strong> ${getStatusBadge(transaction.status)}</div>
+            <div><strong>Result:</strong> ${transaction.result_desc || 'Pending'}</div>
+            <div><strong>Created:</strong> ${formatDateTime(transaction.created_at)}</div>
+            <div><strong>Updated:</strong> ${formatDateTime(transaction.updated_at)}</div>
         </div>
     `;
 

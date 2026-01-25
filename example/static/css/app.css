@@ -2,37 +2,37 @@
     --color-primary: #00C853;
     --color-primary-dark: #00796B;
     --color-primary-light: #69F0AE;
-    
+
     --color-success: #00C853;
     --color-warning: #FFC107;
     --color-error: #F44336;
     --color-info: #2196F3;
     --color-pending: #FF9800;
-    
+
     --color-bg-primary: #0A0E27;
     --color-bg-secondary: #131829;
     --color-bg-tertiary: #1A1F3A;
     --color-bg-card: #1E2442;
-    
+
     --color-text-primary: #FFFFFF;
     --color-text-secondary: #B4B9D0;
     --color-text-muted: #6B7280;
-    
+
     --color-border: #2D3348;
     --color-border-light: #3A4059;
-    
+
     --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    
+
     --radius-sm: 6px;
     --radius-md: 12px;
     --radius-lg: 16px;
     --radius-xl: 24px;
-    
+
     --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
     --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.2);
     --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.3);
     --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.4);
-    
+
     --transition-fast: 150ms ease;
     --transition-base: 250ms ease;
     --transition-slow: 350ms ease;
@@ -101,6 +101,16 @@ body {
     padding: 1.5rem 1rem;
 }
 
+.nav-section-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 1rem 1rem 0.5rem;
+    margin-top: 0.5rem;
+}
+
 .nav-item {
     display: flex;
     align-items: center;
@@ -158,8 +168,15 @@ body {
 }
 
 @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
 }
 
 /* Main Content */
@@ -230,8 +247,15 @@ body {
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* Stats Grid */
@@ -461,7 +485,9 @@ body {
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 /* Table */
@@ -616,6 +642,7 @@ body {
         transform: translateX(400px);
         opacity: 0;
     }
+
     to {
         transform: translateX(0);
         opacity: 1;
