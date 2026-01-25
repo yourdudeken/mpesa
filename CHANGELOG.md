@@ -1,9 +1,7 @@
-# Changelog
+# [1.3.0](https://github.com/yourdudeken/mpesa/compare/v1.2.0...v1.3.0) (2026-01-18)
 
-All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+### Features
 
 ## [1.1.0] - 2026-01-25
 
@@ -29,11 +27,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.0.1] - 2025-12-18
 
-### Fixed
-- PSR-4 autoload compliance for Installer class
-- CI enforcement for composer validation
+# [1.2.0](https://github.com/yourdudeken/mpesa/compare/v1.1.0...v1.2.0) (2025-12-20)
 
-## [1.0.0] - 2025-12-17
+
+### Features
+
+* Add bulk consumer credentials and rename security_credential to initiator_password. ([d019f2d](https://github.com/yourdudeken/mpesa/commit/d019f2d816df633f50cc6d9a32e0eab104d1d1e8))
+
+# [1.1.0](https://github.com/yourdudeken/mpesa/compare/v1.0.0...v1.1.0) (2025-12-18)
+
+
+### Features
+
+* Implement comprehensive CI/CD pipeline with GitHub Actions, semantic-release, and development guidelines. ([2f087b8](https://github.com/yourdudeken/mpesa/commit/2f087b8dc74eb347ce1566b9d3e1d5c6cce4aeb2))
+
+# [1.0.0](https://github.com/yourdudeken/mpesa/compare/v1.0.0) (2025-12-17)
 
 ### Added
 - Initial stable release
