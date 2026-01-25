@@ -21,14 +21,13 @@ class Config implements ArrayAccess,ConfigurationStore
      * @return void
      */
     public function __construct($conf = []){
-        // Config that comes with the package
-        $configFile =  __DIR__ . '/../../config/mpesa.php';
-        $defaultConfig = [];
-        if(\is_file($configFile)){
-            $defaultConfig = require $configFile;
+        // Check for config in current working directory
+        $cwdConfig = getcwd() . '/config/mpesa.php';
+        $cwdCustom = [];
+        if (\is_file($cwdConfig)) {
+            $cwdCustom = require $cwdConfig;
         }
-        $defaultConfig = array_merge($defaultConfig,$conf);
-
+        
         // Config after user edits the config file copied by the system
         $userConfig    =  __DIR__ . '/../../../../../../config/mpesa.php';
         $custom        = [];
@@ -36,7 +35,8 @@ class Config implements ArrayAccess,ConfigurationStore
             $custom = require $userConfig;
         }
         
-        $this->items = array_merge($defaultConfig, $custom);
+        // Merge configs with priority: passed config > cwd config > user config
+        $this->items = array_merge($custom, $cwdCustom, $conf);
     }
 
     /**
