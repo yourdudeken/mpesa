@@ -21,38 +21,56 @@ class Config implements ArrayAccess,ConfigurationStore
      * @return void
      */
     public function __construct($conf = []){
-        // Load internal config (ONLY certificate paths)
+        // Load internal config
         $internalConfigFile = __DIR__ . '/../../config/mpesa.php';
         $internalConfig = [];
         if (\is_file($internalConfigFile)) {
             $internalConfig = require $internalConfigFile;
         }
         
-        // Load from environment variables if available
+        // Load from environment variables
         $envConfig = $this->loadFromEnv();
         
-        // Check for config in current working directory (user's project)
+        // Check for config in user project
         $cwdConfig = getcwd() . '/config/mpesa.php';
         $cwdCustom = [];
         if (\is_file($cwdConfig)) {
             $cwdCustom = require $cwdConfig;
         }
         
-        // Config after user edits the config file copied by the system
-        $userConfig    =  __DIR__ . '/../../../../../../config/mpesa.php';
-        $custom        = [];
+        // Final user config from vendor root (fallback)
+        $userConfig = __DIR__ . '/../../../../../../config/mpesa.php';
+        $custom = [];
         if (\is_file($userConfig)) {
             $custom = require $userConfig;
         }
         
-        // Merge configs with priority: passed config > cwd config > user config > env config > internal config (certs only)
-        $this->items = array_merge(
-            $internalConfig, 
-            $envConfig,
-            $custom, 
-            $cwdCustom, 
-            $conf
-        );
+        // Merge all configs
+        $this->items = array_merge($internalConfig, $envConfig, $custom, $cwdCustom, $conf);
+
+        // Normalize credentials: Ensure root-level keys are available where package expects them
+        $this->normalizeItems();
+    }
+
+    /**
+     * Normalize configuration items.
+     */
+    private function normalizeItems() {
+        // Set API URL based on environment if not explicitly provided
+        if (!isset($this->items['apiUrl'])) {
+            $isSandbox = $this->items['is_sandbox'] ?? true;
+            $this->items['apiUrl'] = $isSandbox 
+                ? ($this->items['apiUrlSandbox'] ?? 'https://sandbox.safaricom.co.ke/')
+                : ($this->items['apiUrlLive'] ?? 'https://api.safaricom.co.ke/');
+        }
+
+        // Map root-level consumer credentials to apps structure
+        if (isset($this->items['consumer_key']) && !isset($this->items['apps']['default']['consumer_key'])) {
+            $this->items['apps']['default']['consumer_key'] = $this->items['consumer_key'];
+        }
+        if (isset($this->items['consumer_secret']) && !isset($this->items['apps']['default']['consumer_secret'])) {
+            $this->items['apps']['default']['consumer_secret'] = $this->items['consumer_secret'];
+        }
     }
 
     /**
@@ -69,7 +87,8 @@ class Config implements ArrayAccess,ConfigurationStore
             $this->loadEnvFile($envFile);
         }
         
-        // Map environment variables to config
+        // Map environment variables to root-level config
+        // Hierarchical lookup will handle the fallbacks for nested keys
         if (getenv('MPESA_ENV') !== false) {
             $config['is_sandbox'] = getenv('MPESA_ENV') === 'sandbox';
         }
@@ -83,36 +102,25 @@ class Config implements ArrayAccess,ConfigurationStore
         }
         
         if (getenv('MPESA_SHORTCODE') !== false) {
-            $config['lnmo']['short_code'] = getenv('MPESA_SHORTCODE');
-            $config['c2b']['short_code'] = getenv('MPESA_SHORTCODE');
+            $config['short_code'] = getenv('MPESA_SHORTCODE');
         }
         
         if (getenv('MPESA_PASSKEY') !== false) {
-            $config['lnmo']['passkey'] = getenv('MPESA_PASSKEY');
+            $config['passkey'] = getenv('MPESA_PASSKEY');
         }
         
         if (getenv('MPESA_CALLBACK_URL') !== false) {
-            $config['lnmo']['callback'] = getenv('MPESA_CALLBACK_URL');
+            $config['callback'] = getenv('MPESA_CALLBACK_URL');
+            $config['result_url'] = getenv('MPESA_CALLBACK_URL');
+            $config['timeout_url'] = getenv('MPESA_CALLBACK_URL');
         }
         
         if (getenv('MPESA_INITIATOR_NAME') !== false) {
-            $initiatorName = getenv('MPESA_INITIATOR_NAME');
-            $config['b2c']['initiator_name'] = $initiatorName;
-            $config['b2b']['initiator_name'] = $initiatorName;
-            $config['account_balance']['initiator_name'] = $initiatorName;
-            $config['transaction_status']['initiator_name'] = $initiatorName;
-            $config['reversal']['initiator_name'] = $initiatorName;
-            $config['b2pochi']['initiator_name'] = $initiatorName;
+            $config['initiator_name'] = getenv('MPESA_INITIATOR_NAME');
         }
         
         if (getenv('MPESA_INITIATOR_PASSWORD') !== false) {
-            $initiatorPassword = getenv('MPESA_INITIATOR_PASSWORD');
-            $config['b2c']['initiator_password'] = $initiatorPassword;
-            $config['b2b']['initiator_password'] = $initiatorPassword;
-            $config['account_balance']['initiator_password'] = $initiatorPassword;
-            $config['transaction_status']['initiator_password'] = $initiatorPassword;
-            $config['reversal']['initiator_password'] = $initiatorPassword;
-            $config['b2pochi']['initiator_password'] = $initiatorPassword;
+            $config['initiator_password'] = getenv('MPESA_INITIATOR_PASSWORD');
         }
         
         return $config;
@@ -201,22 +209,48 @@ class Config implements ArrayAccess,ConfigurationStore
             return $array;
         }
 
+        // Try to get the specific key first
+        $value = $this->retrieve($array, $key);
+        
+        if ($value !== null) {
+            return $value;
+        }
+
+        // If not found and is a nested key, try falling back to the last segment
+        // e.g. b2c.initiator_name -> initiator_name
+        if (strpos($key, '.') !== false) {
+            $segments = explode('.', $key);
+            $lastSegment = end($segments);
+            
+            // Check if the last segment exists at the root level
+            if (isset($array[$lastSegment])) {
+                return $array[$lastSegment];
+            }
+        }
+
+        return $this->value($default);
+    }
+
+    /**
+     * Retrieve a value from the array using dot notation.
+     */
+    private function retrieve($array, $key) {
         if (static::exists($array, $key)) {
             return $array[$key];
         }
 
         if (strpos($key, '.') === false) {
-            return isset($array[$key]) ? $array[$key] : $this->value($default);
+            return isset($array[$key]) ? $array[$key] : null;
         }
- 
+
         foreach (explode('.', $key) as $segment) {
             if (static::accessible($array) && static::exists($array, $segment)) {
                 $array = $array[$segment];
             } else {
-                return $this->value($default);
+                return null;
             }
         }
- 
+
         return $array;
     }
 

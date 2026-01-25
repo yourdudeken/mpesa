@@ -29,90 +29,50 @@ return [
 ### External Configuration (User's Project)
 **Location**: `your-project/config/mpesa.php`
 
-**Purpose**: All M-Pesa configuration (credentials, endpoints, etc.)
+**Purpose**: Only unique credentials and settings. Transaction boilerplate (CommandIDs, API URLs, etc.) is handled by the package automatically.
 
-**Required Contents**:
+**Maximally Simplified Example**:
 ```php
 <?php
 return [
-    'apiUrl' => 'https://sandbox.safaricom.co.ke/',
-    'is_sandbox' => true,
-    
-    'apps' => [
-        'default' => [
-            'consumer_key' => 'your-consumer-key',
-            'consumer_secret' => 'your-consumer-secret',
-        ],
-    ],
-    
-    'lnmo' => [
-        'short_code' => 174379,
-        'passkey' => 'your-passkey',
-        'callback' => 'https://your-callback-url.com',
-        'default_transaction_type' => 'CustomerPayBillOnline'
-    ],
-    
-    'c2b' => [
-        'short_code' => '174379',
-        'test_phone_number' => '254708374149',
-        'default_command_id' => 'CustomerPayBillOnline'
-    ],
-    
-    'b2c' => [
-        'initiator_name' => 'testapi',
-        'initiator_password' => 'Safaricom123!!',
-        'short_code' => '600990',
-        'test_phone_number' => '254708374149',
-        'default_command_id' => 'BusinessPayment',
-    ],
-    
-    'b2b' => [
-        'initiator_name' => 'testapi',
-        'initiator_password' => 'Safaricom123!!',
-        'short_code' => '600990',
-        'default_command_id' => 'BusinessPayBill',
-    ],
-    
-    'account_balance' => [
-        'initiator_name' => 'testapi',
-        'initiator_password' => 'Safaricom123!!',
-        'short_code' => '600990',
-        'default_command_id' => 'AccountBalance',
-    ],
-    
-    'transaction_status' => [
-        'initiator_name' => 'testapi',
-        'initiator_password' => 'Safaricom123!!',
-        'short_code' => '600990',
-        'default_command_id' => 'TransactionStatusQuery',
-    ],
-    
-    'reversal' => [
-        'initiator_name' => 'testapi',
-        'initiator_password' => 'Safaricom123!!',
-        'short_code' => '600990',
-        'default_command_id' => 'TransactionReversal',
-    ],
-    
-    'b2pochi' => [
-        'initiator_name' => 'testapi',
-        'initiator_password' => 'Safaricom123!!',
-        'short_code' => '600990',
-        'test_phone_number' => '254708374149',
-        'default_command_id' => 'BusinessPayToPochi',
-    ],
+    'is_sandbox'         => true,
+
+    // Credentials & Common Fields (Automatically applied to all types)
+    'consumer_key'       => 'your-consumer-key',
+    'consumer_secret'    => 'your-consumer-secret',
+    'short_code'         => '174379',
+    'passkey'            => 'your-passkey',
+    'callback'           => 'https://your-domain.com/callback',
+    'initiator_name'     => 'testapi',
+    'initiator_password' => 'Safaricom123!!',
 ];
 ```
 
-## Configuration Loading Priority
+## How Defaults are Handled
 
-The package loads configuration in this order (highest priority first):
+The package now provides built-in defaults for all transaction boilerplate in its internal `src/config/mpesa.php`. This includes:
 
-1. **Passed to constructor** - `new Mpesa($config)`
-2. **Current working directory** - `getcwd() . '/config/mpesa.php'`
-3. **User config** - `vendor/../../../config/mpesa.php`
-4. **Environment Variables (.env)** - `.env` file in project root
-5. **Internal config** - `src/config/mpesa.php` (certificates only)
+- **CommandIDs**: `BusinessPayment`, `CustomerPayBillOnline`, `AccountBalance`, `BusinessPayToPochi`, etc.
+- **API Settings**: Automatic selection of Sandbox or Production endpoints based on `is_sandbox`.
+- **Certificates**: Built-in certificates loaded automatically.
+
+## Configuration Loading Logic
+
+The package uses a three-layer intelligent lookup system when you request a key (e.g., `mpesa.b2c.initiator_name`):
+
+1.  **Direct Match**: Checks for a specific override in your config section (`b2c.initiator_name`).
+2.  **Global Fallback**: if not found, it checks for a root-level key in your config (`initiator_name`).
+3.  **Package Defaults**: If still not found, it falls back to the package's internal defaults in `src/config/mpesa.php`.
+
+## Configuration Priority
+
+- Passed to constructor -> `new Mpesa($config)`
+- Environment Variables -> `.env`
+- Project Config -> `config/mpesa.php`
+- Project Root Fallback -> `../../../../../../config/mpesa.php`
+- Internal Package Config -> `src/config/mpesa.php` (Lowest priority - defaults)
+
+## Environment Variables (.env) Support
 
 ## Environment Variables (.env) Support
 
