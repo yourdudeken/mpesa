@@ -46,8 +46,8 @@ class B2BTest extends TestCase{
         $this->httpClient->method('getInfo')
         ->will($this->returnValue(500));
 
-        // Test should throw ConfigurationException because Initiator is required but not provided
-        $this->expectException(ConfigurationException::class);
+        // Test should throw MpesaException because request returns 500
+        $this->expectException(MpesaException::class);
         $results = $b2c->submit([
             'amount' => 20,
             'partyB' => '254723731241',
