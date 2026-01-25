@@ -16,8 +16,9 @@ class Pay {
         'CommandID:CommandID' => 'required()({label} is required)',
         'PartyA:PartyA' => 'required()({label} is required)',
         'PartyB:PartyB' => 'required()({label} is required)',
-        'QueueTimeOutURL:QueueTimeOutURL' => 'required()({label} is required)',
-        'ResultURL:ResultURL' => 'required()({label} is required)',
+        'PartyB:PartyB' => 'required()({label} is required)',
+        'QueueTimeOutURL:QueueTimeOutURL' => 'website',
+        'ResultURL:ResultURL' => 'website',
         'Remarks:Remarks' => 'required()({label} is required)',
         'Amount:Amount' => 'required()({label} is required)'
     ];
@@ -50,13 +51,13 @@ class Pay {
             $userParams[ucwords($key)] = $value;
         }
 
-        $shortCode = $this->engine->config->get('mpesa.b2pochi.short_code');
-        $successCallback  = $this->engine->config->get('mpesa.b2pochi.result_url');
-        $timeoutCallback  = $this->engine->config->get('mpesa.b2pochi.timeout_url');
-        $initiator  = $this->engine->config->get('mpesa.b2pochi.initiator_name');
-        $initiatorPass = $this->engine->config->get('mpesa.b2pochi.initiator_password');
-        $securityCredential  = $this->engine->computeSecurityCredential($initiatorPass);
-        $commandId  = $this->engine->config->get('mpesa.b2pochi.default_command_id', 'BusinessPayToPochi');
+        $shortCode        = $this->engine->config->get('mpesa.b2pochi.short_code');
+        $successCallback   = $this->engine->config->get('mpesa.b2pochi.result_url') ?: $this->engine->config->get('mpesa.callback');
+        $timeoutCallback   = $this->engine->config->get('mpesa.b2pochi.timeout_url') ?: $this->engine->config->get('mpesa.callback');
+        $initiator         = $this->engine->config->get('mpesa.b2pochi.initiator_name');
+        $initiatorPass     = $this->engine->config->get('mpesa.b2pochi.initiator_password');
+        $securityCredential = $this->engine->computeSecurityCredential($initiatorPass);
+        $commandId         = $this->engine->config->get('mpesa.b2pochi.default_command_id', 'BusinessPayToPochi');
         
         // Params coming from the config file
         $configParams = [

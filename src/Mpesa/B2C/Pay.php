@@ -16,8 +16,8 @@ class Pay {
         'CommandID:CommandID' => 'required()({label} is required)',
         'PartyA:PartyA' => 'required()({label} is required)',
         'PartyB:PartyB' => 'required()({label} is required)',
-        'QueueTimeOutURL:QueueTimeOutURL' => 'required()({label} is required)',
-        'ResultURL:ResultURL' => 'required()({label} is required)',
+        'QueueTimeOutURL:QueueTimeOutURL' => 'website',
+        'ResultURL:ResultURL' => 'website',
         'Remarks:Remarks' => 'required()({label} is required)',
         'Amount:Amount' => 'required()({label} is required)'
     ];
@@ -60,9 +60,9 @@ class Pay {
             $userParams[ucwords($key)] = $value;
         }
 
-        $shortCode = $this->engine->config->get('mpesa.b2c.short_code');
-        $successCallback  = $this->engine->config->get('mpesa.b2c.result_url');
-        $timeoutCallback  = $this->engine->config->get('mpesa.b2c.timeout_url');
+        $shortCode       = $this->engine->config->get('mpesa.b2c.short_code');
+        $successCallback  = $this->engine->config->get('mpesa.b2c.result_url') ?: $this->engine->config->get('mpesa.callback');
+        $timeoutCallback  = $this->engine->config->get('mpesa.b2c.timeout_url') ?: $this->engine->config->get('mpesa.callback');
         $initiator  = $this->engine->config->get('mpesa.b2c.initiator_name');
         $initiatorPass = $this->engine->config->get('mpesa.b2c.initiator_password');
         $securityCredential  = $this->engine->computeSecurityCredential($initiatorPass);

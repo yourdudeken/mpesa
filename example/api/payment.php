@@ -343,18 +343,17 @@ function handleC2BSimulate($request) {
  */
 function handleAccountBalance($request) {
     $data = $request['data'] ?? [];
-    
     $mpesa = new Mpesa();
     
     $params = [
-        'remarks' => $data['remarks'] ?? 'Balance query'
+        'Remarks' => $data['remarks'] ?? 'Balance query'
     ];
 
     if (!empty($data['result_url'])) {
-        $params['resultURL'] = $data['result_url'];
+        $params['ResultURL'] = $data['result_url'];
     }
     if (!empty($data['timeout_url'])) {
-        $params['queueTimeOutURL'] = $data['timeout_url'];
+        $params['QueueTimeOutURL'] = $data['timeout_url'];
     }
     
     $response = $mpesa->accountBalance($params);
@@ -371,21 +370,20 @@ function handleAccountBalance($request) {
  */
 function handleTransactionStatus($request) {
     $data = $request['data'] ?? [];
-    
     validateRequired($data, ['transaction_id']);
     
     $mpesa = new Mpesa();
     
     $params = [
-        'transactionID' => $data['transaction_id'],
-        'remarks' => $data['remarks'] ?? 'Status check'
+        'TransactionID' => $data['transaction_id'],
+        'Remarks' => $data['remarks'] ?? 'Status check'
     ];
 
     if (!empty($data['result_url'])) {
-        $params['resultURL'] = $data['result_url'];
+        $params['ResultURL'] = $data['result_url'];
     }
     if (!empty($data['timeout_url'])) {
-        $params['queueTimeOutURL'] = $data['timeout_url'];
+        $params['QueueTimeOutURL'] = $data['timeout_url'];
     }
     
     $response = $mpesa->transactionStatus($params);
@@ -402,23 +400,22 @@ function handleTransactionStatus($request) {
  */
 function handleReversal($request) {
     $data = $request['data'] ?? [];
-    
     validateRequired($data, ['transaction_id', 'amount', 'receiver_party', 'remarks']);
     
     $mpesa = new Mpesa();
     
     $params = [
-        'transactionID' => $data['transaction_id'],
-        'amount' => (float) $data['amount'],
-        'receiverParty' => $data['receiver_party'],
-        'remarks' => $data['remarks']
+        'TransactionID' => $data['transaction_id'],
+        'Amount' => (float) $data['amount'],
+        'ReceiverParty' => $data['receiver_party'],
+        'Remarks' => $data['remarks']
     ];
 
     if (!empty($data['result_url'])) {
-        $params['resultURL'] = $data['result_url'];
+        $params['ResultURL'] = $data['result_url'];
     }
     if (!empty($data['timeout_url'])) {
-        $params['queueTimeOutURL'] = $data['timeout_url'];
+        $params['QueueTimeOutURL'] = $data['timeout_url'];
     }
     
     $response = $mpesa->reversal($params);

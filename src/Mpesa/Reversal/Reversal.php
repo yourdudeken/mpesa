@@ -18,8 +18,8 @@ class Reversal {
         'Amount:Amount' => 'required()({label} is required)',
         'ReceiverParty:ReceiverParty' => 'required()({label} is required)',
         'RecieverIdentifierType:RecieverIdentifierType' => 'required()({label} is required)',
-        'ResultURL:ResultURL' => 'required()({label} is required)',
-        'QueueTimeOutURL:QueueTimeOutURL' => 'required()({label} is required)',
+        'ResultURL:ResultURL' => 'website',
+        'QueueTimeOutURL:QueueTimeOutURL' => 'website',
         'Remarks:Remarks' => 'required()({label} is required)',
     ];
 
@@ -51,13 +51,13 @@ class Reversal {
             $userParams[ucwords($key)] = $value;
         }
  
-        $shortCode = $this->engine->config->get('mpesa.reversal.short_code');
-        $successCallback  = $this->engine->config->get('mpesa.reversal.result_url');
-        $timeoutCallback  = $this->engine->config->get('mpesa.reversal.timeout_url');
-        $initiator  = $this->engine->config->get('mpesa.reversal.initiator_name');
-        $commandId  = $this->engine->config->get('mpesa.reversal.default_command_id', 'TransactionReversal');
-        $initiatorPass = $this->engine->config->get('mpesa.reversal.initiator_password');
-        $securityCredential  = $this->engine->computeSecurityCredential($initiatorPass);
+        $shortCode        = $this->engine->config->get('mpesa.reversal.short_code');
+        $successCallback   = $this->engine->config->get('mpesa.reversal.result_url') ?: $this->engine->config->get('mpesa.callback');
+        $timeoutCallback   = $this->engine->config->get('mpesa.reversal.timeout_url') ?: $this->engine->config->get('mpesa.callback');
+        $initiator         = $this->engine->config->get('mpesa.reversal.initiator_name');
+        $commandId         = $this->engine->config->get('mpesa.reversal.default_command_id', 'TransactionReversal');
+        $initiatorPass     = $this->engine->config->get('mpesa.reversal.initiator_password');
+        $securityCredential = $this->engine->computeSecurityCredential($initiatorPass);
         
         // RecieverIdentifierType should be '11' for organization short codes (as per documentation)
         $receiverIdentifierType = '11';
