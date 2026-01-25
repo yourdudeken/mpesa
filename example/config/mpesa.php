@@ -31,9 +31,9 @@ return [
     */
     'apps' => [
         'default' => [
-            'consumer_key' => 'uwd4VCfOjYcpawEsAYAkRyUYKRgCBdJ7',
+            'consumer_key' => 'dGyDD1yDZ7ojyQ3xBzKGGSf6lzs9NwOJwvdOkvmq0KgHz3YD',
     
-            'consumer_secret' => 'cq1hvOrJMyQYtgHU',
+            'consumer_secret' => 'lUf3zoO0SpoEGQK0l0oquLJ6AIWo8RZWJiRZFC4IFHVP2Rv3EA733ajuXGg6C9MM',
         ],
         'bulk' => [
             'consumer_key' => '',
@@ -99,7 +99,7 @@ return [
         | API on completion or failure of a push transaction.
         |
         */
-        'callback' => null,
+        'callback' => 'https://example.com/callback',
         
         /*
         |--------------------------------------------------------------------------
@@ -141,7 +141,7 @@ return [
 
         'on_timeout' => 'Completed',
 
-        'short_code' => '600256',
+        'short_code' => '174379',
 
         'test_phone_number' => '254708374149',
 
@@ -159,13 +159,13 @@ return [
     */
 
     'b2c' => [
-        'initiator_name' => 'apiop59',
+        'initiator_name' => 'testapi',
 
         'default_command_id' => 'BusinessPayment',
 
-        'security_credential' => 'YAL2yKrn',
+        'initiator_password' => 'Safaricom123!!',
 
-        'short_code' => '602973',
+        'short_code' => '600990',
 
         'test_phone_number' => '254708374149',
 
@@ -185,13 +185,13 @@ return [
     */
 
     'b2b' => [
-        'initiator_name' => 'testapi0297',
+        'initiator_name' => 'testapi',
 
         'default_command_id' => 'BusinessPayBill',
 
-        'security_credential' => 'YAL2yKrn',
+        'initiator_password' => 'Safaricom123!!',
 
-        'short_code' => '600256',
+        'short_code' => '600990',
 
         'test_phone_number' => '254708374149',
 
@@ -211,13 +211,13 @@ return [
     */
 
     'account_balance' => [
-        'initiator_name' => 'testapi0297',
+        'initiator_name' => 'testapi',
 
-        'security_credential' => 'YAL2yKrn',
+        'initiator_password' => 'Safaricom123!!',
 
         'default_command_id' => 'AccountBalance',
 
-        'short_code' => '600256',
+        'short_code' => '600990',
 
         'result_url' => '',
 
@@ -235,13 +235,13 @@ return [
     */
 
     'transaction_status' => [
-        'initiator_name' => 'testapi0297',
+        'initiator_name' => 'testapi',
 
-        'security_credential' => 'YAL2yKrn',
+        'initiator_password' => 'Safaricom123!!',
 
         'default_command_id' => 'TransactionStatusQuery',
 
-        'short_code' => '600256',
+        'short_code' => '600990',
 
         'result_url' => '',
 
@@ -259,13 +259,13 @@ return [
     */
 
     'reversal' => [
-        'initiator_name' => 'testapi0297',
+        'initiator_name' => 'testapi',
 
-        'security_credential' => 'YAL2yKrn',
+        'initiator_password' => 'Safaricom123!!',
 
         'default_command_id' => 'TransactionReversal',
 
-        'short_code' => '600256',
+        'short_code' => '600990',
 
         'result_url' => '',
 
@@ -283,13 +283,13 @@ return [
     */
 
     'b2pochi' => [
-        'initiator_name' => 'testapi0297',
+        'initiator_name' => 'testapi',
 
-        'initiator_password' => 'YAL2yKrn',
+        'initiator_password' => 'Safaricom123!!',
 
         'default_command_id' => 'BusinessPayToPochi',
 
-        'short_code' => '600256',
+        'short_code' => '600990',
 
         'test_phone_number' => '254708374149',
 

@@ -120,7 +120,7 @@ return [
     // B2C Configuration
     'b2c' => [
         'initiator_name' => 'testapi',
-        'security_credential' => 'your_credential',
+        'initiator_password' => 'your_credential',
         'short_code' => '600000',
         'result_url' => 'https://yourdomain.com/result',
         'timeout_url' => 'https://yourdomain.com/timeout',

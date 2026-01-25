@@ -71,7 +71,7 @@ class PaymentController {
 The following parameters can be configured in `config/mpesa.php` under the `b2c` section:
 
 - **initiator_name**: The name of the initiator making the request
-- **security_credential**: The encrypted password for the initiator
+- **initiator_password**: The encrypted password for the initiator
 - **default_command_id**: Default is 'BusinessPayment'. Other options include 'SalaryPayment', 'BusinessPayment', 'PromotionPayment'
 - **short_code**: Your business shortcode
 - **test_phone_number**: Phone number for testing in sandbox mode (automatically used in sandbox)

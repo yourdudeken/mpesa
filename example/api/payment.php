@@ -123,17 +123,23 @@ function handleSTKPush($request) {
     
     $response = $mpesa->STKPush($params);
 
-    // Save to database
-    $transaction = new Transaction();
-    $transactionId = $transaction->create([
-        'checkout_request_id' => $response->CheckoutRequestID ?? null,
-        'merchant_request_id' => $response->MerchantRequestID ?? null,
-        'phone_number' => $phoneNumber,
-        'amount' => $data['amount'],
-        'account_reference' => $data['account_reference'],
-        'transaction_desc' => $data['transaction_desc'] ?? 'Payment',
-        'status' => 'pending'
-    ]);
+    // Try to save to database, but don't fail if database is unavailable
+    $transactionId = null;
+    try {
+        $transaction = new Transaction();
+        $transactionId = $transaction->create([
+            'checkout_request_id' => $response->CheckoutRequestID ?? null,
+            'merchant_request_id' => $response->MerchantRequestID ?? null,
+            'phone_number' => $phoneNumber,
+            'amount' => $data['amount'],
+            'account_reference' => $data['account_reference'],
+            'transaction_desc' => $data['transaction_desc'] ?? 'Payment',
+            'status' => 'pending'
+        ]);
+    } catch (Exception $e) {
+        // Database not available, continue without saving
+        error_log('Failed to save transaction to database: ' . $e->getMessage());
+    }
 
     echo json_encode([
         'success' => true,
@@ -415,37 +421,60 @@ function handleReversal($request) {
  * Get Transactions
  */
 function handleGetTransactions($request) {
-    $transaction = new Transaction();
-    
-    $status = $request['status'] ?? null;
-    $phoneNumber = $request['phone_number'] ?? null;
-    $limit = $request['limit'] ?? 50;
+    try {
+        $transaction = new Transaction();
+        
+        $status = $request['status'] ?? null;
+        $phoneNumber = $request['phone_number'] ?? null;
+        $limit = $request['limit'] ?? 50;
 
-    if ($phoneNumber) {
-        $transactions = $transaction->getByPhone($phoneNumber, $limit);
-    } elseif ($status) {
-        $transactions = $transaction->getByStatus($status, $limit);
-    } else {
-        $transactions = $transaction->getAll($limit);
+        if ($phoneNumber) {
+            $transactions = $transaction->getByPhone($phoneNumber, $limit);
+        } elseif ($status) {
+            $transactions = $transaction->getByStatus($status, $limit);
+        } else {
+            $transactions = $transaction->getAll($limit);
+        }
+
+        echo json_encode([
+            'success' => true,
+            'data' => $transactions
+        ]);
+    } catch (Exception $e) {
+        // Database not available, return empty data
+        echo json_encode([
+            'success' => true,
+            'data' => [],
+            'warning' => 'Database not available: ' . $e->getMessage()
+        ]);
     }
-
-    echo json_encode([
-        'success' => true,
-        'data' => $transactions
-    ]);
 }
 
 /**
  * Get Statistics
  */
 function handleGetStats() {
-    $transaction = new Transaction();
-    $stats = $transaction->getStats();
+    try {
+        $transaction = new Transaction();
+        $stats = $transaction->getStats();
 
-    echo json_encode([
-        'success' => true,
-        'data' => $stats
-    ]);
+        echo json_encode([
+            'success' => true,
+            'data' => $stats
+        ]);
+    } catch (Exception $e) {
+        // Database not available, return empty stats
+        echo json_encode([
+            'success' => true,
+            'data' => [
+                'successful' => 0,
+                'pending' => 0,
+                'failed' => 0,
+                'total_amount' => 0
+            ],
+            'warning' => 'Database not available: ' . $e->getMessage()
+        ]);
+    }
 }
 
 /**

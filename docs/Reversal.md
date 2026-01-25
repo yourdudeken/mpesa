@@ -75,7 +75,7 @@ class MpesaController {
 The following parameters can be configured in `config/mpesa.php` under the `reversal` section:
 
 - **initiator_name**: The name of the initiator making the request
-- **security_credential**: The encrypted password for the initiator
+- **initiator_password**: The encrypted password for the initiator
 - **default_command_id**: Default is 'TransactionReversal'
 - **short_code**: Your business shortcode
 - **result_url**: URL to receive reversal results
