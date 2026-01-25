@@ -70,16 +70,16 @@ The following parameters can be configured in `config/mpesa.php` under the `acco
 - **initiator_password**: The encrypted password for the initiator
 - **default_command_id**: Default is 'AccountBalance'
 - **short_code**: Your business shortcode
-- **result_url**: URL to receive balance query results
-- **timeout_url**: URL to receive timeout notifications
+- **result_url** (optional): URL to receive balance query results. Falls back to global callback
+- **timeout_url** (optional): URL to receive timeout notifications. Falls back to global callback
 
 ### Request Parameters
 When calling the accountBalance method, you can pass the following parameters:
 
 - **identifierType** (optional): Type of organization (default: 4 for organization shortcode)
 - **remarks** (optional): Comments sent along with the request
-- **resultURL** (optional): Overrides the configured result URL
-- **queueTimeOutURL** (optional): Overrides the configured timeout URL
+- **resultURL** (optional): Overrides the configured result URL. Falls back to global config
+- **queueTimeOutURL** (optional): Overrides the configured timeout URL. Falls back to global config
 - **commandID** (optional): Overrides the default command ID
 - **initiatorName** (optional): Overrides the configured initiator name
 - **securityCredential** (optional): Overrides the computed security credential

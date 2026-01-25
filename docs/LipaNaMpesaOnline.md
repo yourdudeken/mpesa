@@ -71,7 +71,7 @@ The following parameters can be configured in `config/mpesa.php` under the `lnmo
 
 - **short_code**: Your business shortcode (Paybill or Till Number)
 - **passkey**: The SAG Passkey provided by Safaricom upon registration
-- **callback**: Default callback URL to receive payment notifications
+- **callback** (optional): Default callback URL to receive payment notifications. Falls back to global callback
 - **default_transaction_type**: Default is 'CustomerPayBillOnline' for Paybill, or 'CustomerBuyGoodsOnline' for Till Number
 
 ### Request Parameters
@@ -81,7 +81,7 @@ When calling the STKPush method, you can pass the following parameters:
 - **phoneNumber** (required): Customer's phone number (format: 254XXXXXXXXX)
 - **accountReference** (required): Account reference (e.g., invoice number, order ID)
 - **transactionDesc** (required): Description of the transaction
-- **callBackURL** (optional): Overrides the configured callback URL
+- **callBackURL** (optional): Overrides the configured callback URL. Falls back to global config
 - **transactionType** (optional): Overrides the default transaction type
 - **passkey** (optional): Overrides the configured passkey
 - **shortCode** (optional): Overrides the configured shortcode

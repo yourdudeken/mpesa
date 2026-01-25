@@ -4,20 +4,21 @@ A professional web interface for testing all M-Pesa DARAJA API endpoints. This t
 
 ## Features
 
-- **Modern UI/UX**: Dark theme with smooth animations and responsive design.
-- **Complete Visual Testing**: Test all 10 M-Pesa API endpoints in one place.
+- **Modern UI/UX**: Dark theme with smooth animations and responsive layout.
+- **Complete Visual Testing**: Test all 10 M-Pesa API endpoints including B2Pochi and STK Status.
+- **Callback Logs Dashboard**: Real-time view of incoming Safaricom notifications (STK, C2B, Result).
+- **Intelligent Overrides**: Support for custom Response Types and Command IDs directly from the UI.
+- **Detailed Error Handling**: Detailed API error reporting with specific error messages from Safaricom.
 - **Environment Toggle**: Easy switching between Sandbox and Production modes.
-- **Quick Actions**: Copy API responses to clipboard.
-- **Input Validation**: Form validation with helpful error messages.
-- **Test Data Helper**: Auto-fill test data with keyboard shortcut (Ctrl/Cmd + Shift + T).
 - **Phone Formatting**: Automatic Kenya phone number formatting.
 
 ## Quick Start
 
 ### Prerequisites
 
-- PHP 7.0 or higher
-- Web server (Apache, Nginx, or PHP built-in server)
+- PHP 8.0 or higher
+- Web server (local PHP server is sufficient)
+- ngrok (optional, for receiving real callbacks locally)
 - M-Pesa API credentials
 
 ### Installation
@@ -29,7 +30,7 @@ A professional web interface for testing all M-Pesa DARAJA API endpoints. This t
 
 2. Configure M-Pesa credentials:
    
-   Edit the configuration file at `config/mpesa.php`.
+   Edit the configuration file at `config/mpesa.php`. For real callbacks, use your ngrok URL.
 
 3. Start the development server:
    ```bash
@@ -44,16 +45,18 @@ A professional web interface for testing all M-Pesa DARAJA API endpoints. This t
 ```
 example/
 ├── api/
-│   └── handler.php     # Backend API handler
+│   ├── payment.php     # Main API transaction handler
+│   ├── callback.php    # Universal M-Pesa callback handler
+│   └── logs.php        # JSON log viewer provider
 ├── static/
 │   ├── css/
-│   │   └── main.css    # Stylesheet
+│   │   └── app.css     # Dashboard stylesheet
 │   └── js/
-│       └── main.js     # Frontend logic
+│       └── app.js      # Interactive frontend logic
 ├── config/
-│   └── mpesa.php       # Configuration
-├── index.html          # Main interface
-└── README.md           # Documentation
+│   └── mpesa.php       # Project-level configuration
+├── app.html            # Main dashboard interface
+└── README.md           # Example documentation
 ```
 
 ## Available Endpoints

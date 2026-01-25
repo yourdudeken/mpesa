@@ -75,8 +75,8 @@ The following parameters can be configured in `config/mpesa.php` under the `b2c`
 - **default_command_id**: Default is 'BusinessPayment'. Other options include 'SalaryPayment', 'BusinessPayment', 'PromotionPayment'
 - **short_code**: Your business shortcode
 
-- **result_url**: URL to receive successful transaction results
-- **timeout_url**: URL to receive timeout notifications
+- **result_url** (optional): URL to receive successful transaction results. Falls back to global callback
+- **timeout_url** (optional): URL to receive timeout notifications. Falls back to global callback
 
 ### Request Parameters
 When calling the B2C method, you can pass the following parameters:
@@ -85,8 +85,8 @@ When calling the B2C method, you can pass the following parameters:
 - **partyB** (required): The phone number of the recipient (format: 254XXXXXXXXX)
 - **remarks** (required): Comments sent along with the transaction
 - **occasion** (optional): Any additional information to be associated with the transaction
-- **resultURL** (optional): Overrides the configured result URL
-- **queueTimeOutURL** (optional): Overrides the configured timeout URL
+- **resultURL** (optional): Overrides the configured result URL. Falls back to global config
+- **queueTimeOutURL** (optional): Overrides the configured timeout URL. Falls back to global config
 - **commandID** (optional): Overrides the default command ID. Options: 'SalaryPayment', 'BusinessPayment', 'PromotionPayment'
 - **initiatorName** (optional): Overrides the configured initiator name
 - **securityCredential** (optional): Overrides the computed security credential

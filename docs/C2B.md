@@ -132,8 +132,8 @@ When calling the C2BSimulate method (sandbox only):
 
 - **amount** (required): The amount being paid
 - **msisdn** (required): Customer's phone number (format: 254XXXXXXXXX)
-- **billRefNumber** (required): Account reference/invoice number
-- **commandID** (optional): 'CustomerPayBillOnline' for PayBill or 'CustomerBuyGoodsOnline' for Till Number
+- **billRefNumber** (optional): Account reference/invoice number. Mandatory for PayBill, should be omitted for Buy Goods (the package handles this automatically)
+- **commandID** (optional): 'CustomerPayBillOnline' for PayBill or 'CustomerBuyGoodsOnline' for Till Number. Defaults to PayBill.
 
 ### Payment Flow
 1. Customer initiates payment via M-Pesa SIM toolkit to your PayBill/Till number
