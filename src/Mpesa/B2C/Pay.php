@@ -59,12 +59,6 @@ class Pay {
         foreach ($params as $key => $value) {
             $userParams[ucwords($key)] = $value;
         }
-        
-        $isSandbox = $this->engine->config->get('mpesa.is_sandbox');
-        if($isSandbox === true){
-            // Simulate using the test phone number otherwise it won't work.
-            $userParams['PartyB'] = $this->engine->config->get('mpesa.b2c.test_phone_number');
-        }
 
         $shortCode = $this->engine->config->get('mpesa.b2c.short_code');
         $successCallback  = $this->engine->config->get('mpesa.b2c.result_url');

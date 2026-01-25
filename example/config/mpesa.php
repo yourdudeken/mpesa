@@ -18,7 +18,4 @@ return [
     'callback'           => 'https://webhook.site/e7160be4-2410-4020-8f79-139c727296b4',
     'initiator_name'     => 'testapi',
     'initiator_password' => 'Safaricom123!!',
-    
-    // Test parameters for sandbox
-    'test_phone_number'  => '254708374149',
 ];

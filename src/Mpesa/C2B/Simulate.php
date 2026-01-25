@@ -59,11 +59,7 @@ class Simulate
         }
 
         $shortCode = $this->engine->config->get('mpesa.c2b.short_code');
-        $isSandbox = $this->engine->config->get('mpesa.is_sandbox');
-        if($isSandbox === true){
-            // Simulate using the test phone number otherwise it won't work.
-            $userParams['Msisdn'] = $this->engine->config->get('mpesa.c2b.test_phone_number');
-        }
+
 
         $configParams = [
             'CommandID'         => 'CustomerPayBillOnline',

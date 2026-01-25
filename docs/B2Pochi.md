@@ -72,7 +72,7 @@ The following parameters can be configured in `config/mpesa.php` under the `b2po
 - **initiator_password**: The password for the initiator
 - **default_command_id**: Default is 'BusinessPayToPochi'
 - **short_code**: Your business shortcode
-- **test_phone_number**: Phone number for testing in sandbox mode
+
 - **result_url**: URL to receive successful transaction results
 - **timeout_url**: URL to receive timeout notifications
 

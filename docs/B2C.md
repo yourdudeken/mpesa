@@ -74,7 +74,7 @@ The following parameters can be configured in `config/mpesa.php` under the `b2c`
 - **initiator_password**: The encrypted password for the initiator
 - **default_command_id**: Default is 'BusinessPayment'. Other options include 'SalaryPayment', 'BusinessPayment', 'PromotionPayment'
 - **short_code**: Your business shortcode
-- **test_phone_number**: Phone number for testing in sandbox mode (automatically used in sandbox)
+
 - **result_url**: URL to receive successful transaction results
 - **timeout_url**: URL to receive timeout notifications
 

@@ -116,7 +116,7 @@ The following parameters can be configured in `config/mpesa.php` under the `c2b`
 - **validation_url**: URL to validate payments before they are processed
 - **on_timeout**: What to do when validation times out ('Completed' or 'Cancelled')
 - **short_code**: Your business shortcode (PayBill or Till Number)
-- **test_phone_number**: Phone number for testing in sandbox mode
+
 - **default_command_id**: Default is 'CustomerPayBillOnline' or 'CustomerBuyGoodsOnline'
 
 ### C2B Register Parameters

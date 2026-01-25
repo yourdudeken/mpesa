@@ -74,7 +74,7 @@ The following parameters can be configured in `config/mpesa.php` under the `b2b`
 - **initiator_password**: The encrypted password for the initiator
 - **default_command_id**: Default is 'BusinessPayBill'. Other options include 'BusinessBuyGoods', 'DisburseFundsToBusiness', 'BusinessToBusinessTransfer', 'MerchantToMerchantTransfer'
 - **short_code**: Your business shortcode (sender)
-- **test_phone_number**: Phone number for testing in sandbox mode
+
 - **result_url**: URL to receive successful transaction results
 - **timeout_url**: URL to receive timeout notifications
 
