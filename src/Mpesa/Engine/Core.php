@@ -207,12 +207,23 @@ class Core
      * 
      */
     public function computeSecurityCredential($initiatorPass){
-        // Get certificate path from config
+        // Get certificate path from config based on environment
+        $isSandbox = $this->config->get('mpesa.is_sandbox', true);
+        
+        // Try to get custom certificate path first
         $pubKeyFile = $this->config->get('mpesa.certificate_path');
         
-        // Fallback to environment-based path if not in config
+        // If no custom path, use environment-specific path from config
         if (empty($pubKeyFile)) {
-            $isSandbox = $this->config->get('mpesa.is_sandbox', true);
+            if ($isSandbox) {
+                $pubKeyFile = $this->config->get('mpesa.certificate_path_sandbox');
+            } else {
+                $pubKeyFile = $this->config->get('mpesa.certificate_path_production');
+            }
+        }
+        
+        // Final fallback to internal certificates (should always work due to internal config)
+        if (empty($pubKeyFile)) {
             $pubKeyFile = $isSandbox 
                 ? __DIR__ . '/../../config/SandboxCertificate.cer'
                 : __DIR__ . '/../../config/ProductionCertificate.cer';
@@ -222,7 +233,7 @@ class Core
         if(\is_file($pubKeyFile)){
             $pubKey = file_get_contents($pubKeyFile);
         }else{
-            throw new \Exception("Please provide a valid public key file at: " . $pubKeyFile);
+            throw new \Exception("Certificate file not found at: " . $pubKeyFile);
         }
         openssl_public_encrypt($initiatorPass, $encrypted, $pubKey, OPENSSL_PKCS1_PADDING);
         return base64_encode($encrypted);

@@ -67,7 +67,7 @@ class Pay {
         $senderIdentifierType = 4;
 
         $configParams = [
-            'InitiatorName'             => $initiator,
+            'Initiator'                 => $initiator,
             'SecurityCredential'        => $securityCredential,
             'CommandID'                 => $commandId,
             'PartyA'                    => $shortCode,

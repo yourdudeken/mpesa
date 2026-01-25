@@ -21,7 +21,17 @@ class Config implements ArrayAccess,ConfigurationStore
      * @return void
      */
     public function __construct($conf = []){
-        // Check for config in current working directory
+        // Load internal config (ONLY certificate paths)
+        $internalConfigFile = __DIR__ . '/../../config/mpesa.php';
+        $internalConfig = [];
+        if (\is_file($internalConfigFile)) {
+            $internalConfig = require $internalConfigFile;
+        }
+        
+        // Load from environment variables if available
+        $envConfig = $this->loadFromEnv();
+        
+        // Check for config in current working directory (user's project)
         $cwdConfig = getcwd() . '/config/mpesa.php';
         $cwdCustom = [];
         if (\is_file($cwdConfig)) {
@@ -35,8 +45,114 @@ class Config implements ArrayAccess,ConfigurationStore
             $custom = require $userConfig;
         }
         
-        // Merge configs with priority: passed config > cwd config > user config
-        $this->items = array_merge($custom, $cwdCustom, $conf);
+        // Merge configs with priority: passed config > cwd config > user config > env config > internal config (certs only)
+        $this->items = array_merge(
+            $internalConfig, 
+            $envConfig,
+            $custom, 
+            $cwdCustom, 
+            $conf
+        );
+    }
+
+    /**
+     * Load configuration from environment variables
+     * 
+     * @return array
+     */
+    private function loadFromEnv() {
+        $config = [];
+        
+        // Load .env file if it exists in current directory
+        $envFile = getcwd() . '/.env';
+        if (\is_file($envFile)) {
+            $this->loadEnvFile($envFile);
+        }
+        
+        // Map environment variables to config
+        if (getenv('MPESA_ENV') !== false) {
+            $config['is_sandbox'] = getenv('MPESA_ENV') === 'sandbox';
+        }
+        
+        if (getenv('MPESA_CONSUMER_KEY') !== false) {
+            $config['apps']['default']['consumer_key'] = getenv('MPESA_CONSUMER_KEY');
+        }
+        
+        if (getenv('MPESA_CONSUMER_SECRET') !== false) {
+            $config['apps']['default']['consumer_secret'] = getenv('MPESA_CONSUMER_SECRET');
+        }
+        
+        if (getenv('MPESA_SHORTCODE') !== false) {
+            $config['lnmo']['short_code'] = getenv('MPESA_SHORTCODE');
+            $config['c2b']['short_code'] = getenv('MPESA_SHORTCODE');
+        }
+        
+        if (getenv('MPESA_PASSKEY') !== false) {
+            $config['lnmo']['passkey'] = getenv('MPESA_PASSKEY');
+        }
+        
+        if (getenv('MPESA_CALLBACK_URL') !== false) {
+            $config['lnmo']['callback'] = getenv('MPESA_CALLBACK_URL');
+        }
+        
+        if (getenv('MPESA_INITIATOR_NAME') !== false) {
+            $initiatorName = getenv('MPESA_INITIATOR_NAME');
+            $config['b2c']['initiator_name'] = $initiatorName;
+            $config['b2b']['initiator_name'] = $initiatorName;
+            $config['account_balance']['initiator_name'] = $initiatorName;
+            $config['transaction_status']['initiator_name'] = $initiatorName;
+            $config['reversal']['initiator_name'] = $initiatorName;
+            $config['b2pochi']['initiator_name'] = $initiatorName;
+        }
+        
+        if (getenv('MPESA_INITIATOR_PASSWORD') !== false) {
+            $initiatorPassword = getenv('MPESA_INITIATOR_PASSWORD');
+            $config['b2c']['initiator_password'] = $initiatorPassword;
+            $config['b2b']['initiator_password'] = $initiatorPassword;
+            $config['account_balance']['initiator_password'] = $initiatorPassword;
+            $config['transaction_status']['initiator_password'] = $initiatorPassword;
+            $config['reversal']['initiator_password'] = $initiatorPassword;
+            $config['b2pochi']['initiator_password'] = $initiatorPassword;
+        }
+        
+        return $config;
+    }
+
+    /**
+     * Load environment variables from .env file
+     * 
+     * @param string $path
+     * @return void
+     */
+    private function loadEnvFile($path) {
+        if (!\is_readable($path)) {
+            return;
+        }
+        
+        $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        foreach ($lines as $line) {
+            // Skip comments
+            if (strpos(trim($line), '#') === 0) {
+                continue;
+            }
+            
+            // Parse KEY=VALUE
+            if (strpos($line, '=') !== false) {
+                list($key, $value) = explode('=', $line, 2);
+                $key = trim($key);
+                $value = trim($value);
+                
+                // Remove quotes
+                $value = trim($value, '"\'');
+                
+                // Set environment variable if not already set
+                if (getenv($key) === false) {
+                    putenv("$key=$value");
+                    $_ENV[$key] = $value;
+                    $_SERVER[$key] = $value;
+                }
+            }
+        }
     }
 
     /**
