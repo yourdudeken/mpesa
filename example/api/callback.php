@@ -12,64 +12,86 @@ require_once __DIR__ . '/../models/Transaction.php';
 $input = file_get_contents('php://input');
 $callback = json_decode($input, true);
 
-// Log raw callback
-logCallback('stk_callback', $input);
+// Log raw callback if not empty
+if (!empty($input)) {
+    logCallback('stk_callback', $input);
+}
 
 try {
-    // Extract callback data
+    // 1. STK Push Callback Case
     if (isset($callback['Body']['stkCallback'])) {
         $stkCallback = $callback['Body']['stkCallback'];
         
         $checkoutRequestId = $stkCallback['CheckoutRequestID'] ?? null;
-        $merchantRequestId = $stkCallback['MerchantRequestID'] ?? null;
         $resultCode = $stkCallback['ResultCode'] ?? null;
         $resultDesc = $stkCallback['ResultDesc'] ?? '';
 
-        if (!$checkoutRequestId) {
-            throw new Exception('Missing CheckoutRequestID in callback');
-        }
+        if ($checkoutRequestId) {
+            $updateData = [
+                'result_code' => $resultCode,
+                'result_desc' => $resultDesc,
+                'status' => $resultCode == 0 ? 'completed' : 'failed'
+            ];
 
-        // Prepare update data
-        $updateData = [
-            'result_code' => $resultCode,
-            'result_desc' => $resultDesc,
-            'status' => $resultCode == 0 ? 'completed' : 'failed'
-        ];
-
-        // Extract metadata if payment was successful
-        if ($resultCode == 0 && isset($stkCallback['CallbackMetadata']['Item'])) {
-            $metadata = $stkCallback['CallbackMetadata']['Item'];
-            
-            foreach ($metadata as $item) {
-                $name = $item['Name'] ?? '';
-                $value = $item['Value'] ?? null;
-                
-                switch ($name) {
-                    case 'Amount':
-                        $updateData['amount'] = $value;
-                        break;
-                    case 'MpesaReceiptNumber':
-                        $updateData['mpesa_receipt_number'] = $value;
-                        break;
-                    case 'TransactionDate':
-                        $updateData['transaction_date'] = formatMpesaDate($value);
-                        break;
-                    case 'PhoneNumber':
-                        $updateData['phone_number'] = $value;
-                        break;
+            // Extract STK Metadata
+            if ($resultCode == 0 && isset($stkCallback['CallbackMetadata']['Item'])) {
+                foreach ($stkCallback['CallbackMetadata']['Item'] as $item) {
+                    $name = $item['Name'] ?? '';
+                    $value = $item['Value'] ?? null;
+                    switch ($name) {
+                        case 'Amount': $updateData['amount'] = $value; break;
+                        case 'MpesaReceiptNumber': $updateData['mpesa_receipt_number'] = $value; break;
+                        case 'TransactionDate': $updateData['transaction_date'] = formatMpesaDate($value); break;
+                        case 'PhoneNumber': $updateData['phone_number'] = $value; break;
+                    }
                 }
             }
+
+            $transaction = new Transaction();
+            $transaction->updateFromCallback($checkoutRequestId, $updateData);
+            error_log("STK Callback processed: $checkoutRequestId");
         }
+    } 
+    
+    // 2. B2C / B2B / Reversal / Account Balance / Transaction Status Case
+    elseif (isset($callback['Result'])) {
+        $result = $callback['Result'];
+        $conversationId = $result['ConversationID'] ?? null;
+        $originatorConversationId = $result['OriginatorConversationID'] ?? null;
+        $resultCode = $result['ResultCode'] ?? null;
+        $resultDesc = $result['ResultDesc'] ?? '';
+        
+        // Find transaction by conversation IDs (usually stored during initiation)
+        // Since we don't store them yet in this example, we log it
+        error_log("Transaction Result Received: $resultDesc (Code: $resultCode)");
+        
+        logCallback('transaction_result', $input);
+    }
 
-        // Update transaction in database
+    // 3. C2B Confirmation Case
+    elseif (isset($callback['TransID']) && isset($callback['MSISDN'])) {
+        $transId = $callback['TransID'];
+        $phoneNumber = $callback['MSISDN'];
+        $amount = $callback['TransAmount'];
+        $reference = $callback['BillRefNumber'];
+
+        // Save C2B transaction to database
         $transaction = new Transaction();
-        $transaction->updateFromCallback($checkoutRequestId, $updateData);
+        $transaction->create([
+            'mpesa_receipt_number' => $transId,
+            'phone_number' => $phoneNumber,
+            'amount' => $amount,
+            'account_reference' => $reference,
+            'transaction_desc' => 'C2B Payment',
+            'status' => 'completed'
+        ]);
 
-        // Log successful processing
-        error_log("Callback processed successfully for: $checkoutRequestId");
-
-    } else {
-        error_log('Invalid callback structure: ' . $input);
+        error_log("C2B Payment Received: $transId from $phoneNumber");
+        logCallback('c2b_confirmation', $input);
+    }
+    
+    else {
+        error_log('Unknown callback structure received');
     }
 
 } catch (Exception $e) {

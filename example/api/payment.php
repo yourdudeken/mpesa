@@ -163,7 +163,8 @@ function handleSTKPush($request) {
  * STK Status Query
  */
 function handleSTKStatus($request) {
-    $checkoutRequestId = $request['checkout_request_id'] ?? '';
+    $data = $request['data'] ?? [];
+    $checkoutRequestId = $data['checkout_request_id'] ?? '';
     
     if (empty($checkoutRequestId)) {
         throw new Exception('Checkout Request ID is required');
@@ -427,10 +428,11 @@ function handleReversal($request) {
 function handleGetTransactions($request) {
     try {
         $transaction = new Transaction();
+        $data = $request['data'] ?? [];
         
-        $status = $request['status'] ?? null;
-        $phoneNumber = $request['phone_number'] ?? null;
-        $limit = $request['limit'] ?? 50;
+        $status = $data['status'] ?? null;
+        $phoneNumber = $data['phone_number'] ?? null;
+        $limit = $data['limit'] ?? 50;
 
         if ($phoneNumber) {
             $transactions = $transaction->getByPhone($phoneNumber, $limit);

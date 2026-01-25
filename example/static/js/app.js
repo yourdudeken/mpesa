@@ -19,6 +19,7 @@ const LOGS_API = 'api/logs.php';
 const PAGE_TITLES = {
     'dashboard': 'Dashboard',
     'stk-push': 'STK Push',
+    'stk-status': 'STK Status',
     'b2c': 'B2C Payment',
     'b2b': 'B2B Transfer',
     'b2pochi': 'B2Pochi Payment',
@@ -349,17 +350,32 @@ function displayCallbacks(logs) {
         return;
     }
 
-    container.innerHTML = logs.map((log, index) => `
-        <div class="callback-entry">
-            <div class="callback-header">
-                <strong>#${logs.length - index}</strong>
-                <span class="callback-time">${log.timestamp}</span>
+    container.innerHTML = logs.map((log, index) => {
+        let displayData = log.data;
+        try {
+            if (log.data && log.data.trim() !== '') {
+                displayData = JSON.stringify(JSON.parse(log.data), null, 2);
+            } else {
+                displayData = 'No payload received';
+            }
+        } catch (e) {
+            console.warn('Failed to parse callback data:', log.data);
+            displayData = log.data; // Show raw if not JSON
+        }
+
+        return `
+            <div class="callback-entry">
+                <div class="callback-header">
+                    <strong>#${logs.length - index}</strong>
+                    <span class="callback-time">${log.timestamp}</span>
+                    <span class="callback-type-badge">${log.type}</span>
+                </div>
+                <div class="callback-body">
+                    <pre><code>${escapeHtml(displayData)}</code></pre>
+                </div>
             </div>
-            <div class="callback-body">
-                <pre><code>${escapeHtml(JSON.stringify(JSON.parse(log.data), null, 2))}</code></pre>
-            </div>
-        </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
 document.getElementById('clearCallbacks')?.addEventListener('click', async () => {

@@ -60,6 +60,14 @@
                     <span>STK Push</span>
                 </button>
 
+                <button class="nav-item" data-page="stk-status">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
+                    <span>STK Status</span>
+                </button>
+
                 <button class="nav-item" data-page="c2b">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
@@ -300,6 +308,36 @@
 
                                 <button type="submit" class="btn btn-primary btn-block">
                                     <span class="btn-text">Send STK Push</span>
+                                    <span class="btn-loader"></span>
+                                </button>
+                            </form>
+
+                            <div class="payment-result" style="display: none;">
+                                <div class="result-icon"></div>
+                                <h4 class="result-title"></h4>
+                                <p class="result-message"></p>
+                                <div class="result-details"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STK Status Query Page -->
+                <div class="page" id="stk-status">
+                    <div class="card" style="max-width: 600px; margin: 0 auto;">
+                        <div class="card-header">
+                            <h3>STK Status Query</h3>
+                            <p class="card-subtitle">Check the status of an STK Push request</p>
+                        </div>
+                        <div class="card-body">
+                            <form id="stkStatusForm" class="form" data-action="stk_status">
+                                <div class="form-group">
+                                    <label for="stkCheckoutId">Checkout Request ID *</label>
+                                    <input type="text" id="stkCheckoutId" name="checkout_request_id" required
+                                        placeholder="ws_CO_1234567890">
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-block">
+                                    <span class="btn-text">Check Status</span>
                                     <span class="btn-loader"></span>
                                 </button>
                             </form>
