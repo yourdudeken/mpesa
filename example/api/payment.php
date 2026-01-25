@@ -294,9 +294,9 @@ function handleC2BRegister($request) {
     $mpesa = new Mpesa();
     
     $response = $mpesa->C2BRegister([
-        'validationURL' => $data['validation_url'],
-        'confirmationURL' => $data['confirmation_url'],
-        'responseType' => $data['response_type'] ?? 'Completed'
+        'ValidationURL' => $data['validation_url'],
+        'ConfirmationURL' => $data['confirmation_url'],
+        'ResponseType' => $data['response_type'] ?? null
     ]);
 
     echo json_encode([
@@ -318,9 +318,10 @@ function handleC2BSimulate($request) {
     $mpesa = new Mpesa();
     
     $response = $mpesa->C2BSimulate([
-        'amount' => (float) $data['amount'],
-        'msisdn' => $phoneNumber,
-        'billRefNumber' => $data['bill_ref_number']
+        'Amount' => (float) $data['amount'],
+        'Msisdn' => $phoneNumber,
+        'BillRefNumber' => $data['bill_ref_number'],
+        'CommandID' => $data['command_id'] ?? null
     ]);
 
     echo json_encode([

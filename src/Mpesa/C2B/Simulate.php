@@ -59,10 +59,11 @@ class Simulate
         }
 
         $shortCode = $this->engine->config->get('mpesa.c2b.short_code');
+        $commandId = $this->engine->config->get('mpesa.c2b.default_command_id');
 
 
         $configParams = [
-            'CommandID'         => 'CustomerPayBillOnline',
+            'CommandID'         => $commandId,
             'ShortCode'         => intval($shortCode),
         ];
 
