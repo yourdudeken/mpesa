@@ -75,11 +75,11 @@ class MpesaController {
 The following parameters can be configured in `config/mpesa.php` under the `reversal` section:
 
 - **initiator_name**: The name of the initiator making the request
-- **security_credential**: The encrypted password for the initiator
+- **initiator_password**: The encrypted password for the initiator
 - **default_command_id**: Default is 'TransactionReversal'
 - **short_code**: Your business shortcode
-- **result_url**: URL to receive reversal results
-- **timeout_url**: URL to receive timeout notifications
+- **result_url** (optional): URL to receive reversal results. Falls back to global callback
+- **timeout_url** (optional): URL to receive timeout notifications. Falls back to global callback
 
 ### Request Parameters
 When calling the reversal method, you can pass the following parameters:
@@ -90,8 +90,8 @@ When calling the reversal method, you can pass the following parameters:
 - **receiverIdentifierType** (required): Type of receiver (1=MSISDN, 2=Till, 4=Shortcode)
 - **remarks** (optional): Comments about the reversal
 - **occasion** (optional): Reason for the reversal
-- **resultURL** (optional): Overrides the configured result URL
-- **queueTimeOutURL** (optional): Overrides the configured timeout URL
+- **resultURL** (optional): Overrides the configured result URL. Falls back to global config
+- **queueTimeOutURL** (optional): Overrides the configured timeout URL. Falls back to global config
 - **commandID** (optional): Overrides the default command ID
 - **initiatorName** (optional): Overrides the configured initiator name
 - **securityCredential** (optional): Overrides the computed security credential

@@ -71,12 +71,12 @@ class PaymentController {
 The following parameters can be configured in `config/mpesa.php` under the `b2b` section:
 
 - **initiator_name**: The name of the initiator making the request
-- **security_credential**: The encrypted password for the initiator
+- **initiator_password**: The encrypted password for the initiator
 - **default_command_id**: Default is 'BusinessPayBill'. Other options include 'BusinessBuyGoods', 'DisburseFundsToBusiness', 'BusinessToBusinessTransfer', 'MerchantToMerchantTransfer'
 - **short_code**: Your business shortcode (sender)
-- **test_phone_number**: Phone number for testing in sandbox mode
-- **result_url**: URL to receive successful transaction results
-- **timeout_url**: URL to receive timeout notifications
+
+- **result_url** (optional): URL to receive successful transaction results. Falls back to global callback
+- **timeout_url** (optional): URL to receive timeout notifications. Falls back to global callback
 
 ### Request Parameters
 When calling the B2B method, you can pass the following parameters:
@@ -85,8 +85,8 @@ When calling the B2B method, you can pass the following parameters:
 - **partyB** (required): The shortcode of the recipient business
 - **accountReference** (required): Account reference for the transaction
 - **remarks** (required): Comments sent along with the transaction
-- **resultURL** (optional): Overrides the configured result URL
-- **queueTimeOutURL** (optional): Overrides the configured timeout URL
+- **resultURL** (optional): Overrides the configured result URL. Falls back to global config
+- **queueTimeOutURL** (optional): Overrides the configured timeout URL. Falls back to global config
 - **commandID** (optional): Overrides the default command ID
 - **initiatorName** (optional): Overrides the configured initiator name
 - **securityCredential** (optional): Overrides the computed security credential

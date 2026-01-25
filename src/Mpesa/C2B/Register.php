@@ -56,9 +56,9 @@ class Register
             $userParams[ucwords($key)] = $value;
         }
 
-        $shortCode = $this->engine->config->get('mpesa.c2b.short_code');
-        $confirmationURL   = $this->engine->config->get('mpesa.c2b.confirmation_url');
-        $responseType   = $this->engine->config->get('mpesa.c2b.responseType');
+        $shortCode       = $this->engine->config->get('mpesa.c2b.short_code');
+        $confirmationURL = $this->engine->config->get('mpesa.c2b.confirmation_url');
+        $responseType    = $this->engine->config->get('mpesa.c2b.response_type');
         $validationURL   = $this->engine->config->get('mpesa.c2b.validation_url');
 
         $configParams = [
@@ -69,7 +69,7 @@ class Register
         ];
 
         // This gives precedence to params coming from user allowing them to override config params
-        $body = array_merge($configParams,$userParams);
+        $body = array_merge($configParams, $userParams);
 
         return $this->engine->makePostRequest([
             'endpoint' => $this->endpoint,

@@ -45,8 +45,8 @@ class C2BRegisterTest extends TestCase{
         $this->httpClient->method('getInfo')
         ->will($this->returnValue(500));
 
-        // Test should throw ConfigurationException because ResponseType is required but not provided
-        $this->expectException(ConfigurationException::class);
+        // Test should throw MpesaException because request returns 500
+        $this->expectException(MpesaException::class);
         $results = $b2c->submit([
             'confirmationURL' => "https://example.com/v1/payments/callback",
             'validationURL' => "https://example.com/v1/payments/callback"

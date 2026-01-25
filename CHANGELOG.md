@@ -3,8 +3,29 @@
 
 ### Features
 
-* Add M-Pesa API example interface with frontend, styling, JavaScript, and a PHP backend handler. ([439f947](https://github.com/yourdudeken/mpesa/commit/439f9478e542b4da0101360d59a25a6f46b60e4b))
-* Implement a callback log viewer with real-time polling and clear functionality. ([1046c6f](https://github.com/yourdudeken/mpesa/commit/1046c6f70dcbffe93fce9bb44ec49bc17cb671c7))
+## [1.1.0] - 2026-01-25
+
+### Added
+- Hierarchical configuration system with intelligent fallbacks
+- Universal callback handler support for STK, C2B, B2C, and B2B
+- STK Status Query endpoint support
+- B2Pochi payment method support
+- Interactive testing dashboard with real-time callback logging
+- Command-aware field pruning for C2B simulations (Buy Goods support)
+- Detailed error reporting in API responses
+
+### Fixed
+- Improved validation rule naming consistency (maxlength)
+- Unified exception hierarchy (ConfigurationException now extends MpesaException)
+- Autoloading support for B2Pochi class
+- C2B simulation schema validation errors for Buy Goods commands
+- Robust JSON parsing for callback logs in the example dashboard
+
+### Changed
+- Refactored all payment handlers to use smart defaults and optional callback URLs
+- Updated internal configuration with standard Safaricom defaults
+
+## [1.0.1] - 2025-12-18
 
 # [1.2.0](https://github.com/yourdudeken/mpesa/compare/v1.1.0...v1.2.0) (2025-12-20)
 

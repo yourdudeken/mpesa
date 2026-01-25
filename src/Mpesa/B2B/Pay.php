@@ -17,8 +17,8 @@ class Pay {
         'PartyA:PartyA' => 'required()({label} is required)',
         'RecieverIdentifierType:RecieverIdentifierType' => 'required()({label} is required)',
         'PartyB:PartyB' => 'required()({label} is required)',
-        'QueueTimeOutURL:QueueTimeOutURL' => 'required()({label} is required)',
-        'ResultURL:ResultURL' => 'required()({label} is required)',
+        'QueueTimeOutURL:QueueTimeOutURL' => 'website',
+        'ResultURL:ResultURL' => 'website',
         'SenderIdentifierType:SenderIdentifierType' => 'required()({label} is required)',
         'Remarks:Remarks' => 'required()({label} is required)',
         'AccountReference:AccountReference' => 'required()({label} is required)',
@@ -54,20 +54,20 @@ class Pay {
             $userParams[ucwords($key)] = $value;
         }
 
-        $shortCode = $this->engine->config->get('mpesa.b2b.short_code');
-        $successCallback  = $this->engine->config->get('mpesa.b2b.result_url');
-        $timeoutCallback  = $this->engine->config->get('mpesa.b2b.timeout_url');
-        $initiator  = $this->engine->config->get('mpesa.b2b.initiator_name');
-        $initiatorPass = $this->engine->config->get('mpesa.b2b.initiator_password');
-        $securityCredential  = $this->engine->computeSecurityCredential($initiatorPass);
-        $commandId  = $this->engine->config->get('mpesa.b2b.default_command_id');
+        $shortCode        = $this->engine->config->get('mpesa.b2b.short_code');
+        $successCallback   = $this->engine->config->get('mpesa.b2b.result_url') ?: $this->engine->config->get('mpesa.callback');
+        $timeoutCallback   = $this->engine->config->get('mpesa.b2b.timeout_url') ?: $this->engine->config->get('mpesa.callback');
+        $initiator         = $this->engine->config->get('mpesa.b2b.initiator_name');
+        $initiatorPass     = $this->engine->config->get('mpesa.b2b.initiator_password');
+        $securityCredential = $this->engine->computeSecurityCredential($initiatorPass);
+        $commandId         = $this->engine->config->get('mpesa.b2b.default_command_id');
 
         // TODO: Compute. For now only support ShortCode
         $receiverIdentifierType = 4;
-        $senderIdentifierType = 4;
+        $senderIdentifierType   = 4;
 
         $configParams = [
-            'InitiatorName'             => $initiator,
+            'Initiator'                 => $initiator,
             'SecurityCredential'        => $securityCredential,
             'CommandID'                 => $commandId,
             'PartyA'                    => $shortCode,

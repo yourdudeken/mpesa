@@ -8,6 +8,7 @@
   'Yourdudeken\\Mpesa\\Auth\\Authenticator' => 'Mpesa/Auth/Authenticator.php',
   'Yourdudeken\\Mpesa\\B2B\\Pay' => 'Mpesa/B2B/Pay.php',
   'Yourdudeken\\Mpesa\\B2C\\Pay' => 'Mpesa/B2C/Pay.php',
+  'Yourdudeken\\Mpesa\\B2Pochi\\Pay' => 'Mpesa/B2Pochi/Pay.php',
   'Yourdudeken\\Mpesa\\C2B\\Register' => 'Mpesa/C2B/Register.php',
   'Yourdudeken\\Mpesa\\C2B\\Simulate' => 'Mpesa/C2B/Simulate.php',
   'Yourdudeken\\Mpesa\\Contracts\\CacheStore' => 'Mpesa/Contracts/CacheStore.php',

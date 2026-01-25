@@ -17,8 +17,8 @@ class TransactionStatus {
         'IdentifierType:IdentifierType' => 'required()({label} is required)',
         'Remarks:Remarks' => 'required()({label} is required)',
         'PartyA:Party A' => 'required()({label} is required)',
-        'QueueTimeOutURL:QueueTimeOutURL' => 'required()({label} is required)',
-        'ResultURL:ResultURL' => 'required()({label} is required)',
+        'QueueTimeOutURL:QueueTimeOutURL' => 'website',
+        'ResultURL:ResultURL' => 'website',
         'TransactionID:TransactionID' => 'required()({label} is required)',
     ];
     /**
@@ -46,9 +46,9 @@ class TransactionStatus {
         foreach ($params as $key => $value) {
             $userParams[ucwords($key)] = $value;
         }
-        $shortCode = $this->engine->config->get('mpesa.transaction_status.short_code');
-        $successCallback  = $this->engine->config->get('mpesa.transaction_status.result_url');
-        $timeoutCallback  = $this->engine->config->get('mpesa.transaction_status.timeout_url');
+        $shortCode        = $this->engine->config->get('mpesa.transaction_status.short_code');
+        $successCallback   = $this->engine->config->get('mpesa.transaction_status.result_url') ?: $this->engine->config->get('mpesa.callback');
+        $timeoutCallback   = $this->engine->config->get('mpesa.transaction_status.timeout_url') ?: $this->engine->config->get('mpesa.callback');
         $initiator  = $this->engine->config->get('mpesa.transaction_status.initiator_name');
         $commandId  = $this->engine->config->get('mpesa.transaction_status.default_command_id');
         $initiatorPass = $this->engine->config->get('mpesa.transaction_status.initiator_password');

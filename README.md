@@ -12,14 +12,14 @@ A comprehensive PHP package for integrating with Safaricom's M-Pesa DARAJA API. 
 
 ## Features
 
- **Complete API Coverage** - All M-Pesa API endpoints supported  
- **Easy to Use** - Simple, intuitive interface  
- **Well Documented** - Comprehensive documentation for each endpoint  
+ **Complete API Coverage** - All M-Pesa API endpoints supported including B2Pochi and STK Status  
+ **Hierarchical Configuration** - Intelligent fallbacks for nested settings (e.g. b2c.initiator falls back to initiator)  
+ **Universal Callbacks** - Centralized logic for handling STK, C2B, and result notifications  
+ **Smart Defaults** - Pre-configured standard Safaricom command IDs and response types  
+ **Robust Validation** - Command-aware field pruning and detailed error reporting  
+ **Real-time Logging** - Built-in support for viewing and managing M-Pesa callback logs  
  **Framework Agnostic** - Works with any PHP project  
- **Laravel Support** - Dedicated Laravel package available  
  **Sandbox & Production** - Easy switching between environments  
- **Automatic Token Management** - Handles authentication automatically  
- **Callback Handling** - Built-in support for M-Pesa callbacks  
 
 ## Requirements
 
@@ -120,7 +120,7 @@ return [
     // B2C Configuration
     'b2c' => [
         'initiator_name' => 'testapi',
-        'security_credential' => 'your_credential',
+        'initiator_password' => 'your_credential',
         'short_code' => '600000',
         'result_url' => 'https://yourdomain.com/result',
         'timeout_url' => 'https://yourdomain.com/timeout',

@@ -16,8 +16,8 @@ class Pay {
         'CommandID:CommandID' => 'required()({label} is required)',
         'PartyA:PartyA' => 'required()({label} is required)',
         'PartyB:PartyB' => 'required()({label} is required)',
-        'QueueTimeOutURL:QueueTimeOutURL' => 'required()({label} is required)',
-        'ResultURL:ResultURL' => 'required()({label} is required)',
+        'QueueTimeOutURL:QueueTimeOutURL' => 'website',
+        'ResultURL:ResultURL' => 'website',
         'Remarks:Remarks' => 'required()({label} is required)',
         'Amount:Amount' => 'required()({label} is required)'
     ];
@@ -59,16 +59,10 @@ class Pay {
         foreach ($params as $key => $value) {
             $userParams[ucwords($key)] = $value;
         }
-        
-        $isSandbox = $this->engine->config->get('mpesa.is_sandbox');
-        if($isSandbox === true){
-            // Simulate using the test phone number otherwise it won't work.
-            $userParams['PartyB'] = $this->engine->config->get('mpesa.b2c.test_phone_number');
-        }
 
-        $shortCode = $this->engine->config->get('mpesa.b2c.short_code');
-        $successCallback  = $this->engine->config->get('mpesa.b2c.result_url');
-        $timeoutCallback  = $this->engine->config->get('mpesa.b2c.timeout_url');
+        $shortCode       = $this->engine->config->get('mpesa.b2c.short_code');
+        $successCallback  = $this->engine->config->get('mpesa.b2c.result_url') ?: $this->engine->config->get('mpesa.callback');
+        $timeoutCallback  = $this->engine->config->get('mpesa.b2c.timeout_url') ?: $this->engine->config->get('mpesa.callback');
         $initiator  = $this->engine->config->get('mpesa.b2c.initiator_name');
         $initiatorPass = $this->engine->config->get('mpesa.b2c.initiator_password');
         $securityCredential  = $this->engine->computeSecurityCredential($initiatorPass);

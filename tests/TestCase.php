@@ -29,7 +29,8 @@ class TestCase extends PHPUnit
     protected function setUp(): void
     {
         parent::setUp();
-        $config       = new Config();
+        $testConfig = require __DIR__ . '/config/mpesa.php';
+        $config       = new Config($testConfig);
         $cache        = new Cache($config);
         $this->httpClient = $this->createMock(HttpRequest::class);
         $this->auth = $this->createMock(Authenticator::class);
