@@ -99,7 +99,7 @@ return [
         | API on completion or failure of a push transaction.
         |
         */
-        'callback' => 'https://example.com/callback',
+        'callback' => 'https://webhook.site/e7160be4-2410-4020-8f79-139c727296b4',
         
         /*
         |--------------------------------------------------------------------------
