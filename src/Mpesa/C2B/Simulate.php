@@ -29,7 +29,7 @@ class Simulate
         'CommandID:CommandID' => 'required()({label} is required)',
         'Msisdn:Msisdn' => 'required()({label} is required)',
         'Amount:Amount' => 'required()({label} is required)',
-        'BillRefNumber:BillRefNumber' => 'required()({label} is required)'
+        'BillRefNumber:BillRefNumber' => 'maxlength(20)({label} is too long)',
     ];
 
     /**
@@ -61,14 +61,22 @@ class Simulate
         $shortCode = $this->engine->config->get('mpesa.c2b.short_code');
         $commandId = $this->engine->config->get('mpesa.c2b.default_command_id');
 
-
         $configParams = [
             'CommandID'         => $commandId,
             'ShortCode'         => intval($shortCode),
         ];
 
-        // This gives precedence to params coming from user allowing them to override config params
-        $body = array_merge($configParams,$userParams);
+        // Merge logic
+        $body = array_merge($configParams, $userParams);
+
+        // Safaricom Schema Fix: 
+        // For CustomerBuyGoodsOnline (Till Number), BillRefNumber should not be sent
+        // For CustomerPayBillOnline, it is mandatory
+        if ($body['CommandID'] === 'CustomerBuyGoodsOnline') {
+            unset($body['BillRefNumber']);
+        } elseif (empty($body['BillRefNumber'])) {
+            $body['BillRefNumber'] = $shortCode; // Fallback
+        }
 
         return $this->engine->makePostRequest([
             'endpoint' => $this->endpoint,
