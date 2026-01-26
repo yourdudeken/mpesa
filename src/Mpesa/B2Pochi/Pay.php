@@ -56,7 +56,7 @@ class Pay {
         $initiator         = $this->engine->config->get('mpesa.b2pochi.initiator_name');
         $initiatorPass     = $this->engine->config->get('mpesa.b2pochi.initiator_password');
         $securityCredential = $this->engine->computeSecurityCredential($initiatorPass);
-        $commandId         = $this->engine->config->get('mpesa.b2pochi.default_command_id', 'BusinessPayToPochi');
+        $commandId         = $this->engine->config->get('mpesa.b2pochi.default_command_id');
         $remarks           = $this->engine->config->get('mpesa.b2pochi.remarks');
         
         // Params coming from the config file

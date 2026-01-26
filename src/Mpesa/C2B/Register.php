@@ -57,9 +57,9 @@ class Register
         }
 
         $shortCode       = $this->engine->config->get('mpesa.c2b.short_code');
-        $confirmationURL = $this->engine->config->get('mpesa.c2b.confirmation_url');
+        $confirmationURL = $this->engine->config->get('mpesa.c2b.confirmation_url') ?: $this->engine->config->get('mpesa.callback');
         $responseType    = $this->engine->config->get('mpesa.c2b.response_type');
-        $validationURL   = $this->engine->config->get('mpesa.c2b.validation_url');
+        $validationURL   = $this->engine->config->get('mpesa.c2b.validation_url') ?: $this->engine->config->get('mpesa.callback');
 
         $configParams = [
             'ShortCode'       => $shortCode,

@@ -53,18 +53,20 @@ class STKPush{
         $shortCode = $this->engine->config->get('mpesa.lnmo.short_code');
         $passkey   = $this->engine->config->get('mpesa.lnmo.passkey');
         $password  = \base64_encode($shortCode . $passkey . $time);
-        $remarks   = $this->engine->config->get('mpesa.lnmo.remarks');
         $accountReference = $this->engine->config->get('mpesa.lnmo.account_reference');
+        $callback = $this->engine->config->get('mpesa.lnmo.callback') ?: $this->engine->config->get('mpesa.callback');
+        $transactionType = $this->engine->config->get('mpesa.lnmo.default_transaction_type');
+        $transactionDesc = $this->engine->config->get('mpesa.lnmo.default_transaction_desc');
 
         // Computed and params from config file.
         $configParams = [
             'BusinessShortCode' => $shortCode,
-            'CallBackURL'       => $this->engine->config->get('mpesa.lnmo.callback') ?: $this->engine->config->get('mpesa.callback'),
-            'TransactionType'   => $this->engine->config->get('mpesa.lnmo.default_transaction_type'),
+            'CallBackURL'       => $callback,
+            'TransactionType'   => $transactionType,
             'Password'          => $password,
             'PartyB'            => $shortCode,
             'Timestamp'         => $time,
-            'TransactionDesc'   => $remarks,
+            'TransactionDesc'   => $transactionDesc,
             'AccountReference'  => $accountReference,
         ];
 

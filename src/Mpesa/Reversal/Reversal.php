@@ -60,9 +60,7 @@ class Reversal {
         $securityCredential = $this->engine->computeSecurityCredential($initiatorPass);
         $remarks           = $this->engine->config->get('mpesa.reversal.remarks');
         $occasion          = $this->engine->config->get('mpesa.reversal.occasion');
-        
-        // RecieverIdentifierType should be '11' for organization short codes (as per documentation)
-        $receiverIdentifierType = '11';
+        $receiverIdentifierType = $this->engine->config->get('mpesa.reversal.reciever_identifier_type');
 
         $configParams = [
             'Initiator'              => $initiator,
