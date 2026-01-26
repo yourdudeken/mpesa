@@ -58,6 +58,8 @@ class Reversal {
         $commandId         = $this->engine->config->get('mpesa.reversal.default_command_id', 'TransactionReversal');
         $initiatorPass     = $this->engine->config->get('mpesa.reversal.initiator_password');
         $securityCredential = $this->engine->computeSecurityCredential($initiatorPass);
+        $remarks           = $this->engine->config->get('mpesa.reversal.remarks');
+        $occasion          = $this->engine->config->get('mpesa.reversal.occasion');
         
         // RecieverIdentifierType should be '11' for organization short codes (as per documentation)
         $receiverIdentifierType = '11';
@@ -69,7 +71,9 @@ class Reversal {
             'ReceiverParty'          => $shortCode,
             'RecieverIdentifierType' => $receiverIdentifierType,
             'QueueTimeOutURL'        => $timeoutCallback,
-            'ResultURL'              => $successCallback
+            'ResultURL'              => $successCallback,
+            'Remarks'                => $remarks,
+            'Occasion'               => $occasion,
         ];
 
         // This gives precedence to params coming from user allowing them to override config params

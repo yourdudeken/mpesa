@@ -79,8 +79,8 @@ When calling the STKPush method, you can pass the following parameters:
 
 - **amount** (required): The amount to charge the customer
 - **phoneNumber** (required): Customer's phone number (format: 254XXXXXXXXX)
-- **accountReference** (required): Account reference (e.g., invoice number, order ID)
-- **transactionDesc** (required): Description of the transaction
+- **accountReference** (optional): Account reference. Falls back to config default
+- **transactionDesc** (optional): Description of the transaction. Falls back to config default
 - **callBackURL** (optional): Overrides the configured callback URL. Falls back to global config
 - **transactionType** (optional): Overrides the default transaction type
 - **passkey** (optional): Overrides the configured passkey

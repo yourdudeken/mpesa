@@ -61,10 +61,11 @@ class Pay {
         $initiatorPass     = $this->engine->config->get('mpesa.b2b.initiator_password');
         $securityCredential = $this->engine->computeSecurityCredential($initiatorPass);
         $commandId         = $this->engine->config->get('mpesa.b2b.default_command_id');
+        $remarks           = $this->engine->config->get('mpesa.b2b.remarks');
+        $accountReference  = $this->engine->config->get('mpesa.b2b.account_reference');
+        $senderIdentifierType = $this->engine->config->get('mpesa.b2b.sender_identifier_type');
+        $receiverIdentifierType = $this->engine->config->get('mpesa.b2b.receiver_identifier_type');
 
-        // TODO: Compute. For now only support ShortCode
-        $receiverIdentifierType = 4;
-        $senderIdentifierType   = 4;
 
         $configParams = [
             'Initiator'                 => $initiator,
@@ -75,6 +76,8 @@ class Pay {
             'SenderIdentifierType'      => $senderIdentifierType,
             'QueueTimeOutURL'           => $timeoutCallback,
             'ResultURL'                 => $successCallback,
+            'Remarks'                   => $remarks,
+            'AccountReference'          => $accountReference,
         ];
 
         // This gives precedence to params coming from user allowing them to override config params

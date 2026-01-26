@@ -83,8 +83,8 @@ When calling the B2B method, you can pass the following parameters:
 
 - **amount** (required): The amount to transfer to the business
 - **partyB** (required): The shortcode of the recipient business
-- **accountReference** (required): Account reference for the transaction
-- **remarks** (required): Comments sent along with the transaction
+- **accountReference** (optional): Account reference. Falls back to config default
+- **remarks** (optional): Comments sent along with the transaction. Falls back to config default
 - **resultURL** (optional): Overrides the configured result URL. Falls back to global config
 - **queueTimeOutURL** (optional): Overrides the configured timeout URL. Falls back to global config
 - **commandID** (optional): Overrides the default command ID

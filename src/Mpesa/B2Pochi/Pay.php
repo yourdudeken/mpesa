@@ -57,6 +57,7 @@ class Pay {
         $initiatorPass     = $this->engine->config->get('mpesa.b2pochi.initiator_password');
         $securityCredential = $this->engine->computeSecurityCredential($initiatorPass);
         $commandId         = $this->engine->config->get('mpesa.b2pochi.default_command_id', 'BusinessPayToPochi');
+        $remarks           = $this->engine->config->get('mpesa.b2pochi.remarks');
         
         // Params coming from the config file
         $configParams = [
@@ -66,6 +67,7 @@ class Pay {
             'PartyA'            => $shortCode,
             'QueueTimeOutURL'   => $timeoutCallback,
             'ResultURL'         => $successCallback,
+            'Remarks'           => $remarks,
         ];
 
         // This gives precedence to params coming from user allowing them to override config params

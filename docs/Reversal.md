@@ -88,8 +88,8 @@ When calling the reversal method, you can pass the following parameters:
 - **amount** (required): The amount to reverse (must match original transaction amount)
 - **receiverParty** (required): The party that received the original payment
 - **receiverIdentifierType** (required): Type of receiver (1=MSISDN, 2=Till, 4=Shortcode)
-- **remarks** (optional): Comments about the reversal
-- **occasion** (optional): Reason for the reversal
+- **remarks** (optional): Comments about the reversal. Falls back to config default
+- **occasion** (optional): Reason for the reversal. Falls back to config default
 - **resultURL** (optional): Overrides the configured result URL. Falls back to global config
 - **queueTimeOutURL** (optional): Overrides the configured timeout URL. Falls back to global config
 - **commandID** (optional): Overrides the default command ID

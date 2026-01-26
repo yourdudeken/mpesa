@@ -55,8 +55,8 @@ class Balance {
         $commandId         = $this->engine->config->get('mpesa.account_balance.default_command_id');
         $initiatorPass     = $this->engine->config->get('mpesa.account_balance.initiator_password');
         $securityCredential = $this->engine->computeSecurityCredential($initiatorPass);
-        // TODO: Compute
-        $identifierType = '4';
+        $identifierType    = $this->engine->config->get('mpesa.account_balance.identifier_type');
+        $remarks           = $this->engine->config->get('mpesa.account_balance.remarks');
 
         $configParams = [
             'Initiator'         => $initiator,
@@ -66,6 +66,7 @@ class Balance {
             'IdentifierType'    => $identifierType,
             'QueueTimeOutURL'   => $timeoutCallback,
             'ResultURL'         => $successCallback,
+            'Remarks'           => $remarks,
         ];
 
         // This gives precedence to params coming from user allowing them to override config params

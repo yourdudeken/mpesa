@@ -53,15 +53,19 @@ class STKPush{
         $shortCode = $this->engine->config->get('mpesa.lnmo.short_code');
         $passkey   = $this->engine->config->get('mpesa.lnmo.passkey');
         $password  = \base64_encode($shortCode . $passkey . $time);
+        $remarks   = $this->engine->config->get('mpesa.lnmo.remarks');
+        $accountReference = $this->engine->config->get('mpesa.lnmo.account_reference');
 
         // Computed and params from config file.
         $configParams = [
             'BusinessShortCode' => $shortCode,
-            'CallBackURL'       => $this->engine->config->get('mpesa.lnmo.callback'),
+            'CallBackURL'       => $this->engine->config->get('mpesa.lnmo.callback') ?: $this->engine->config->get('mpesa.callback'),
             'TransactionType'   => $this->engine->config->get('mpesa.lnmo.default_transaction_type'),
             'Password'          => $password,
             'PartyB'            => $shortCode,
             'Timestamp'         => $time,
+            'TransactionDesc'   => $remarks,
+            'AccountReference'  => $accountReference,
         ];
 
         // This gives precedence to params coming from user allowing them to override config params
