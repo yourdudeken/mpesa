@@ -25,21 +25,23 @@ require "../src/autoload.php";
 
 use Yourdudeken\Mpesa\Init as Mpesa;
 
-$mpesa = new Mpesa();
+$mpesa = new Mpesa([
+    'consumer_key'    => '...',
+    'consumer_secret' => '...',
+    'short_code'      => '174379',
+    'passkey'         => '...',
+    'callback'        => 'https://example.com/stk'
+]);
 
 try {
     $response = $mpesa->STKPush([
-        'amount' => 100,
-        'phoneNumber' => '254722000000',
-        'accountReference' => 'INV-001',
-        'transactionDesc' => 'Payment for invoice INV-001',
-        'callBackURL' => 'https://example.com/v1/payments/stk/callback'
+        'amount'      => 10,
+        'phoneNumber' => '2547XXXXXXXX'
     ]);
     
     echo json_encode($response);
 } catch(\Exception $e) {
-    $response = json_decode($e->getMessage());
-    echo json_encode($response);
+    echo "Error: " . $e->getMessage();
 }
 ```
 
@@ -50,20 +52,17 @@ use Yourdudeken\Mpesa\Init as Mpesa;
 class CheckoutController {
 
    public function initiatePayment() {
-      $mpesa = new Mpesa();
+      // Configuration can be central or passed here
+      $mpesa = new Mpesa(config('mpesa'));
       
       $response = $mpesa->STKPush([
-          'amount' => 100,
-          'phoneNumber' => '254722000000',
-          'accountReference' => 'INV-001',
-          'transactionDesc' => 'Payment for invoice INV-001',
-          'callBackURL' => route('mpesa.stk.callback')
+          'amount'      => 10,
+          'phoneNumber' => '2547XXXXXXXX'
       ]); 
       
       return response()->json($response);
    }
 }
-
 ```
 
 ### Configuration Parameters
@@ -224,7 +223,7 @@ echo json_encode(['ResultCode' => 0, 'ResultDesc' => 'Success']);
 ```
 
 ### STK Status Query
-You can also query the status of an STK Push request using the STKStatus method:
+You can also query the status of an STK Push request using the STKStatus method. All security parameters (ShortCode, Password, Timestamp) are generated automatically from your config:
 
 ```php
 $response = $mpesa->STKStatus([

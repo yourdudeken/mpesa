@@ -56,7 +56,7 @@ class STKPush{
         $accountReference = $this->engine->config->get('mpesa.lnmo.account_reference');
         $callback = $this->engine->config->get('mpesa.lnmo.callback') ?: $this->engine->config->get('mpesa.callback');
         $transactionType = $this->engine->config->get('mpesa.lnmo.default_transaction_type');
-        $transactionDesc = $this->engine->config->get('mpesa.lnmo.default_transaction_desc');
+        $transactionDesc = $this->engine->config->get('mpesa.lnmo.transaction_desc');
 
         // Computed and params from config file.
         $configParams = [

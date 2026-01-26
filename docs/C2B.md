@@ -21,20 +21,20 @@ require "../src/autoload.php";
 
 use Yourdudeken\Mpesa\Init as Mpesa;
 
-$mpesa = new Mpesa();
+$mpesa = new Mpesa([
+    'consumer_key'    => '...',
+    'consumer_secret' => '...',
+    'short_code'      => '600000',
+    'callback'        => 'https://example.com/c2b' // Specific URLs are generated automatically
+]);
 
 try {
-    $response = $mpesa->C2BRegister([
-        'validationURL' => 'https://example.com/v1/payments/c2b/validate',
-        'confirmationURL' => 'https://example.com/v1/payments/c2b/confirm',
-        'responseType' => 'Completed',  // or 'Cancelled'
-        'shortCode' => '600000'
-    ]);
+    // If you provided a 'callback' above, you don't even need parameters here
+    $response = $mpesa->C2BRegister();
     
     echo json_encode($response);
 } catch(\Exception $e) {
-    $response = json_decode($e->getMessage());
-    echo json_encode($response);
+    echo "Error: " . $e->getMessage();
 }
 ```
 
@@ -45,13 +45,10 @@ use Yourdudeken\Mpesa\Init as Mpesa;
 class MpesaController {
 
    public function registerC2B() {
-      $mpesa = new Mpesa();
+      $mpesa = new Mpesa(config('mpesa'));
       
-      $response = $mpesa->C2BRegister([
-          'validationURL' => route('mpesa.c2b.validate'),
-          'confirmationURL' => route('mpesa.c2b.confirm'),
-          'responseType' => 'Completed'
-      ]); 
+      // Zero parameters if config has 'callback' and 'short_code'
+      $response = $mpesa->C2BRegister(); 
       
       return response()->json($response);
    }
@@ -70,20 +67,23 @@ require "../src/autoload.php";
 
 use Yourdudeken\Mpesa\Init as Mpesa;
 
-$mpesa = new Mpesa();
+$mpesa = new Mpesa([
+    'consumer_key'    => '...',
+    'consumer_secret' => '...',
+    'short_code'      => '600000',
+    'is_sandbox'      => true
+]);
 
 try {
     $response = $mpesa->C2BSimulate([
         'amount' => 100,
         'msisdn' => '254722000000',
-        'billRefNumber' => 'INV-001',
-        'commandID' => 'CustomerPayBillOnline'  // or 'CustomerBuyGoodsOnline'
+        'billRefNumber' => 'INV-001'
     ]);
     
     echo json_encode($response);
 } catch(\Exception $e) {
-    $response = json_decode($e->getMessage());
-    echo json_encode($response);
+    echo "Error: " . $e->getMessage();
 }
 ```
 
@@ -94,19 +94,17 @@ use Yourdudeken\Mpesa\Init as Mpesa;
 class MpesaController {
 
    public function simulateC2B() {
-      $mpesa = new Mpesa();
+      $mpesa = new Mpesa(config('mpesa'));
       
       $response = $mpesa->C2BSimulate([
           'amount' => 100,
           'msisdn' => '254722000000',
-          'billRefNumber' => 'INV-001',
-          'commandID' => 'CustomerPayBillOnline'
+          'billRefNumber' => 'INV-001'
       ]); 
       
       return response()->json($response);
    }
 }
-
 ```
 
 ### Configuration Parameters

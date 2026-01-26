@@ -24,24 +24,24 @@ require "../src/autoload.php";
 
 use Yourdudeken\Mpesa\Init as Mpesa;
 
-$mpesa = new Mpesa();
+$mpesa = new Mpesa([
+    'consumer_key'       => '...',
+    'consumer_secret'    => '...',
+    'initiator_name'     => 'testapi',
+    'initiator_password' => '...',
+    'short_code'         => '600000',
+    'callback'           => 'https://example.com/reversal'
+]);
 
 try {
     $response = $mpesa->reversal([
-        'transactionID' => 'NLJ7RT61SV',  // The M-Pesa transaction ID to reverse
-        'amount' => 100,  // Amount to reverse
-        'receiverParty' => '600000',  // The shortcode that received the original payment
-        'receiverIdentifierType' => 4,  // 4 for organization shortcode
-        'remarks' => 'Reversing erroneous payment',
-        'occasion' => 'Duplicate payment',
-        'resultURL' => 'https://example.com/v1/mpesa/reversal/result',
-        'queueTimeOutURL' => 'https://example.com/v1/mpesa/reversal/timeout'
+        'transactionID' => 'NLJ7RT61SV',
+        'amount'        => 100
     ]);
     
     echo json_encode($response);
 } catch(\Exception $e) {
-    $response = json_decode($e->getMessage());
-    echo json_encode($response);
+    echo "Error: " . $e->getMessage();
 }
 ```
 
@@ -52,24 +52,17 @@ use Yourdudeken\Mpesa\Init as Mpesa;
 class MpesaController {
 
    public function reverseTransaction($transactionId) {
-      $mpesa = new Mpesa();
+      $mpesa = new Mpesa(config('mpesa'));
       
       $response = $mpesa->reversal([
           'transactionID' => $transactionId,
-          'amount' => 100,
-          'receiverParty' => '600000',
-          'receiverIdentifierType' => 4,
-          'remarks' => 'Reversing erroneous payment',
-          'occasion' => 'Duplicate payment',
-          'resultURL' => route('mpesa.reversal.result'),
-          'queueTimeOutURL' => route('mpesa.reversal.timeout')
+          'amount'        => 100
       ]); 
       
       return response()->json($response);
    }
 }
-
-```
+````
 
 ### Configuration Parameters
 The following parameters can be configured in `config/mpesa.php` under the `reversal` section:

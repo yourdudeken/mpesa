@@ -17,12 +17,6 @@ class Config implements ArrayAccess,ConfigurationStore
     /**
      * Create a new configuration repository.
      *
-     * @param  array  $items
-     * @return void
-     */
-    /**
-     * Create a new configuration repository.
-     *
      * @param  array  $conf
      * @return void
      */
@@ -34,11 +28,8 @@ class Config implements ArrayAccess,ConfigurationStore
             $internalConfig = require $internalConfigFile;
         }
         
-        // Load from environment variables
-        $envConfig = $this->loadFromEnv();
-        
-        // Merge configs: Internal < Env < Constructor
-        $this->items = array_merge($internalConfig, $envConfig, $conf);
+        // Merge configs: Internal < Constructor
+        $this->items = array_merge($internalConfig, $conf);
 
         // Normalize credentials and generate URLs
         $this->normalizeItems();
@@ -105,74 +96,40 @@ class Config implements ArrayAccess,ConfigurationStore
     }
 
     /**
-     * Load configuration from environment variables
-     * 
-     * @return array
+     * Set a given configuration value.
+     *
+     * @param  string  $key
+     * @param  mixed   $value
+     * @return void
      */
-    private function loadFromEnv() {
-        $config = [];
-        
-        // Environment variables mapping
-        $mapping = [
-            'MPESA_ENV'               => 'is_sandbox',
-            'MPESA_CONSUMER_KEY'     => 'consumer_key',
-            'MPESA_CONSUMER_SECRET'  => 'consumer_secret',
-            'MPESA_SHORTCODE'        => 'short_code',
-            'MPESA_PASSKEY'          => 'passkey',
-            'MPESA_CALLBACK_URL'     => 'callback',
-            'MPESA_INITIATOR_NAME'   => 'initiator_name',
-            'MPESA_INITIATOR_PASSWORD' => 'initiator_password',
-        ];
+    public function set($key, $value)
+    {
+        $keys = explode('.', $key);
 
-        foreach ($mapping as $envKey => $configKey) {
-            $val = getenv($envKey);
-            if ($val !== false) {
-                if ($configKey === 'is_sandbox') {
-                    $config[$configKey] = ($val === 'sandbox' || $val === 'true' || $val === '1');
-                } else {
-                    $config[$configKey] = $val;
-                }
+        $items = &$this->items;
+
+        while (count($keys) > 1) {
+            $key = array_shift($keys);
+
+            if (! isset($items[$key]) || ! is_array($items[$key])) {
+                $items[$key] = [];
             }
+
+            $items = &$items[$key];
         }
-        
-        return $config;
+
+        $items[array_shift($keys)] = $value;
     }
 
     /**
-     * Load environment variables from .env file
-     * 
-     * @param string $path
-     * @return void
+     * Determine if the given configuration value exists.
+     *
+     * @param  string  $key
+     * @return bool
      */
-    private function loadEnvFile($path) {
-        if (!\is_readable($path)) {
-            return;
-        }
-        
-        $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-        foreach ($lines as $line) {
-            // Skip comments
-            if (strpos(trim($line), '#') === 0) {
-                continue;
-            }
-            
-            // Parse KEY=VALUE
-            if (strpos($line, '=') !== false) {
-                list($key, $value) = explode('=', $line, 2);
-                $key = trim($key);
-                $value = trim($value);
-                
-                // Remove quotes
-                $value = trim($value, '"\'');
-                
-                // Set environment variable if not already set
-                if (getenv($key) === false) {
-                    putenv("$key=$value");
-                    $_ENV[$key] = $value;
-                    $_SERVER[$key] = $value;
-                }
-            }
-        }
+    public function has($key)
+    {
+        return ! is_null($this->get($key));
     }
 
     /**
@@ -198,10 +155,10 @@ class Config implements ArrayAccess,ConfigurationStore
          if ($array instanceof ArrayAccess) {
              return $array->offsetExists($key);
          }
- 
+  
          return array_key_exists($key, $array);
      }
-
+ 
      /**
      * Get an item from an array using "dot" notation.
      *

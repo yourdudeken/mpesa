@@ -24,22 +24,23 @@ require "../src/autoload.php";
 
 use Yourdudeken\Mpesa\Init as Mpesa;
 
-$mpesa = new Mpesa();
+$mpesa = new Mpesa([
+    'consumer_key'       => '...',
+    'consumer_secret'    => '...',
+    'initiator_name'     => 'testapi',
+    'initiator_password' => '...',
+    'short_code'         => '600000',
+    'callback'           => 'https://example.com/status'
+]);
 
 try {
     $response = $mpesa->transactionStatus([
-        'transactionID' => 'NLJ7RT61SV',  // The M-Pesa transaction ID
-        'identifierType' => 4,  // 4 for organization shortcode
-        'remarks' => 'Transaction status query',
-        'occasion' => 'Reconciliation',
-        'resultURL' => 'https://example.com/v1/mpesa/status/result',
-        'queueTimeOutURL' => 'https://example.com/v1/mpesa/status/timeout'
+        'transactionID' => 'NLJ7RT61SV'
     ]);
     
     echo json_encode($response);
 } catch(\Exception $e) {
-    $response = json_decode($e->getMessage());
-    echo json_encode($response);
+    echo "Error: " . $e->getMessage();
 }
 ```
 
@@ -50,22 +51,16 @@ use Yourdudeken\Mpesa\Init as Mpesa;
 class MpesaController {
 
    public function checkTransactionStatus($transactionId) {
-      $mpesa = new Mpesa();
+      $mpesa = new Mpesa(config('mpesa'));
       
       $response = $mpesa->transactionStatus([
-          'transactionID' => $transactionId,
-          'identifierType' => 4,
-          'remarks' => 'Transaction status query',
-          'occasion' => 'Reconciliation',
-          'resultURL' => route('mpesa.status.result'),
-          'queueTimeOutURL' => route('mpesa.status.timeout')
+          'transactionID' => $transactionId
       ]); 
       
       return response()->json($response);
    }
 }
-
-```
+````
 
 ### Configuration Parameters
 The following parameters can be configured in `config/mpesa.php` under the `transaction_status` section:

@@ -59,23 +59,21 @@ require "vendor/autoload.php";
 
 use Yourdudeken\Mpesa\Init as Mpesa;
 
-// Initialize with default config
-$mpesa = new Mpesa();
-
-// Or pass custom configuration
+// Initialize with minimal merchant profile
 $mpesa = new Mpesa([
-    'consumer_key' => 'your_consumer_key',
-    'consumer_secret' => 'your_consumer_secret',
-    'is_sandbox' => true
+    'is_sandbox'         => true,
+    'consumer_key'       => 'your_key',
+    'consumer_secret'    => 'your_secret',
+    'short_code'         => '174379',
+    'passkey'            => 'bfb27...',
+    'callback'           => 'https://example.com/mpesa' // Base URL for all callbacks
 ]);
 
 try {
-    // Initiate STK Push
+    // Initiate STK Push (Metadata fields are now optional)
     $response = $mpesa->STKPush([
-        'amount' => 100,
-        'phoneNumber' => '254722000000',
-        'accountReference' => 'INV-001',
-        'transactionDesc' => 'Payment for invoice'
+        'amount'      => 10,
+        'phoneNumber' => '2547XXXXXXXX'
     ]);
     
     echo json_encode($response);
@@ -98,35 +96,21 @@ src/config/mpesa.php
 
 ```php
 return [
-    // API Environment
-    'apiUrl' => 'https://sandbox.safaricom.co.ke/',
-    'is_sandbox' => true,
+    // Application Environment
+    'is_sandbox'         => true,
+
+    // Core Identity Credentials
+    'consumer_key'       => 'your_key',
+    'consumer_secret'    => 'your_secret',
+    'short_code'         => '174379',
+    'passkey'            => 'bfb27...',
     
-    // Credentials
-    'apps' => [
-        'default' => [
-            'consumer_key' => 'your_consumer_key',
-            'consumer_secret' => 'your_consumer_secret',
-        ],
-    ],
-    
-    // STK Push Configuration
-    'lnmo' => [
-        'short_code' => '174379',
-        'passkey' => 'your_passkey',
-        'callback' => 'https://yourdomain.com/callback',
-    ],
-    
-    // B2C Configuration
-    'b2c' => [
-        'initiator_name' => 'testapi',
-        'initiator_password' => 'your_credential',
-        'short_code' => '600000',
-        'result_url' => 'https://yourdomain.com/result',
-        'timeout_url' => 'https://yourdomain.com/timeout',
-    ],
-    
-    // Additional configurations for B2B, C2B, etc.
+    // Unified Callback (Package appends specific paths automatically)
+    'callback'           => 'https://api.com/mpesa',
+
+    // Business Initiator Credentials (for B2C, B2B, Reversals, Status)
+    'initiator_name'     => 'testapi',
+    'initiator_password' => 'Safaricom123!!',
 ];
 ```
 
@@ -262,7 +246,7 @@ Initiate payment requests directly to customer phones. Customers authorize payme
 
 **Use Cases:** E-commerce checkout, bill payments, donations, subscriptions
 
-### 2. [Lipa na M-Pesa Online Query](docs/LipaNaMpesaOnlineQuery.md)
+### 2. [Lipa na M-Pesa Online Query](docs/LipaNaMpesaOnline.md#stk-status-query)
 Query the status of STK Push requests to verify payment completion.
 
 **Use Cases:** Payment verification, transaction reconciliation

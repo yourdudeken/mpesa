@@ -24,21 +24,24 @@ require "../src/autoload.php";
 
 use Yourdudeken\Mpesa\Init as Mpesa;
 
-$mpesa = new Mpesa();
+$mpesa = new Mpesa([
+    'consumer_key'       => '...',
+    'consumer_secret'    => '...',
+    'initiator_name'     => 'testapi',
+    'initiator_password' => '...',
+    'short_code'         => '600000',
+    'callback'           => 'https://example.com/pochi'
+]);
 
 try {
     $response = $mpesa->B2Pochi([
         'amount' => 100,
-        'partyB' => '254722000000',
-        'remarks' => 'Payment to Pochi account',
-        'resultURL' => 'https://example.com/v1/payments/b2pochi/result',
-        'queueTimeOutURL' => 'https://example.com/v1/payments/b2pochi/timeout'
+        'partyB' => '2547XXXXXXXX'
     ]);
     
     echo json_encode($response);
 } catch(\Exception $e) {
-    $response = json_decode($e->getMessage());
-    echo json_encode($response);
+    echo "Error: " . $e->getMessage();
 }
 ```
 
@@ -49,20 +52,16 @@ use Yourdudeken\Mpesa\Init as Mpesa;
 class PaymentController {
 
    public function sendToPochi() {
-      $mpesa = new Mpesa();
+      $mpesa = new Mpesa(config('mpesa'));
       
       $response = $mpesa->B2Pochi([
           'amount' => 100,
-          'partyB' => '254722000000',
-          'remarks' => 'Payment to Pochi account',
-          'resultURL' => route('mpesa.b2pochi.result'),
-          'queueTimeOutURL' => route('mpesa.b2pochi.timeout')
+          'partyB' => '2547XXXXXXXX'
       ]); 
       
       return response()->json($response);
    }
 }
-
 ```
 
 ### Configuration Parameters
