@@ -218,8 +218,7 @@ Your confirmation response should be:
 
 ### Known issues with this endpoint
 1. **URL Registration**: You must register your URLs before you can receive payment notifications. Registration is per shortcode.
-2. **Validation Timeout**: Your validation endpoint must respond within 30 seconds or the payment will be processed based on your `on_timeout` setting.
-3. **HTTPS Required**: Both validation and confirmation URLs must use HTTPS in production.
-4. **Simulation Limitations**: C2B Simulate only works in sandbox mode. In production, use actual M-Pesa payments for testing.
-5. **Duplicate Notifications**: Implement idempotency checks as you may receive duplicate confirmation requests.
-6. **IP Whitelisting**: Consider whitelisting Safaricom's IP addresses for added security.
+2. **HTTPS Required**: Both validation and confirmation URLs must use HTTPS in production.
+3. **Simulation Limitations**: C2B Simulate only works in sandbox mode. In production, use actual M-Pesa payments for testing.
+4. **Duplicate Notifications**: Implement idempotency checks as you may receive duplicate confirmation requests.
+5. **IP Whitelisting**: Consider whitelisting Safaricom's IP addresses for added security.
