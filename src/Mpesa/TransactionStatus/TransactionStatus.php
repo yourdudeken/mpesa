@@ -53,9 +53,12 @@ class TransactionStatus {
         $commandId  = $this->engine->config->get('mpesa.transaction_status.default_command_id');
         $initiatorPass = $this->engine->config->get('mpesa.transaction_status.initiator_password');
         $securityCredential  = $this->engine->computeSecurityCredential($initiatorPass);
-        $remarks           = $this->engine->config->get('mpesa.transaction_status.remarks');
-        $occasion          = $this->engine->config->get('mpesa.transaction_status.occasion');
+        $remarks           = trim($this->engine->config->get('mpesa.transaction_status.remarks') ?: 'None');
+        $occasion          = trim($this->engine->config->get('mpesa.transaction_status.occasion') ?: '');
         $identifierType    = $this->engine->config->get('mpesa.transaction_status.identifier_type');
+
+        $remarks = substr($remarks, 0, 100);
+        $occasion = substr($occasion, 0, 100);
 
         $configParams = [
             'Initiator'         => $initiator,
@@ -66,7 +69,7 @@ class TransactionStatus {
             'QueueTimeOutURL'   => $timeoutCallback,
             'ResultURL'         => $successCallback,
             'Remarks'           => $remarks,
-            'Occasion'          => $occasion,
+            'Occasion'          => !empty($occasion) ? $occasion : null,
         ];
 
         // This gives precedence to params coming from user allowing them to override config params

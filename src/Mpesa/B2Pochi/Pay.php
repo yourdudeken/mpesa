@@ -57,8 +57,10 @@ class Pay {
         $initiatorPass     = $this->engine->config->get('mpesa.b2pochi.initiator_password');
         $securityCredential = $this->engine->computeSecurityCredential($initiatorPass);
         $commandId         = $this->engine->config->get('mpesa.b2pochi.default_command_id');
-        $remarks           = $this->engine->config->get('mpesa.b2pochi.remarks');
+        $remarks           = trim($this->engine->config->get('mpesa.b2pochi.remarks') ?: 'None');
         
+        $remarks = substr($remarks, 0, 100);
+
         // Params coming from the config file
         $configParams = [
             'InitiatorName'     => $initiator,

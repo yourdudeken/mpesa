@@ -15,13 +15,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
-// Set working directory to example folder so config is loaded correctly
-chdir(__DIR__ . '/..');
-
 require_once __DIR__ . '/../../src/autoload.php';
 require_once __DIR__ . '/../models/Transaction.php';
 
 use Yourdudeken\Mpesa\Init as Mpesa;
+
+// Load explicit configuration from the local config file
+$configPath = __DIR__ . '/../config/mpesa.php';
+$config = is_file($configPath) ? require $configPath : [];
 
 try {
     $input = file_get_contents('php://input');
@@ -36,50 +37,50 @@ try {
     switch ($action) {
         // STK Push
         case 'stk_push':
-            handleSTKPush($request);
+            handleSTKPush($request, $config);
             break;
 
         case 'stk_status':
-            handleSTKStatus($request);
+            handleSTKStatus($request, $config);
             break;
 
         // B2C
         case 'b2c_payment':
-            handleB2C($request);
+            handleB2C($request, $config);
             break;
 
         // B2B
         case 'b2b_payment':
-            handleB2B($request);
+            handleB2B($request, $config);
             break;
 
         // B2Pochi
         case 'b2pochi_payment':
-            handleB2Pochi($request);
+            handleB2Pochi($request, $config);
             break;
 
         // C2B
         case 'c2b_register':
-            handleC2BRegister($request);
+            handleC2BRegister($request, $config);
             break;
 
         case 'c2b_simulate':
-            handleC2BSimulate($request);
+            handleC2BSimulate($request, $config);
             break;
 
         // Account Balance
         case 'account_balance':
-            handleAccountBalance($request);
+            handleAccountBalance($request, $config);
             break;
 
         // Transaction Status
         case 'transaction_status':
-            handleTransactionStatus($request);
+            handleTransactionStatus($request, $config);
             break;
 
         // Reversal
         case 'reversal':
-            handleReversal($request);
+            handleReversal($request, $config);
             break;
 
         // Data queries
@@ -106,13 +107,13 @@ try {
 /**
  * STK Push (Lipa na M-Pesa Online)
  */
-function handleSTKPush($request) {
+function handleSTKPush($request, $config) {
     $data = $request['data'] ?? [];
     
     validateRequired($data, ['phone_number', 'amount', 'account_reference']);
     
     $phoneNumber = formatPhoneNumber($data['phone_number']);
-    $mpesa = new Mpesa();
+    $mpesa = new Mpesa($config);
     
     $params = [
         'amount' => (float) $data['amount'],
@@ -162,7 +163,7 @@ function handleSTKPush($request) {
 /**
  * STK Status Query
  */
-function handleSTKStatus($request) {
+function handleSTKStatus($request, $config) {
     $data = $request['data'] ?? [];
     $checkoutRequestId = $data['checkout_request_id'] ?? '';
     
@@ -170,7 +171,7 @@ function handleSTKStatus($request) {
         throw new Exception('Checkout Request ID is required');
     }
 
-    $mpesa = new Mpesa();
+    $mpesa = new Mpesa($config);
     $response = $mpesa->STKStatus([
         'checkoutRequestID' => $checkoutRequestId
     ]);
@@ -184,12 +185,12 @@ function handleSTKStatus($request) {
 /**
  * B2C Payment
  */
-function handleB2C($request) {
+function handleB2C($request, $config) {
     $data = $request['data'] ?? [];
     validateRequired($data, ['amount', 'phone_number', 'remarks']);
     
     $phoneNumber = formatPhoneNumber($data['phone_number']);
-    $mpesa = new Mpesa();
+    $mpesa = new Mpesa($config);
     
     $params = [
         'Amount' => (float) $data['amount'],
@@ -222,11 +223,11 @@ function handleB2C($request) {
 /**
  * B2B Payment
  */
-function handleB2B($request) {
+function handleB2B($request, $config) {
     $data = $request['data'] ?? [];
     validateRequired($data, ['amount', 'party_b', 'account_reference', 'remarks']);
     
-    $mpesa = new Mpesa();
+    $mpesa = new Mpesa($config);
     
     $params = [
         'Amount' => (float) $data['amount'],
@@ -257,12 +258,12 @@ function handleB2B($request) {
 /**
  * B2Pochi Payment
  */
-function handleB2Pochi($request) {
+function handleB2Pochi($request, $config) {
     $data = $request['data'] ?? [];
     validateRequired($data, ['amount', 'phone_number', 'remarks']);
     
     $phoneNumber = formatPhoneNumber($data['phone_number']);
-    $mpesa = new Mpesa();
+    $mpesa = new Mpesa($config);
     
     $params = [
         'Amount' => (float) $data['amount'],
@@ -289,12 +290,12 @@ function handleB2Pochi($request) {
 /**
  * C2B Register URLs
  */
-function handleC2BRegister($request) {
+function handleC2BRegister($request, $config) {
     $data = $request['data'] ?? [];
     
     validateRequired($data, ['validation_url', 'confirmation_url']);
     
-    $mpesa = new Mpesa();
+    $mpesa = new Mpesa($config);
     
     $params = [
         'ValidationURL' => $data['validation_url'],
@@ -317,12 +318,12 @@ function handleC2BRegister($request) {
 /**
  * C2B Simulate Payment
  */
-function handleC2BSimulate($request) {
+function handleC2BSimulate($request, $config) {
     $data = $request['data'] ?? [];
     validateRequired($data, ['amount', 'phone_number']);
     
     $phoneNumber = formatPhoneNumber($data['phone_number']);
-    $mpesa = new Mpesa();
+    $mpesa = new Mpesa($config);
     
     $response = $mpesa->C2BSimulate([
         'Amount' => (float) $data['amount'],
@@ -341,9 +342,9 @@ function handleC2BSimulate($request) {
 /**
  * Account Balance Query
  */
-function handleAccountBalance($request) {
+function handleAccountBalance($request, $config) {
     $data = $request['data'] ?? [];
-    $mpesa = new Mpesa();
+    $mpesa = new Mpesa($config);
     
     $params = [
         'Remarks' => $data['remarks'] ?? 'Balance query'
@@ -368,11 +369,11 @@ function handleAccountBalance($request) {
 /**
  * Transaction Status Query
  */
-function handleTransactionStatus($request) {
+function handleTransactionStatus($request, $config) {
     $data = $request['data'] ?? [];
     validateRequired($data, ['transaction_id']);
     
-    $mpesa = new Mpesa();
+    $mpesa = new Mpesa($config);
     
     $params = [
         'TransactionID' => $data['transaction_id'],
@@ -398,11 +399,11 @@ function handleTransactionStatus($request) {
 /**
  * Transaction Reversal
  */
-function handleReversal($request) {
+function handleReversal($request, $config) {
     $data = $request['data'] ?? [];
     validateRequired($data, ['transaction_id', 'amount', 'receiver_party', 'remarks']);
     
-    $mpesa = new Mpesa();
+    $mpesa = new Mpesa($config);
     
     $params = [
         'TransactionID' => $data['transaction_id'],

@@ -49,6 +49,7 @@ class Balance {
         }
 
         $shortCode        = $this->engine->config->get('mpesa.account_balance.short_code');
+        $shortCode         = $this->engine->config->get('mpesa.account_balance.short_code');
         $successCallback   = $this->engine->config->get('mpesa.account_balance.result_url') ?: $this->engine->config->get('mpesa.callback');
         $timeoutCallback   = $this->engine->config->get('mpesa.account_balance.timeout_url') ?: $this->engine->config->get('mpesa.callback');
         $initiator         = $this->engine->config->get('mpesa.account_balance.initiator_name');
@@ -56,7 +57,9 @@ class Balance {
         $initiatorPass     = $this->engine->config->get('mpesa.account_balance.initiator_password');
         $securityCredential = $this->engine->computeSecurityCredential($initiatorPass);
         $identifierType    = $this->engine->config->get('mpesa.account_balance.identifier_type');
-        $remarks           = $this->engine->config->get('mpesa.account_balance.remarks');
+        $remarks           = trim($this->engine->config->get('mpesa.account_balance.remarks') ?: 'None');
+
+        $remarks = substr($remarks, 0, 100);
 
         $configParams = [
             'Initiator'         => $initiator,

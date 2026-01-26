@@ -61,11 +61,14 @@ class Pay {
         $initiatorPass     = $this->engine->config->get('mpesa.b2b.initiator_password');
         $securityCredential = $this->engine->computeSecurityCredential($initiatorPass);
         $commandId         = $this->engine->config->get('mpesa.b2b.default_command_id');
-        $remarks           = $this->engine->config->get('mpesa.b2b.remarks');
-        $accountReference  = $this->engine->config->get('mpesa.b2b.account_reference');
+        $remarks           = trim($this->engine->config->get('mpesa.b2b.remarks') ?: 'None');
+        $accountReference  = trim($this->engine->config->get('mpesa.b2b.account_reference') ?: 'None');
         $senderIdentifierType = $this->engine->config->get('mpesa.b2b.sender_identifier_type');
-        $receiverIdentifierType = $this->engine->config->get('mpesa.b2b.receiver_identifier_type');
+        $receiverIdentifierType = $this->engine->config->get('mpesa.b2b.reciever_identifier_type');
 
+        // Safaricom limits
+        $remarks = substr($remarks, 0, 100);
+        $accountReference = substr($accountReference, 0, 20);
 
         $configParams = [
             'Initiator'                 => $initiator,

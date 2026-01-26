@@ -58,9 +58,12 @@ class Reversal {
         $commandId         = $this->engine->config->get('mpesa.reversal.default_command_id', 'TransactionReversal');
         $initiatorPass     = $this->engine->config->get('mpesa.reversal.initiator_password');
         $securityCredential = $this->engine->computeSecurityCredential($initiatorPass);
-        $remarks           = $this->engine->config->get('mpesa.reversal.remarks');
-        $occasion          = $this->engine->config->get('mpesa.reversal.occasion');
+        $remarks           = trim($this->engine->config->get('mpesa.reversal.remarks') ?: 'None');
+        $occasion          = trim($this->engine->config->get('mpesa.reversal.occasion') ?: '');
         $receiverIdentifierType = $this->engine->config->get('mpesa.reversal.reciever_identifier_type');
+
+        $remarks = substr($remarks, 0, 100);
+        $occasion = substr($occasion, 0, 100);
 
         $configParams = [
             'Initiator'              => $initiator,
@@ -71,7 +74,7 @@ class Reversal {
             'QueueTimeOutURL'        => $timeoutCallback,
             'ResultURL'              => $successCallback,
             'Remarks'                => $remarks,
-            'Occasion'               => $occasion,
+            'Occasion'               => !empty($occasion) ? $occasion : null,
         ];
 
         // This gives precedence to params coming from user allowing them to override config params

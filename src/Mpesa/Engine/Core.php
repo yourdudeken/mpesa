@@ -142,13 +142,17 @@ class Core
     * @return mixed|\Psr\Http\Message\ResponseInterface
     **/
     public function makePostRequest($options = [],$appName = 'default'){
-        
+        // Filter out null values to prevent Safaricom schema rejection (400 Bad Request)
+        $body = array_filter($options['body'], function($value) {
+            return $value !== null;
+        });
+
         $response = $this->request('POST', $options['endpoint'], [
             'headers' => [
                 'Authorization: Bearer ' . $this->auth->authenticate($appName),
                 'Content-Type: application/json',
             ],
-            'body' => $options['body'],
+            'body' => $body,
         ]);
 
         return $response;

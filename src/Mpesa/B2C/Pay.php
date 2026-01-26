@@ -67,8 +67,12 @@ class Pay {
         $initiatorPass = $this->engine->config->get('mpesa.b2c.initiator_password');
         $securityCredential  = $this->engine->computeSecurityCredential($initiatorPass);
         $commandId  = $this->engine->config->get('mpesa.b2c.default_command_id');
-        $remarks    = $this->engine->config->get('mpesa.b2c.remarks');
-        $occasion   = $this->engine->config->get('mpesa.b2c.occasion');
+        $remarks    = trim($this->engine->config->get('mpesa.b2c.remarks') ?: 'Transaction');
+        $occasion   = trim($this->engine->config->get('mpesa.b2c.occasion') ?: '');
+
+        // Safaricom Remarks limit is 100
+        $remarks = substr($remarks, 0, 100);
+        $occasion = substr($occasion, 0, 100);
         
         // Params coming from the config file
         $configParams = [
@@ -79,7 +83,7 @@ class Pay {
             'QueueTimeOutURL'   => $timeoutCallback,
             'ResultURL'         => $successCallback,
             'Remarks'           => $remarks,
-            'Occasion'          => $occasion,
+            'Occasion'          => !empty($occasion) ? $occasion : null,
         ];
 
         // This gives precedence to params coming from user allowing them to override config params
