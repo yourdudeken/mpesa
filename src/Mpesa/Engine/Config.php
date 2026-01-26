@@ -20,6 +20,12 @@ class Config implements ArrayAccess,ConfigurationStore
      * @param  array  $items
      * @return void
      */
+    /**
+     * Create a new configuration repository.
+     *
+     * @param  array  $conf
+     * @return void
+     */
     public function __construct($conf = []){
         // Load internal config
         $internalConfigFile = __DIR__ . '/../../config/mpesa.php';
@@ -31,24 +37,10 @@ class Config implements ArrayAccess,ConfigurationStore
         // Load from environment variables
         $envConfig = $this->loadFromEnv();
         
-        // Check for config in user project
-        $cwdConfig = getcwd() . '/config/mpesa.php';
-        $cwdCustom = [];
-        if (\is_file($cwdConfig)) {
-            $cwdCustom = require $cwdConfig;
-        }
-        
-        // Final user config from vendor root (fallback)
-        $userConfig = __DIR__ . '/../../../../../../config/mpesa.php';
-        $custom = [];
-        if (\is_file($userConfig)) {
-            $custom = require $userConfig;
-        }
-        
-        // Merge all configs
-        $this->items = array_merge($internalConfig, $envConfig, $custom, $cwdCustom, $conf);
+        // Merge configs: Internal < Env < Constructor
+        $this->items = array_merge($internalConfig, $envConfig, $conf);
 
-        // Normalize credentials: Ensure root-level keys are available where package expects them
+        // Normalize credentials and generate URLs
         $this->normalizeItems();
     }
 
@@ -71,6 +63,45 @@ class Config implements ArrayAccess,ConfigurationStore
         if (isset($this->items['consumer_secret']) && !isset($this->items['apps']['default']['consumer_secret'])) {
             $this->items['apps']['default']['consumer_secret'] = $this->items['consumer_secret'];
         }
+
+        // Auto-generate callback URLs if a base callback is provided
+        $this->generateCallbackUrls();
+    }
+
+    /**
+     * Generate specific callback URLs from a base URL if not provided.
+     */
+    private function generateCallbackUrls() {
+        $baseCallback = $this->items['callback'] ?? null;
+        if (empty($baseCallback)) {
+            return;
+        }
+
+        $baseCallback = rtrim($baseCallback, '/');
+
+        // lnmo callback
+        if (!isset($this->items['lnmo']['callback'])) {
+            $this->items['lnmo']['callback'] = $baseCallback;
+        }
+
+        // C2B URLs
+        if (!isset($this->items['c2b']['confirmation_url'])) {
+            $this->items['c2b']['confirmation_url'] = $baseCallback . '/confirmation';
+        }
+        if (!isset($this->items['c2b']['validation_url'])) {
+            $this->items['c2b']['validation_url'] = $baseCallback . '/validation';
+        }
+
+        // Result and Timeout URLs for B2C, B2B, Reversal, AccountBalance, TransactionStatus
+        $endpoints = ['b2c', 'b2b', 'reversal', 'account_balance', 'transaction_status', 'b2pochi'];
+        foreach ($endpoints as $endpoint) {
+            if (!isset($this->items[$endpoint]['result_url'])) {
+                $this->items[$endpoint]['result_url'] = $baseCallback . '/result';
+            }
+            if (!isset($this->items[$endpoint]['timeout_url'])) {
+                $this->items[$endpoint]['timeout_url'] = $baseCallback . '/timeout';
+            }
+        }
     }
 
     /**
@@ -81,46 +112,27 @@ class Config implements ArrayAccess,ConfigurationStore
     private function loadFromEnv() {
         $config = [];
         
-        // Load .env file if it exists in current directory
-        $envFile = getcwd() . '/.env';
-        if (\is_file($envFile)) {
-            $this->loadEnvFile($envFile);
-        }
-        
-        // Map environment variables to root-level config
-        // Hierarchical lookup will handle the fallbacks for nested keys
-        if (getenv('MPESA_ENV') !== false) {
-            $config['is_sandbox'] = getenv('MPESA_ENV') === 'sandbox';
-        }
-        
-        if (getenv('MPESA_CONSUMER_KEY') !== false) {
-            $config['apps']['default']['consumer_key'] = getenv('MPESA_CONSUMER_KEY');
-        }
-        
-        if (getenv('MPESA_CONSUMER_SECRET') !== false) {
-            $config['apps']['default']['consumer_secret'] = getenv('MPESA_CONSUMER_SECRET');
-        }
-        
-        if (getenv('MPESA_SHORTCODE') !== false) {
-            $config['short_code'] = getenv('MPESA_SHORTCODE');
-        }
-        
-        if (getenv('MPESA_PASSKEY') !== false) {
-            $config['passkey'] = getenv('MPESA_PASSKEY');
-        }
-        
-        if (getenv('MPESA_CALLBACK_URL') !== false) {
-            $config['callback'] = getenv('MPESA_CALLBACK_URL');
-            $config['result_url'] = getenv('MPESA_CALLBACK_URL');
-            $config['timeout_url'] = getenv('MPESA_CALLBACK_URL');
-        }
-        
-        if (getenv('MPESA_INITIATOR_NAME') !== false) {
-            $config['initiator_name'] = getenv('MPESA_INITIATOR_NAME');
-        }
-        
-        if (getenv('MPESA_INITIATOR_PASSWORD') !== false) {
-            $config['initiator_password'] = getenv('MPESA_INITIATOR_PASSWORD');
+        // Environment variables mapping
+        $mapping = [
+            'MPESA_ENV'               => 'is_sandbox',
+            'MPESA_CONSUMER_KEY'     => 'consumer_key',
+            'MPESA_CONSUMER_SECRET'  => 'consumer_secret',
+            'MPESA_SHORTCODE'        => 'short_code',
+            'MPESA_PASSKEY'          => 'passkey',
+            'MPESA_CALLBACK_URL'     => 'callback',
+            'MPESA_INITIATOR_NAME'   => 'initiator_name',
+            'MPESA_INITIATOR_PASSWORD' => 'initiator_password',
+        ];
+
+        foreach ($mapping as $envKey => $configKey) {
+            $val = getenv($envKey);
+            if ($val !== false) {
+                if ($configKey === 'is_sandbox') {
+                    $config[$configKey] = ($val === 'sandbox' || $val === 'true' || $val === '1');
+                } else {
+                    $config[$configKey] = $val;
+                }
+            }
         }
         
         return $config;

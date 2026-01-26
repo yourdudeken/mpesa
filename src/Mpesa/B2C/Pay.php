@@ -16,8 +16,8 @@ class Pay {
         'CommandID:CommandID' => 'required()({label} is required)',
         'PartyA:PartyA' => 'required()({label} is required)',
         'PartyB:PartyB' => 'required()({label} is required)',
-        'QueueTimeOutURL:QueueTimeOutURL' => 'website',
-        'ResultURL:ResultURL' => 'website',
+        'QueueTimeOutURL:QueueTimeOutURL' => 'required()({label} is required) | website',
+        'ResultURL:ResultURL' => 'required()({label} is required) | website',
         'Remarks:Remarks' => 'required()({label} is required)',
         'Amount:Amount' => 'required()({label} is required)'
     ];

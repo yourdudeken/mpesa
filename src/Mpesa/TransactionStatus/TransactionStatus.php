@@ -17,8 +17,8 @@ class TransactionStatus {
         'IdentifierType:IdentifierType' => 'required()({label} is required)',
         'Remarks:Remarks' => 'required()({label} is required)',
         'PartyA:Party A' => 'required()({label} is required)',
-        'QueueTimeOutURL:QueueTimeOutURL' => 'website',
-        'ResultURL:ResultURL' => 'website',
+        'QueueTimeOutURL:QueueTimeOutURL' => 'required()({label} is required) | website',
+        'ResultURL:ResultURL' => 'required()({label} is required) | website',
         'TransactionID:TransactionID' => 'required()({label} is required)',
     ];
     /**

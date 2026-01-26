@@ -18,8 +18,8 @@ class Reversal {
         'Amount:Amount' => 'required()({label} is required)',
         'ReceiverParty:ReceiverParty' => 'required()({label} is required)',
         'RecieverIdentifierType:RecieverIdentifierType' => 'required()({label} is required)',
-        'ResultURL:ResultURL' => 'website',
-        'QueueTimeOutURL:QueueTimeOutURL' => 'website',
+        'ResultURL:ResultURL' => 'required()({label} is required) | website',
+        'QueueTimeOutURL:QueueTimeOutURL' => 'required()({label} is required) | website',
         'Remarks:Remarks' => 'required()({label} is required)',
     ];
 

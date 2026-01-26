@@ -17,8 +17,8 @@ class Balance {
         'PartyA:PartyA' => 'required()({label} is required)',
         'IdentifierType:IdentifierType' => 'required()({label} is required)',
         'Remarks:Remarks' => 'required()({label} is required)',
-        'QueueTimeOutURL:QueueTimeOutURL' => 'website',
-        'ResultURL:ResultURL' => 'website'
+        'QueueTimeOutURL:QueueTimeOutURL' => 'required()({label} is required) | website',
+        'ResultURL:ResultURL' => 'required()({label} is required) | website'
     ];
 
     /**
