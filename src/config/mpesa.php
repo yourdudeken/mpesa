@@ -41,7 +41,6 @@ return [
     'c2b' => [
         'default_command_id' => 'CustomerPayBillOnline',
         'response_type' => 'Completed',
-        'on_timeout' => 'Completed',
     ],
     'b2c' => [
         'default_command_id' => 'BusinessPayment',

@@ -114,7 +114,7 @@ The following parameters can be configured in `config/mpesa.php` under the `c2b`
 
 - **confirmation_url**: URL to receive payment confirmations
 - **validation_url**: URL to validate payments before they are processed
-- **on_timeout**: What to do when validation times out ('Completed' or 'Cancelled')
+- **response_type**: What to use as response type ('Completed' or 'Cancelled')
 - **short_code**: Your business shortcode (PayBill or Till Number)
 
 - **default_command_id**: Default is 'CustomerPayBillOnline' or 'CustomerBuyGoodsOnline'
