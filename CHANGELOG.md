@@ -1,3 +1,17 @@
+# [1.5.0](https://github.com/yourdudeken/mpesa/compare/v1.4.0...v1.5.0) (2026-01-28)
+
+
+### Bug Fixes
+
+* Filter null values from Mpesa API request bodies and standardize remarks/occasion parameter handling. ([b4af4b8](https://github.com/yourdudeken/mpesa/commit/b4af4b8610f498d1e1061118d7cd39f949ad15ed))
+
+
+### Features
+
+* Add configurable remarks, occasion, and identifierType to Mpesa services and update documentation for optional parameters.` ([26a331f](https://github.com/yourdudeken/mpesa/commit/26a331f0ba3bf91c3ed72ad925228947e6ef9f2b))
+* externalize Mpesa service parameters to configuration and implement generic callback fallbacks. ([486bef7](https://github.com/yourdudeken/mpesa/commit/486bef7a97d75940da0776077ea44adbaea7dd71))
+* Unify Mpesa configuration and simplify API call parameters across services and documentation. ([f52c181](https://github.com/yourdudeken/mpesa/commit/f52c18194bb49e749586dcf3c1b07fa5947d4104))
+
 # [1.4.0](https://github.com/yourdudeken/mpesa/compare/v1.3.0...v1.4.0) (2026-01-25)
 
 
