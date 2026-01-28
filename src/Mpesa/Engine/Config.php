@@ -17,7 +17,7 @@ class Config implements ArrayAccess,ConfigurationStore
     /**
      * Create a new configuration repository.
      *
-     * @param  array  $items
+     * @param  array  $conf
      * @return void
      */
     public function __construct($conf = []){
@@ -28,27 +28,10 @@ class Config implements ArrayAccess,ConfigurationStore
             $internalConfig = require $internalConfigFile;
         }
         
-        // Load from environment variables
-        $envConfig = $this->loadFromEnv();
-        
-        // Check for config in user project
-        $cwdConfig = getcwd() . '/config/mpesa.php';
-        $cwdCustom = [];
-        if (\is_file($cwdConfig)) {
-            $cwdCustom = require $cwdConfig;
-        }
-        
-        // Final user config from vendor root (fallback)
-        $userConfig = __DIR__ . '/../../../../../../config/mpesa.php';
-        $custom = [];
-        if (\is_file($userConfig)) {
-            $custom = require $userConfig;
-        }
-        
-        // Merge all configs
-        $this->items = array_merge($internalConfig, $envConfig, $custom, $cwdCustom, $conf);
+        // Merge configs: Internal < Constructor
+        $this->items = array_merge($internalConfig, $conf);
 
-        // Normalize credentials: Ensure root-level keys are available where package expects them
+        // Normalize credentials and generate URLs
         $this->normalizeItems();
     }
 
@@ -74,93 +57,40 @@ class Config implements ArrayAccess,ConfigurationStore
     }
 
     /**
-     * Load configuration from environment variables
-     * 
-     * @return array
+     * Set a given configuration value.
+     *
+     * @param  string  $key
+     * @param  mixed   $value
+     * @return void
      */
-    private function loadFromEnv() {
-        $config = [];
-        
-        // Load .env file if it exists in current directory
-        $envFile = getcwd() . '/.env';
-        if (\is_file($envFile)) {
-            $this->loadEnvFile($envFile);
+    public function set($key, $value)
+    {
+        $keys = explode('.', $key);
+
+        $items = &$this->items;
+
+        while (count($keys) > 1) {
+            $key = array_shift($keys);
+
+            if (! isset($items[$key]) || ! is_array($items[$key])) {
+                $items[$key] = [];
+            }
+
+            $items = &$items[$key];
         }
-        
-        // Map environment variables to root-level config
-        // Hierarchical lookup will handle the fallbacks for nested keys
-        if (getenv('MPESA_ENV') !== false) {
-            $config['is_sandbox'] = getenv('MPESA_ENV') === 'sandbox';
-        }
-        
-        if (getenv('MPESA_CONSUMER_KEY') !== false) {
-            $config['apps']['default']['consumer_key'] = getenv('MPESA_CONSUMER_KEY');
-        }
-        
-        if (getenv('MPESA_CONSUMER_SECRET') !== false) {
-            $config['apps']['default']['consumer_secret'] = getenv('MPESA_CONSUMER_SECRET');
-        }
-        
-        if (getenv('MPESA_SHORTCODE') !== false) {
-            $config['short_code'] = getenv('MPESA_SHORTCODE');
-        }
-        
-        if (getenv('MPESA_PASSKEY') !== false) {
-            $config['passkey'] = getenv('MPESA_PASSKEY');
-        }
-        
-        if (getenv('MPESA_CALLBACK_URL') !== false) {
-            $config['callback'] = getenv('MPESA_CALLBACK_URL');
-            $config['result_url'] = getenv('MPESA_CALLBACK_URL');
-            $config['timeout_url'] = getenv('MPESA_CALLBACK_URL');
-        }
-        
-        if (getenv('MPESA_INITIATOR_NAME') !== false) {
-            $config['initiator_name'] = getenv('MPESA_INITIATOR_NAME');
-        }
-        
-        if (getenv('MPESA_INITIATOR_PASSWORD') !== false) {
-            $config['initiator_password'] = getenv('MPESA_INITIATOR_PASSWORD');
-        }
-        
-        return $config;
+
+        $items[array_shift($keys)] = $value;
     }
 
     /**
-     * Load environment variables from .env file
-     * 
-     * @param string $path
-     * @return void
+     * Determine if the given configuration value exists.
+     *
+     * @param  string  $key
+     * @return bool
      */
-    private function loadEnvFile($path) {
-        if (!\is_readable($path)) {
-            return;
-        }
-        
-        $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-        foreach ($lines as $line) {
-            // Skip comments
-            if (strpos(trim($line), '#') === 0) {
-                continue;
-            }
-            
-            // Parse KEY=VALUE
-            if (strpos($line, '=') !== false) {
-                list($key, $value) = explode('=', $line, 2);
-                $key = trim($key);
-                $value = trim($value);
-                
-                // Remove quotes
-                $value = trim($value, '"\'');
-                
-                // Set environment variable if not already set
-                if (getenv($key) === false) {
-                    putenv("$key=$value");
-                    $_ENV[$key] = $value;
-                    $_SERVER[$key] = $value;
-                }
-            }
-        }
+    public function has($key)
+    {
+        return ! is_null($this->get($key));
     }
 
     /**
@@ -186,10 +116,10 @@ class Config implements ArrayAccess,ConfigurationStore
          if ($array instanceof ArrayAccess) {
              return $array->offsetExists($key);
          }
- 
+  
          return array_key_exists($key, $array);
      }
-
+ 
      /**
      * Get an item from an array using "dot" notation.
      *

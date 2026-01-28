@@ -114,14 +114,15 @@
                             </div>
                             <div class="form-group">
                                 <label for="stk_description">Transaction Description</label>
-                                <input type="text" id="stk_description" name="transactionDesc"
+                                <input type="text" id="stk_description" name="transaction_desc"
                                     placeholder="Payment for order">
                             </div>
                             <div class="form-group full-width">
                                 <label for="stk_callback">Callback URL</label>
-                                <input type="url" id="stk_callback" name="callbackURL"
-                                    placeholder="http://your-domain.ngrok-free.app/mpesa/example/api/callback.php">
-                                <small style="color: var(--color-text-muted);">Leave empty to use default config</small>
+                                <input type="url" id="stk_callback" name="callback_url"
+                                    placeholder="https://example.com/callback/stk">
+                                <small style="color: var(--color-text-muted);">Optional: Overrides global
+                                    callback</small>
                             </div>
                         </div>
                         <button type="submit" class="btn btn-primary">
@@ -162,17 +163,17 @@
                         <div class="form-grid">
                             <div class="form-group full-width">
                                 <label for="c2b_validation">Validation URL *</label>
-                                <input type="url" id="c2b_validation" name="validationURL" required
+                                <input type="url" id="c2b_validation" name="validation_url" required
                                     placeholder="https://yourdomain.com/validate">
                             </div>
                             <div class="form-group full-width">
                                 <label for="c2b_confirmation">Confirmation URL *</label>
-                                <input type="url" id="c2b_confirmation" name="confirmationURL" required
+                                <input type="url" id="c2b_confirmation" name="confirmation_url" required
                                     placeholder="https://yourdomain.com/confirm">
                             </div>
                             <div class="form-group">
                                 <label for="c2b_response_type">Response Type</label>
-                                <select id="c2b_response_type" name="responseType">
+                                <select id="c2b_response_type" name="response_type">
                                     <option value="Completed">Completed</option>
                                     <option value="Cancelled">Cancelled</option>
                                 </select>
@@ -246,6 +247,16 @@
                             <div class="form-group full-width">
                                 <label for="b2c_occasion">Occasion</label>
                                 <input type="text" id="b2c_occasion" name="occasion" placeholder="Salary, Bonus, etc.">
+                            </div>
+                            <div class="form-group">
+                                <label for="b2c_result">Result URL</label>
+                                <input type="url" id="b2c_result" name="result_url"
+                                    placeholder="https://example.com/result">
+                            </div>
+                            <div class="form-group">
+                                <label for="b2c_timeout">Timeout URL</label>
+                                <input type="url" id="b2c_timeout" name="timeout_url"
+                                    placeholder="https://example.com/timeout">
                             </div>
                         </div>
                         <button type="submit" class="btn btn-primary">

@@ -17,8 +17,8 @@ class Balance {
         'PartyA:PartyA' => 'required()({label} is required)',
         'IdentifierType:IdentifierType' => 'required()({label} is required)',
         'Remarks:Remarks' => 'required()({label} is required)',
-        'QueueTimeOutURL:QueueTimeOutURL' => 'website',
-        'ResultURL:ResultURL' => 'website'
+        'QueueTimeOutURL:QueueTimeOutURL' => 'required()({label} is required) | website',
+        'ResultURL:ResultURL' => 'required()({label} is required) | website'
     ];
 
     /**
@@ -42,12 +42,6 @@ class Balance {
      * @throws \Exception
      */
     public function submit($params = [],$appName='default'){
-         // Make sure all the indexes are in Uppercases as shown in docs
-        $userParams = [];
-        foreach ($params as $key => $value) {
-             $userParams[ucwords($key)] = $value;
-        }
-
         $shortCode        = $this->engine->config->get('mpesa.account_balance.short_code');
         $successCallback   = $this->engine->config->get('mpesa.account_balance.result_url') ?: $this->engine->config->get('mpesa.callback');
         $timeoutCallback   = $this->engine->config->get('mpesa.account_balance.timeout_url') ?: $this->engine->config->get('mpesa.callback');
@@ -55,8 +49,8 @@ class Balance {
         $commandId         = $this->engine->config->get('mpesa.account_balance.default_command_id');
         $initiatorPass     = $this->engine->config->get('mpesa.account_balance.initiator_password');
         $securityCredential = $this->engine->computeSecurityCredential($initiatorPass);
-        // TODO: Compute
-        $identifierType = '4';
+        $identifierType    = $this->engine->config->get('mpesa.account_balance.identifier_type');
+        $remarks           = $this->engine->config->get('mpesa.account_balance.remarks');
 
         $configParams = [
             'Initiator'         => $initiator,
@@ -66,10 +60,20 @@ class Balance {
             'IdentifierType'    => $identifierType,
             'QueueTimeOutURL'   => $timeoutCallback,
             'ResultURL'         => $successCallback,
+            'Remarks'           => $remarks,
         ];
 
-        // This gives precedence to params coming from user allowing them to override config params
-        $body = array_merge($configParams,$userParams);
+        // Normalize user-provided params and merge with config defaults
+        $userParams = $this->engine->normalizeParams($params, [
+            'initiator' => 'Initiator',
+            'identifier_type' => 'IdentifierType',
+        ]);
+        $body = array_merge($configParams, $userParams);
+
+        // Final normalization pass to ensure all merged fields are safe
+        $body = $this->engine->normalizeParams($body, [
+            'InitiatorName' => 'Initiator', // Balance uses 'Initiator'
+        ]);
 
         return $this->engine->makePostRequest([
             'endpoint' => $this->endpoint,

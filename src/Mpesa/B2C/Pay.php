@@ -16,8 +16,8 @@ class Pay {
         'CommandID:CommandID' => 'required()({label} is required)',
         'PartyA:PartyA' => 'required()({label} is required)',
         'PartyB:PartyB' => 'required()({label} is required)',
-        'QueueTimeOutURL:QueueTimeOutURL' => 'website',
-        'ResultURL:ResultURL' => 'website',
+        'QueueTimeOutURL:QueueTimeOutURL' => 'required()({label} is required) | website',
+        'ResultURL:ResultURL' => 'required()({label} is required) | website',
         'Remarks:Remarks' => 'required()({label} is required)',
         'Amount:Amount' => 'required()({label} is required)'
     ];
@@ -54,12 +54,6 @@ class Pay {
      * @throws \Exception
      */
     public function submit($params = [],$appName = 'default'){
-        // Make sure all the indexes are in Uppercases as shown in docs
-        $userParams = [];
-        foreach ($params as $key => $value) {
-            $userParams[ucwords($key)] = $value;
-        }
-
         $shortCode       = $this->engine->config->get('mpesa.b2c.short_code');
         $successCallback  = $this->engine->config->get('mpesa.b2c.result_url') ?: $this->engine->config->get('mpesa.callback');
         $timeoutCallback  = $this->engine->config->get('mpesa.b2c.timeout_url') ?: $this->engine->config->get('mpesa.callback');
@@ -67,8 +61,10 @@ class Pay {
         $initiatorPass = $this->engine->config->get('mpesa.b2c.initiator_password');
         $securityCredential  = $this->engine->computeSecurityCredential($initiatorPass);
         $commandId  = $this->engine->config->get('mpesa.b2c.default_command_id');
-        
-        // Params coming from the config file
+        $remarks    = $this->engine->config->get('mpesa.b2c.remarks');
+        $occasion   = $this->engine->config->get('mpesa.b2c.occasion');
+
+        // Params coming from the config file (pre-normalized for M-Pesa API)
         $configParams = [
             'InitiatorName'     => $initiator,
             'SecurityCredential'=> $securityCredential,
@@ -76,10 +72,16 @@ class Pay {
             'PartyA'            => $shortCode,
             'QueueTimeOutURL'   => $timeoutCallback,
             'ResultURL'         => $successCallback,
+            'Remarks'           => $remarks,
+            'Occasion'          => $occasion,
         ];
 
-        // This gives precedence to params coming from user allowing them to override config params
-        $body = array_merge($configParams,$userParams);
+        // Normalize user-provided params and merge with config defaults
+        $userParams = $this->engine->normalizeParams($params);
+        $body = array_merge($configParams, $userParams);
+
+        // Final normalization pass to ensure all merged fields are safe
+        $body = $this->engine->normalizeParams($body);
 
         // Send the request to mpesa
         return $this->engine->makePostRequest([

@@ -50,16 +50,10 @@ class Register
      * @throws \Exception
      */
     public function submit($params = [],$appName='default'){
-        // Make sure all the indexes are in Uppercases as shown in docs
-        $userParams = [];
-        foreach ($params as $key => $value) {
-            $userParams[ucwords($key)] = $value;
-        }
-
         $shortCode       = $this->engine->config->get('mpesa.c2b.short_code');
-        $confirmationURL = $this->engine->config->get('mpesa.c2b.confirmation_url');
+        $confirmationURL = $this->engine->config->get('mpesa.c2b.confirmation_url') ?: $this->engine->config->get('mpesa.callback');
         $responseType    = $this->engine->config->get('mpesa.c2b.response_type');
-        $validationURL   = $this->engine->config->get('mpesa.c2b.validation_url');
+        $validationURL   = $this->engine->config->get('mpesa.c2b.validation_url') ?: $this->engine->config->get('mpesa.callback');
 
         $configParams = [
             'ShortCode'       => $shortCode,
@@ -68,8 +62,12 @@ class Register
             'ValidationURL'   => $validationURL
         ];
 
-        // This gives precedence to params coming from user allowing them to override config params
+        // Normalize user-provided params and merge with config defaults
+        $userParams = $this->engine->normalizeParams($params);
         $body = array_merge($configParams, $userParams);
+
+        // Final normalization pass
+        $body = $this->engine->normalizeParams($body);
 
         return $this->engine->makePostRequest([
             'endpoint' => $this->endpoint,

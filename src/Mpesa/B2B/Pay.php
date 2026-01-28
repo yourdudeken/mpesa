@@ -17,8 +17,8 @@ class Pay {
         'PartyA:PartyA' => 'required()({label} is required)',
         'RecieverIdentifierType:RecieverIdentifierType' => 'required()({label} is required)',
         'PartyB:PartyB' => 'required()({label} is required)',
-        'QueueTimeOutURL:QueueTimeOutURL' => 'website',
-        'ResultURL:ResultURL' => 'website',
+        'QueueTimeOutURL:QueueTimeOutURL' => 'required()({label} is required) | website',
+        'ResultURL:ResultURL' => 'required()({label} is required) | website',
         'SenderIdentifierType:SenderIdentifierType' => 'required()({label} is required)',
         'Remarks:Remarks' => 'required()({label} is required)',
         'AccountReference:AccountReference' => 'required()({label} is required)',
@@ -48,12 +48,6 @@ class Pay {
      * @throws \Exception
      */
     public function submit($params = [],$appName = 'default'){
-        // Make sure all the indexes are in Uppercases as shown in docs
-        $userParams = [];
-        foreach ($params as $key => $value) {
-            $userParams[ucwords($key)] = $value;
-        }
-
         $shortCode        = $this->engine->config->get('mpesa.b2b.short_code');
         $successCallback   = $this->engine->config->get('mpesa.b2b.result_url') ?: $this->engine->config->get('mpesa.callback');
         $timeoutCallback   = $this->engine->config->get('mpesa.b2b.timeout_url') ?: $this->engine->config->get('mpesa.callback');
@@ -61,10 +55,10 @@ class Pay {
         $initiatorPass     = $this->engine->config->get('mpesa.b2b.initiator_password');
         $securityCredential = $this->engine->computeSecurityCredential($initiatorPass);
         $commandId         = $this->engine->config->get('mpesa.b2b.default_command_id');
-
-        // TODO: Compute. For now only support ShortCode
-        $receiverIdentifierType = 4;
-        $senderIdentifierType   = 4;
+        $remarks           = $this->engine->config->get('mpesa.b2b.remarks');
+        $accountReference  = $this->engine->config->get('mpesa.b2b.account_reference');
+        $senderIdentifierType = $this->engine->config->get('mpesa.b2b.sender_identifier_type');
+        $receiverIdentifierType = $this->engine->config->get('mpesa.b2b.reciever_identifier_type');
 
         $configParams = [
             'Initiator'                 => $initiator,
@@ -75,10 +69,22 @@ class Pay {
             'SenderIdentifierType'      => $senderIdentifierType,
             'QueueTimeOutURL'           => $timeoutCallback,
             'ResultURL'                 => $successCallback,
+            'Remarks'                   => $remarks,
+            'AccountReference'          => $accountReference,
         ];
 
-        // This gives precedence to params coming from user allowing them to override config params
-        $body = array_merge($configParams,$userParams);
+        // Normalize user-provided params and merge with config defaults
+        $userParams = $this->engine->normalizeParams($params, [
+            'initiator' => 'Initiator',
+            'receiver_identifier_type' => 'RecieverIdentifierType',
+            'sender_identifier_type' => 'SenderIdentifierType',
+        ]);
+        $body = array_merge($configParams, $userParams);
+
+        // Final normalization pass to ensure all merged fields are safe
+        $body = $this->engine->normalizeParams($body, [
+            'InitiatorName' => 'Initiator', // B2B uses 'Initiator' instead of 'InitiatorName'
+        ]);
         
         return $this->engine->makePostRequest([
             'endpoint' => $this->endpoint,

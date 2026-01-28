@@ -143,18 +143,15 @@ function routeRequest($mpesa, $endpoint, $data)
  */
 function handleSTKPush($mpesa, $data)
 {
-    validateRequired($data, ['amount', 'phoneNumber', 'accountReference']);
+    validateRequired($data, ['amount', 'phone_number', 'account_reference']);
     
     $params = [
-        'amount' => (float) $data['amount'],
-        'phoneNumber' => $data['phoneNumber'],
-        'accountReference' => $data['accountReference'],
-        'transactionDesc' => $data['transactionDesc'] ?? 'Payment'
+        'amount'            => (float) $data['amount'],
+        'phone'             => $data['phone_number'],
+        'reference'         => $data['account_reference'],
+        'description'       => $data['transaction_desc'] ?? 'Payment',
+        'callback_url'      => $data['callback_url'] ?? null
     ];
-
-    if (!empty($data['callbackURL'])) {
-        $params['CallBackURL'] = $data['callbackURL'];
-    }
     
     return $mpesa->STKPush($params);
 }
@@ -164,10 +161,10 @@ function handleSTKPush($mpesa, $data)
  */
 function handleSTKStatus($mpesa, $data)
 {
-    validateRequired($data, ['checkoutRequestID']);
+    validateRequired($data, ['checkout_request_id']);
     
     return $mpesa->STKStatus([
-        'checkoutRequestID' => $data['checkoutRequestID']
+        'checkout_request_id' => $data['checkout_request_id']
     ]);
 }
 
@@ -176,12 +173,12 @@ function handleSTKStatus($mpesa, $data)
  */
 function handleC2BRegister($mpesa, $data)
 {
-    validateRequired($data, ['validationURL', 'confirmationURL']);
+    validateRequired($data, ['validation_url', 'confirmation_url']);
     
     return $mpesa->C2BRegister([
-        'validationURL' => $data['validationURL'],
-        'confirmationURL' => $data['confirmationURL'],
-        'responseType' => $data['responseType'] ?? 'Completed'
+        'validation_url' => $data['validation_url'],
+        'confirmation_url' => $data['confirmation_url'],
+        'response_type' => $data['response_type'] ?? 'Completed'
     ]);
 }
 
@@ -204,14 +201,16 @@ function handleC2BSimulate($mpesa, $data)
  */
 function handleB2C($mpesa, $data)
 {
-    validateRequired($data, ['amount', 'partyB', 'remarks']);
+    validateRequired($data, ['amount', 'phone_number', 'remarks']);
     
     return $mpesa->B2C([
-        'amount' => (float) $data['amount'],
-        'partyB' => $data['partyB'],
-        'remarks' => $data['remarks'],
-        'occasion' => $data['occasion'] ?? '',
-        'commandID' => $data['commandID'] ?? 'BusinessPayment'
+        'amount'      => (float) $data['amount'],
+        'party_b'      => $data['phone_number'],
+        'remarks'     => $data['remarks'],
+        'occasion'    => $data['occasion'] ?? '',
+        'command_id'  => $data['command_id'] ?? 'BusinessPayment',
+        'result_url'  => $data['result_url'] ?? null,
+        'timeout_url' => $data['timeout_url'] ?? null
     ]);
 }
 
@@ -220,14 +219,16 @@ function handleB2C($mpesa, $data)
  */
 function handleB2B($mpesa, $data)
 {
-    validateRequired($data, ['amount', 'partyB', 'accountReference', 'remarks']);
+    validateRequired($data, ['amount', 'party_b', 'account_reference', 'remarks']);
     
     return $mpesa->B2B([
-        'amount' => (float) $data['amount'],
-        'partyB' => $data['partyB'],
-        'accountReference' => $data['accountReference'],
-        'remarks' => $data['remarks'],
-        'commandID' => $data['commandID'] ?? 'BusinessPayBill'
+        'amount'            => (float) $data['amount'],
+        'party_b'            => $data['party_b'],
+        'account_reference' => $data['account_reference'],
+        'remarks'           => $data['remarks'],
+        'command_id'        => $data['command_id'] ?? 'BusinessPayBill',
+        'result_url'        => $data['result_url'] ?? null,
+        'timeout_url'       => $data['timeout_url'] ?? null
     ]);
 }
 
@@ -236,12 +237,14 @@ function handleB2B($mpesa, $data)
  */
 function handleB2Pochi($mpesa, $data)
 {
-    validateRequired($data, ['amount', 'partyB', 'remarks']);
+    validateRequired($data, ['amount', 'phone_number', 'remarks']);
     
     return $mpesa->B2Pochi([
-        'amount' => (float) $data['amount'],
-        'partyB' => $data['partyB'],
-        'remarks' => $data['remarks']
+        'amount'      => (float) $data['amount'],
+        'phone'       => $data['phone_number'],
+        'remarks'     => $data['remarks'],
+        'result_url'  => $data['result_url'] ?? null,
+        'timeout_url' => $data['timeout_url'] ?? null
     ]);
 }
 
@@ -251,7 +254,9 @@ function handleB2Pochi($mpesa, $data)
 function handleAccountBalance($mpesa, $data)
 {
     return $mpesa->accountBalance([
-        'remarks' => $data['remarks'] ?? 'Balance query'
+        'remarks'      => $data['remarks'] ?? 'Balance query',
+        'result_url'   => $data['result_url'] ?? null,
+        'timeout_url'  => $data['timeout_url'] ?? null
     ]);
 }
 
@@ -260,11 +265,13 @@ function handleAccountBalance($mpesa, $data)
  */
 function handleTransactionStatus($mpesa, $data)
 {
-    validateRequired($data, ['transactionID']);
+    validateRequired($data, ['transaction_id']);
     
     return $mpesa->transactionStatus([
-        'transactionID' => $data['transactionID'],
-        'remarks' => $data['remarks'] ?? 'Status check'
+        'transaction_id' => $data['transaction_id'],
+        'remarks'        => $data['remarks'] ?? 'Status check',
+        'result_url'     => $data['result_url'] ?? null,
+        'timeout_url'    => $data['timeout_url'] ?? null
     ]);
 }
 
@@ -273,13 +280,15 @@ function handleTransactionStatus($mpesa, $data)
  */
 function handleReversal($mpesa, $data)
 {
-    validateRequired($data, ['transactionID', 'amount', 'receiverParty', 'remarks']);
+    validateRequired($data, ['transaction_id', 'amount', 'receiver_party', 'remarks']);
     
     return $mpesa->reversal([
-        'transactionID' => $data['transactionID'],
-        'amount' => (float) $data['amount'],
-        'receiverParty' => $data['receiverParty'],
-        'remarks' => $data['remarks']
+        'transaction_id'  => $data['transaction_id'],
+        'amount'          => (float) $data['amount'],
+        'receiver_party'  => $data['receiver_party'],
+        'remarks'         => $data['remarks'],
+        'result_url'      => $data['result_url'] ?? null,
+        'timeout_url'     => $data['timeout_url'] ?? null
     ]);
 }
 

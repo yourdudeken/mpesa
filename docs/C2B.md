@@ -21,20 +21,20 @@ require "../src/autoload.php";
 
 use Yourdudeken\Mpesa\Init as Mpesa;
 
-$mpesa = new Mpesa();
+$mpesa = new Mpesa([
+    'consumer_key'    => '...',
+    'consumer_secret' => '...',
+    'short_code'      => '600000',
+    'callback'        => 'https://example.com/c2b' // Specific URLs are generated automatically
+]);
 
 try {
-    $response = $mpesa->C2BRegister([
-        'validationURL' => 'https://example.com/v1/payments/c2b/validate',
-        'confirmationURL' => 'https://example.com/v1/payments/c2b/confirm',
-        'responseType' => 'Completed',  // or 'Cancelled'
-        'shortCode' => '600000'
-    ]);
+    // If you provided a 'callback' above, you don't even need parameters here
+    $response = $mpesa->C2BRegister();
     
     echo json_encode($response);
 } catch(\Exception $e) {
-    $response = json_decode($e->getMessage());
-    echo json_encode($response);
+    echo "Error: " . $e->getMessage();
 }
 ```
 
@@ -45,13 +45,10 @@ use Yourdudeken\Mpesa\Init as Mpesa;
 class MpesaController {
 
    public function registerC2B() {
-      $mpesa = new Mpesa();
+      $mpesa = new Mpesa(config('mpesa'));
       
-      $response = $mpesa->C2BRegister([
-          'validationURL' => route('mpesa.c2b.validate'),
-          'confirmationURL' => route('mpesa.c2b.confirm'),
-          'responseType' => 'Completed'
-      ]); 
+      // Zero parameters if config has 'callback' and 'short_code'
+      $response = $mpesa->C2BRegister(); 
       
       return response()->json($response);
    }
@@ -70,20 +67,23 @@ require "../src/autoload.php";
 
 use Yourdudeken\Mpesa\Init as Mpesa;
 
-$mpesa = new Mpesa();
+$mpesa = new Mpesa([
+    'consumer_key'    => '...',
+    'consumer_secret' => '...',
+    'short_code'      => '600000',
+    'is_sandbox'      => true
+]);
 
 try {
     $response = $mpesa->C2BSimulate([
         'amount' => 100,
         'msisdn' => '254722000000',
-        'billRefNumber' => 'INV-001',
-        'commandID' => 'CustomerPayBillOnline'  // or 'CustomerBuyGoodsOnline'
+        'billRefNumber' => 'INV-001'
     ]);
     
     echo json_encode($response);
 } catch(\Exception $e) {
-    $response = json_decode($e->getMessage());
-    echo json_encode($response);
+    echo "Error: " . $e->getMessage();
 }
 ```
 
@@ -94,19 +94,17 @@ use Yourdudeken\Mpesa\Init as Mpesa;
 class MpesaController {
 
    public function simulateC2B() {
-      $mpesa = new Mpesa();
+      $mpesa = new Mpesa(config('mpesa'));
       
       $response = $mpesa->C2BSimulate([
           'amount' => 100,
           'msisdn' => '254722000000',
-          'billRefNumber' => 'INV-001',
-          'commandID' => 'CustomerPayBillOnline'
+          'billRefNumber' => 'INV-001'
       ]); 
       
       return response()->json($response);
    }
 }
-
 ```
 
 ### Configuration Parameters
@@ -114,7 +112,7 @@ The following parameters can be configured in `config/mpesa.php` under the `c2b`
 
 - **confirmation_url**: URL to receive payment confirmations
 - **validation_url**: URL to validate payments before they are processed
-- **on_timeout**: What to do when validation times out ('Completed' or 'Cancelled')
+- **response_type**: What to use as response type ('Completed' or 'Cancelled')
 - **short_code**: Your business shortcode (PayBill or Till Number)
 
 - **default_command_id**: Default is 'CustomerPayBillOnline' or 'CustomerBuyGoodsOnline'
@@ -218,8 +216,7 @@ Your confirmation response should be:
 
 ### Known issues with this endpoint
 1. **URL Registration**: You must register your URLs before you can receive payment notifications. Registration is per shortcode.
-2. **Validation Timeout**: Your validation endpoint must respond within 30 seconds or the payment will be processed based on your `on_timeout` setting.
-3. **HTTPS Required**: Both validation and confirmation URLs must use HTTPS in production.
-4. **Simulation Limitations**: C2B Simulate only works in sandbox mode. In production, use actual M-Pesa payments for testing.
-5. **Duplicate Notifications**: Implement idempotency checks as you may receive duplicate confirmation requests.
-6. **IP Whitelisting**: Consider whitelisting Safaricom's IP addresses for added security.
+2. **HTTPS Required**: Both validation and confirmation URLs must use HTTPS in production.
+3. **Simulation Limitations**: C2B Simulate only works in sandbox mode. In production, use actual M-Pesa payments for testing.
+4. **Duplicate Notifications**: Implement idempotency checks as you may receive duplicate confirmation requests.
+5. **IP Whitelisting**: Consider whitelisting Safaricom's IP addresses for added security.

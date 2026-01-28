@@ -24,20 +24,22 @@ require "../src/autoload.php";
 
 use Yourdudeken\Mpesa\Init as Mpesa;
 
-$mpesa = new Mpesa();
+$mpesa = new Mpesa([
+    'consumer_key'       => '...',
+    'consumer_secret'    => '...',
+    'initiator_name'     => 'testapi',
+    'initiator_password' => '...',
+    'short_code'         => '600000',
+    'callback'           => 'https://example.com/balance'
+]);
 
 try {
-    $response = $mpesa->accountBalance([
-        'identifierType' => 4,  // 4 for organization shortcode
-        'remarks' => 'Balance query',
-        'resultURL' => 'https://example.com/v1/mpesa/balance/result',
-        'queueTimeOutURL' => 'https://example.com/v1/mpesa/balance/timeout'
-    ]);
+    // Everything is fetched from config
+    $response = $mpesa->accountBalance();
     
     echo json_encode($response);
 } catch(\Exception $e) {
-    $response = json_decode($e->getMessage());
-    echo json_encode($response);
+    echo "Error: " . $e->getMessage();
 }
 ```
 
@@ -48,20 +50,14 @@ use Yourdudeken\Mpesa\Init as Mpesa;
 class MpesaController {
 
    public function checkBalance() {
-      $mpesa = new Mpesa();
+      $mpesa = new Mpesa(config('mpesa'));
       
-      $response = $mpesa->accountBalance([
-          'identifierType' => 4,
-          'remarks' => 'Balance query',
-          'resultURL' => route('mpesa.balance.result'),
-          'queueTimeOutURL' => route('mpesa.balance.timeout')
-      ]); 
+      $response = $mpesa->accountBalance(); 
       
       return response()->json($response);
    }
 }
-
-```
+````
 
 ### Configuration Parameters
 The following parameters can be configured in `config/mpesa.php` under the `account_balance` section:
@@ -77,7 +73,7 @@ The following parameters can be configured in `config/mpesa.php` under the `acco
 When calling the accountBalance method, you can pass the following parameters:
 
 - **identifierType** (optional): Type of organization (default: 4 for organization shortcode)
-- **remarks** (optional): Comments sent along with the request
+- **remarks** (optional): Comments sent along with the request. Falls back to config default
 - **resultURL** (optional): Overrides the configured result URL. Falls back to global config
 - **queueTimeOutURL** (optional): Overrides the configured timeout URL. Falls back to global config
 - **commandID** (optional): Overrides the default command ID

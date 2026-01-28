@@ -352,53 +352,53 @@ function fillTestData() {
     const testData = {
         stkpush: {
             amount: '100',
-            phoneNumber: '254722000000',
-            accountReference: 'TEST-' + Date.now(),
-            transactionDesc: 'Test payment'
+            phone_number: '254722000000',
+            account_reference: 'TEST-' + Date.now(),
+            transaction_desc: 'Test payment'
         },
         stkstatus: {
-            checkoutRequestID: 'ws_CO_191220191020363925'
+            checkout_request_id: 'ws_CO_191220191020363925'
         },
         c2bregister: {
-            validationURL: 'https://example.com/validate',
-            confirmationURL: 'https://example.com/confirm',
-            responseType: 'Completed'
+            validation_url: 'https://example.com/validate',
+            confirmation_url: 'https://example.com/confirm',
+            response_type: 'Completed'
         },
         c2bsimulate: {
             amount: '100',
-            msisdn: '254722000000',
-            billRefNumber: 'INV-' + Date.now()
+            phone_number: '254722000000',
+            bill_ref_number: 'INV-' + Date.now()
         },
         b2c: {
             amount: '500',
-            partyB: '254722000000',
-            commandID: 'BusinessPayment',
+            phone_number: '254722000000',
+            command_id: 'BusinessPayment',
             remarks: 'Test B2C payment',
             occasion: 'Testing'
         },
         b2b: {
             amount: '1000',
-            partyB: '600000',
-            commandID: 'BusinessPayBill',
-            accountReference: 'INV-' + Date.now(),
+            party_b: '600000',
+            command_id: 'BusinessPayBill',
+            account_reference: 'INV-' + Date.now(),
             remarks: 'Test B2B transfer'
         },
         b2pochi: {
             amount: '100',
-            partyB: '254722000000',
+            phone_number: '254722000000',
             remarks: 'Test Pochi deposit'
         },
         balance: {
             remarks: 'Balance query test'
         },
         status: {
-            transactionID: 'NLJ7RT61SV',
+            transaction_id: 'NLJ7RT61SV',
             remarks: 'Status check test'
         },
         reversal: {
-            transactionID: 'NLJ7RT61SV',
+            transaction_id: 'NLJ7RT61SV',
             amount: '100',
-            receiverParty: '600000',
+            receiver_party: '600000',
             remarks: 'Test reversal'
         }
     };

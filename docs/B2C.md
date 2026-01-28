@@ -24,22 +24,24 @@ require "../src/autoload.php";
 
 use Yourdudeken\Mpesa\Init as Mpesa;
 
-$mpesa = new Mpesa();
+$mpesa = new Mpesa([
+    'consumer_key'       => '...',
+    'consumer_secret'    => '...',
+    'initiator_name'     => 'testapi',
+    'initiator_password' => '...',
+    'short_code'         => '600000',
+    'callback'           => 'https://example.com/b2c'
+]);
 
 try {
     $response = $mpesa->B2C([
         'amount' => 100,
-        'partyB' => '254722000000',
-        'remarks' => 'Salary payment for December',
-        'occasion' => 'Monthly Salary',
-        'resultURL' => 'https://example.com/v1/payments/b2c/result',
-        'queueTimeOutURL' => 'https://example.com/v1/payments/b2c/timeout'
+        'partyB' => '2547XXXXXXXX'
     ]);
     
     echo json_encode($response);
 } catch(\Exception $e) {
-    $response = json_decode($e->getMessage());
-    echo json_encode($response);
+    echo "Error: " . $e->getMessage();
 }
 ```
 
@@ -50,22 +52,17 @@ use Yourdudeken\Mpesa\Init as Mpesa;
 class PaymentController {
 
    public function payCustomer() {
-      $mpesa = new Mpesa();
+      $mpesa = new Mpesa(config('mpesa'));
       
       $response = $mpesa->B2C([
           'amount' => 100,
-          'partyB' => '254722000000',
-          'remarks' => 'Salary payment for December',
-          'occasion' => 'Monthly Salary',
-          'resultURL' => route('mpesa.b2c.result'),
-          'queueTimeOutURL' => route('mpesa.b2c.timeout')
+          'partyB' => '2547XXXXXXXX'
       ]); 
       
       return response()->json($response);
    }
 }
-
-```
+````
 
 ### Configuration Parameters
 The following parameters can be configured in `config/mpesa.php` under the `b2c` section:
@@ -83,8 +80,8 @@ When calling the B2C method, you can pass the following parameters:
 
 - **amount** (required): The amount to send to the customer
 - **partyB** (required): The phone number of the recipient (format: 254XXXXXXXXX)
-- **remarks** (required): Comments sent along with the transaction
-- **occasion** (optional): Any additional information to be associated with the transaction
+- **remarks** (optional): Comments sent along with the transaction. Falls back to config default
+- **occasion** (optional): Any additional information. Falls back to config default
 - **resultURL** (optional): Overrides the configured result URL. Falls back to global config
 - **queueTimeOutURL** (optional): Overrides the configured timeout URL. Falls back to global config
 - **commandID** (optional): Overrides the default command ID. Options: 'SalaryPayment', 'BusinessPayment', 'PromotionPayment'

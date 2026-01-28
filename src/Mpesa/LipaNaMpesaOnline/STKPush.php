@@ -43,29 +43,33 @@ class STKPush{
      * 
     */
     public function submit($params = [],$appName='default'){
-        // Make sure all the indexes are in Uppercases as shown in docs
-        $userParams = [];
-        foreach ($params as $key => $value) {
-            $userParams[ucwords($key)] = $value;
-        }
-
         $time      = $this->engine->getCurrentRequestTime();
         $shortCode = $this->engine->config->get('mpesa.lnmo.short_code');
         $passkey   = $this->engine->config->get('mpesa.lnmo.passkey');
         $password  = \base64_encode($shortCode . $passkey . $time);
+        $accountReference = $this->engine->config->get('mpesa.lnmo.account_reference');
+        $callback = $this->engine->config->get('mpesa.lnmo.callback') ?: $this->engine->config->get('mpesa.callback');
+        $transactionType = $this->engine->config->get('mpesa.lnmo.default_transaction_type');
+        $transactionDesc = $this->engine->config->get('mpesa.lnmo.transaction_desc');
 
-        // Computed and params from config file.
+        // Computed and params from config file (pre-normalized for M-Pesa API)
         $configParams = [
             'BusinessShortCode' => $shortCode,
-            'CallBackURL'       => $this->engine->config->get('mpesa.lnmo.callback'),
-            'TransactionType'   => $this->engine->config->get('mpesa.lnmo.default_transaction_type'),
+            'CallBackURL'       => $callback,
+            'TransactionType'   => $transactionType,
             'Password'          => $password,
             'PartyB'            => $shortCode,
             'Timestamp'         => $time,
+            'TransactionDesc'   => $transactionDesc,
+            'AccountReference'  => $accountReference,
         ];
 
-        // This gives precedence to params coming from user allowing them to override config params
-        $body = array_merge($configParams,$userParams);
+        // Normalize user-provided params and merge with config defaults
+        $userParams = $this->engine->normalizeParams($params);
+        $body = array_merge($configParams, $userParams);
+
+        // Final normalization pass to ensure all merged fields are safe
+        $body = $this->engine->normalizeParams($body);
         if(empty($body['PartyA']) && !empty($body['PhoneNumber'])){
             $body['PartyA'] = $body['PhoneNumber'];
         }

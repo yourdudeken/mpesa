@@ -30,7 +30,11 @@ class BalanceTest extends TestCase{
      * 
      */
     public function testSubmitWithoutParams(){
-        $b2c = new Balance($this->engine);
+        // Create a fresh core with empty config to force validation error
+        $config = new \Yourdudeken\Mpesa\Engine\Config([]);
+        $engine = new Core($config, $this->engine->cache, $this->httpClient, $this->auth);
+        
+        $b2c = new Balance($engine);
         $this->expectException(ConfigurationException::class);
         $results = $b2c->submit();
     }
