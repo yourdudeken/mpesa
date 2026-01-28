@@ -4,9 +4,9 @@ namespace Yourdudeken\Mpesa\Validation;
 
 interface ValidatorInterface
 {
-    public function add($selector, $name = null, $options = null, $messageTemplate = null, $label = null);
+    public function add(mixed $selector, mixed $name = null, mixed $options = null, ?string $messageTemplate = null, ?string $label = null): self;
 
-    public function remove($selector, $name = true, $options = null);
+    public function remove(string $selector, mixed $name = true, mixed $options = null): self;
 
-    public function validate($data = array());
+    public function validate(mixed $data = null): bool;
 }

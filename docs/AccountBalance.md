@@ -70,7 +70,7 @@ class MpesaController {
 ````
 
 ### Configuration Parameters
-The following parameters can be configured in `config/mpesa.php` under the `account_balance` section:
+The following parameters can be configured in `config/mpesa.php` under the `balance` section:
 
 - **initiator_name**: The name of the initiator making the request
 - **initiator_password**: The encrypted password for the initiator
@@ -80,7 +80,7 @@ The following parameters can be configured in `config/mpesa.php` under the `acco
 - **timeout_url** (optional): URL to receive timeout notifications. Falls back to global callback
 
 ### Request Parameters
-When calling the accountBalance method, you can pass the following parameters:
+When calling the balance->submit() method, you can pass the following parameters:
 
 - **identifierType** (optional): Type of organization (default: 4 for organization shortcode)
 - **remarks** (optional): Comments sent along with the request. Falls back to config default

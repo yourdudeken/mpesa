@@ -199,14 +199,14 @@ $mpesa->c2bSimulate->submit([
 
 ### Account Balance
 ```php
-$mpesa->accountBalance->submit([
+$mpesa->balance->submit([
     'result_url' => 'https://domain.com/result'
 ]);
 ```
 
 ### Transaction Status
 ```php
-$mpesa->transactionStatus->submit([
+$mpesa->status->submit([
     'transaction_id' => 'NLJ7RT61SV',
     'result_url'     => 'https://domain.com/result'
 ]);

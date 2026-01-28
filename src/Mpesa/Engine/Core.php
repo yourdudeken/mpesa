@@ -21,12 +21,12 @@ class Core
     /**
      * @var ConfigurationStore
      */
-    protected ConfigurationStore $config;
+    public ConfigurationStore $config;
 
     /**
      * @var CacheStore
      */
-    protected CacheStore $cache;
+    public CacheStore $cache;
 
     /**
      * @var Core
@@ -36,7 +36,7 @@ class Core
     /**
      * @var Authenticator
      */
-    protected Authenticator $auth;
+    public Authenticator $auth;
 
     /**
      * @var string
@@ -56,7 +56,7 @@ class Core
     /**
      * @var HttpRequest
      */
-    protected HttpRequest $httpClient;
+    public HttpRequest $httpClient;
 
     /**
      * Core constructor.
@@ -286,12 +286,16 @@ class Core
     /**
      * Compute security credential using Safaricom's public certificate.
      *
-     * @param string $initiatorPass
+     * @param string|null $initiatorPass
      * @return string
-     * @throws Exception
+     * @throws ConfigurationException
      */
-    public function computeSecurityCredential(string $initiatorPass): string
+    public function computeSecurityCredential(?string $initiatorPass): string
     {
+        if (empty($initiatorPass)) {
+            throw new ConfigurationException('Initiator password is required for this transaction type. Please set [initiator.password] in your configuration.');
+        }
+
         $isSandbox = $this->config->get('mpesa.is_sandbox', true);
         
         $pubKeyFile = $this->config->get('mpesa.certificate_path')
@@ -312,7 +316,7 @@ class Core
         $pubKey = file_get_contents($pubKeyFile);
         
         if (!openssl_public_encrypt($initiatorPass, $encrypted, $pubKey, OPENSSL_PKCS1_PADDING)) {
-            throw new Exception('Failed to encrypt initiator password');
+            throw new Exception('Failed to encrypt initiator password: ' . openssl_error_string());
         }
 
         return base64_encode($encrypted);

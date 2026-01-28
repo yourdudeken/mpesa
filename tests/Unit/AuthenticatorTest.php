@@ -29,14 +29,15 @@ class AuthenticatorTest extends TestCase{
      * @test
      **/
     public function testAuthentication(){
-        $this->httpClient->method('execute')
-        ->will($this->returnValue('{"access_token":"asdasdsad"}'));
-        
-        $this->httpClient->method('getInfo')
-        ->will($this->returnValue(200));
+        $response = (object) [
+            'getStatusCode' => fn() => 200,
+            'getBody' => fn() => '{"access_token":"asdasdsad","expires_in":"3600"}'
+        ];
 
-        $auth   = new Authenticator();
-        $auth->setEngine($this->engine);
+        $this->httpClient->method('request')
+            ->willReturn($response);
+
+        $auth   = new Authenticator($this->engine->config, $this->engine->cache, $this->httpClient);
         
         $token  = $auth->authenticate();
         $this->assertIsString($token);

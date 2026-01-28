@@ -26,11 +26,11 @@ interface CacheStore
      *
      * @param string $key
      * @param mixed $value
-     * @param float|int|null $seconds
+     * @param int|float|null $seconds
      * 
      * @return void
      */
-    public function put(string $key, mixed $value, float|int $seconds = null): void;
+    public function put(string $key, mixed $value, int|float|null $seconds = null): void;
 
     /**
      * Check if an item exists in the cache.

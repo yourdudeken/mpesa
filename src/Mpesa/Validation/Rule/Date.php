@@ -9,15 +9,15 @@ class Date extends AbstractRule
 
     const LABELED_MESSAGE = '{label} must be a date having the format {format}';
 
-    protected $options = array(
+    protected array $options = [
         'format' => 'Y-m-d'
-    );
+    ];
 
-    protected $optionsIndexMap = array(
+    protected array $optionsIndexMap = [
         0 => self::OPTION_FORMAT
-    );
+    ];
 
-    public function validate($value, $valueIdentifier = null)
+    public function validate(mixed $value, mixed $valueIdentifier = null): bool
     {
         $this->value   = $value;
         $this->success = $value == date(

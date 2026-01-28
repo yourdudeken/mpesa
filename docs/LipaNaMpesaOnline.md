@@ -71,7 +71,7 @@ class CheckoutController {
 ```
 
 ### Configuration Parameters
-The following parameters can be configured in `config/mpesa.php` under the `lnmo` section:
+The following parameters can be configured in `config/mpesa.php` under the `stk` section:
 
 - **short_code**: Your business shortcode (Paybill or Till Number)
 - **passkey**: The SAG Passkey provided by Safaricom upon registration
@@ -79,7 +79,7 @@ The following parameters can be configured in `config/mpesa.php` under the `lnmo
 - **default_transaction_type**: Default is 'CustomerPayBillOnline' for Paybill, or 'CustomerBuyGoodsOnline' for Till Number
 
 ### Request Parameters
-When calling the STKPush method, you can pass the following parameters:
+When calling the stk->submit() method, you can pass the following parameters:
 
 - **amount** (required): The amount to charge the customer
 - **phoneNumber** (required): Customer's phone number (format: 254XXXXXXXXX)

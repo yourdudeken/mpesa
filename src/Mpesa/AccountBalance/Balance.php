@@ -29,15 +29,15 @@ class Balance extends AbstractTransaction
      */
     public function submit(array $params = [], string $appName = 'default'): mixed
     {
-        $shortCode          = $this->engine->getConfig()->get('mpesa.account_balance.short_code');
-        $successCallback    = $this->engine->getConfig()->get('mpesa.account_balance.result_url');
-        $timeoutCallback    = $this->engine->getConfig()->get('mpesa.account_balance.timeout_url');
-        $initiator          = $this->engine->getConfig()->get('mpesa.account_balance.initiator_name');
-        $commandId          = $this->engine->getConfig()->get('mpesa.account_balance.default_command_id');
-        $initiatorPass      = $this->engine->getConfig()->get('mpesa.account_balance.initiator_password');
+        $shortCode          = $this->engine->getConfig()->get('mpesa.balance.short_code');
+        $successCallback    = $this->engine->getConfig()->get('mpesa.balance.result_url');
+        $timeoutCallback    = $this->engine->getConfig()->get('mpesa.balance.timeout_url');
+        $initiator          = $this->engine->getConfig()->get('mpesa.balance.initiator_name');
+        $commandId          = $this->engine->getConfig()->get('mpesa.balance.default_command_id');
+        $initiatorPass      = $this->engine->getConfig()->get('mpesa.balance.initiator_password');
         $securityCredential = $this->engine->computeSecurityCredential($initiatorPass);
-        $identifierType     = $this->engine->getConfig()->get('mpesa.account_balance.identifier_type');
-        $remarks            = $this->engine->getConfig()->get('mpesa.account_balance.remarks');
+        $identifierType     = $this->engine->getConfig()->get('mpesa.balance.identifier_type');
+        $remarks            = $this->engine->getConfig()->get('mpesa.balance.remarks');
 
         $configParams = [
             'Initiator'          => $initiator,

@@ -72,7 +72,7 @@ class MpesaController {
 ````
 
 ### Configuration Parameters
-The following parameters can be configured in `config/mpesa.php` under the `transaction_status` section:
+The following parameters can be configured in `config/mpesa.php` under the `status` section:
 
 - **initiator_name**: The name of the initiator making the request
 - **initiator_password**: The encrypted password for the initiator
@@ -82,7 +82,7 @@ The following parameters can be configured in `config/mpesa.php` under the `tran
 - **timeout_url** (optional): URL to receive timeout notifications. Falls back to global callback
 
 ### Request Parameters
-When calling the transactionStatus method, you can pass the following parameters:
+When calling the status->submit() method, you can pass the following parameters:
 
 - **transactionID** (required): The M-Pesa transaction ID to query (e.g., 'NLJ7RT61SV')
 - **identifierType** (optional): Type of organization (default: 4 for organization shortcode)

@@ -3,6 +3,7 @@
 namespace Yourdudeken\Mpesa\Validation;
 
 use Yourdudeken\Mpesa\Validation\Rule\Callback as CallbackRule;
+use Yourdudeken\Mpesa\Validation\Rule\AbstractRule;
 
 class RuleFactory
 {

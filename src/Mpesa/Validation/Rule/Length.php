@@ -10,15 +10,15 @@ class Length extends AbstractRule
     const MESSAGE = 'This input must be between {min} and {max} characters long';
     const LABELED_MESSAGE = '{label} must be between {min} and {max} characters long';
 
-    protected $options = array();
+    protected array $options = [];
 
-    protected $optionsIndexMap = array(
+    protected array $optionsIndexMap = [
         0 => self::OPTION_MIN,
         1 => self::OPTION_MAX,
         2 => self::OPTION_ENCODING
-    );
+    ];
 
-    public function validate($value, $valueIdentifier = null)
+    public function validate(mixed $value, mixed $valueIdentifier = null): bool
     {
         $this->value  = $value;
         $maxValidator = new MinLength();

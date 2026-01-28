@@ -9,14 +9,14 @@ class MaxLength extends AbstractStringRule
     const MESSAGE = 'This input should have less than {max} characters';
     const LABELED_MESSAGE = '{label} should have less than {max} characters';
 
-    protected $options = array();
+    protected array $options = [];
 
-    protected $optionsIndexMap = array(
+    protected array $optionsIndexMap = [
         0 => self::OPTION_MAX,
         1 => self::OPTION_ENCODING
-    );
+    ];
 
-    public function validate($value, $valueIdentifier = null)
+    public function validate(mixed $value, mixed $valueIdentifier = null): bool
     {
         $this->value = $value;
         if (! isset($this->options['max'])) {

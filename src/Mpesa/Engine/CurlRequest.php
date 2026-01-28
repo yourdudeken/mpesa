@@ -90,6 +90,11 @@ class CurlRequest implements HttpRequest
         curl_reset($this->handle);
     }
 
+    public function execute(): mixed
+    {
+        return curl_exec($this->handle);
+    }
+
     public function close(): void
     {
         if ($this->handle) {

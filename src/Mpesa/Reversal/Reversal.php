@@ -9,16 +9,16 @@ class Reversal extends AbstractTransaction
     protected string $endpoint = 'mpesa/reversal/v1/request';
 
     protected array $validationRules = [
-        'Initiator:Initiator'                           => 'required()({label} is required)',
-        'SecurityCredential:SecurityCredential'         => 'required()({label} is required)',
-        'CommandID:CommandID'                           => 'required()({label} is required)',
-        'TransactionID:TransactionID'                   => 'required()({label} is required)',
-        'Amount:Amount'                                 => 'required()({label} is required)',
-        'ReceiverParty:ReceiverParty'                   => 'required()({label} is required)',
-        'RecieverIdentifierType:RecieverIdentifierType' => 'required()({label} is required)',
-        'ResultURL:ResultURL'                           => 'required()({label} is required) | website',
-        'QueueTimeOutURL:QueueTimeOutURL'               => 'required()({label} is required) | website',
-        'Remarks:Remarks'                               => 'required()({label} is required)',
+        'Initiator:Initiator'                          => 'required()({label} is required)',
+        'SecurityCredential:SecurityCredential'        => 'required()({label} is required)',
+        'CommandID:CommandID'                          => 'required()({label} is required)',
+        'TransactionID:TransactionID'                  => 'required()({label} is required)',
+        'Amount:Amount'                                => 'required()({label} is required)',
+        'ReceiverParty:ReceiverParty'                  => 'required()({label} is required)',
+        'ReceiverIdentifierType:ReceiverIdentifierType' => 'required()({label} is required)',
+        'ResultURL:ResultURL'                          => 'required()({label} is required) | website',
+        'QueueTimeOutURL:QueueTimeOutURL'              => 'required()({label} is required) | website',
+        'Remarks:Remarks'                              => 'required()({label} is required)',
     ];
 
     /**
@@ -40,14 +40,14 @@ class Reversal extends AbstractTransaction
         $securityCredential     = $this->engine->computeSecurityCredential($initiatorPass);
         $remarks                = $this->engine->getConfig()->get('mpesa.reversal.remarks');
         $occasion               = $this->engine->getConfig()->get('mpesa.reversal.occasion');
-        $receiverIdentifierType = $this->engine->getConfig()->get('mpesa.reversal.reciever_identifier_type');
+        $receiverIdentifierType = $this->engine->getConfig()->get('mpesa.reversal.receiver_identifier_type');
 
         $configParams = [
             'Initiator'              => $initiator,
             'SecurityCredential'     => $securityCredential,
             'CommandID'              => $commandId,
             'ReceiverParty'          => $shortCode,
-            'RecieverIdentifierType' => $receiverIdentifierType,
+            'ReceiverIdentifierType' => $receiverIdentifierType,
             'QueueTimeOutURL'        => $timeoutCallback,
             'ResultURL'              => $successCallback,
             'Remarks'                => $remarks,
@@ -58,7 +58,7 @@ class Reversal extends AbstractTransaction
             'initiator'                => 'Initiator',
             'transaction_id'           => 'TransactionID',
             'receiver_party'           => 'ReceiverParty',
-            'receiver_identifier_type' => 'RecieverIdentifierType',
+            'receiver_identifier_type' => 'ReceiverIdentifierType',
         ];
 
         $body = $this->prepareBody($configParams, $params, $mappings);

@@ -63,7 +63,7 @@ class Authenticator
      * @throws ConfigurationException
      * @throws ErrorException
      */
-    public function authenticate(): string
+    public function authenticate(?string $appName = null): string
     {
         $cacheKey = self::AC_TOKEN;
 

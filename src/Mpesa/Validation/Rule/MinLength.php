@@ -9,14 +9,14 @@ class MinLength extends AbstractStringRule
     const MESSAGE = 'This input should have at least {min} characters';
     const LABELED_MESSAGE = '{label} should have at least {min} characters';
 
-    protected $options = array();
+    protected array $options = [];
 
-    protected $optionsIndexMap = array(
+    protected array $optionsIndexMap = [
         0 => self::OPTION_MIN,
         1 => self::OPTION_ENCODING
-    );
+    ];
 
-    public function validate($value, $valueIdentifier = null)
+    public function validate(mixed $value, mixed $valueIdentifier = null): bool
     {
         $this->value = $value;
         if (! isset($this->options['min'])) {

@@ -9,16 +9,16 @@ class LessThan extends AbstractRule
     const MESSAGE = 'This input should be less than {max}';
     const LABELED_MESSAGE = '{label} should be less than {max}';
 
-    protected $options = array(
+    protected array $options = [
         'inclusive' => true
-    );
+    ];
 
-    protected $optionsIndexMap = array(
+    protected array $optionsIndexMap = [
         0 => self::OPTION_MAX,
         1 => self::OPTION_INCLUSIVE
-    );
+    ];
 
-    public function validate($value, $valueIdentifier = null)
+    public function validate(mixed $value, mixed $valueIdentifier = null): bool
     {
         $this->value = $value;
         if (! isset($this->options['max'])) {

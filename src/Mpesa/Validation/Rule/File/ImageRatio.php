@@ -15,10 +15,10 @@ class ImageRatio extends AbstractRule
 
     const LABELED_MESSAGE = '{label} does must have a ratio (width/height) of {ratio})';
 
-    protected $options = array(
+    protected array $options = [
         self::OPTION_RATIO        => 0,
         self::OPTION_ERROR_MARGIN => 0,
-    );
+    ];
 
     protected function normalizeRatio($ratio)
     {
@@ -34,7 +34,7 @@ class ImageRatio extends AbstractRule
         return 0;
     }
 
-    public function validate($value, $valueIdentifier = null)
+    public function validate(mixed $value, mixed $valueIdentifier = null): bool
     {
         $this->value = $value;
         $ratio       = $this->normalizeRatio($this->options[self::OPTION_RATIO]);

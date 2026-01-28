@@ -87,7 +87,7 @@ The following parameters can be configured in `config/mpesa.php` under the `b2b`
 - **timeout_url** (optional): URL to receive timeout notifications. Falls back to global callback
 
 ### Request Parameters
-When calling the B2B method, you can pass the following parameters:
+When calling the b2b->submit() method, you can pass the following parameters:
 
 - **amount** (required): The amount to transfer to the business
 - **partyB** (required): The shortcode of the recipient business

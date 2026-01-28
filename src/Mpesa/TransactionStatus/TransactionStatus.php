@@ -30,16 +30,16 @@ class TransactionStatus extends AbstractTransaction
      */
     public function submit(array $params = [], string $appName = 'default'): mixed
     {
-        $shortCode          = $this->engine->getConfig()->get('mpesa.transaction_status.short_code');
-        $successCallback    = $this->engine->getConfig()->get('mpesa.transaction_status.result_url');
-        $timeoutCallback    = $this->engine->getConfig()->get('mpesa.transaction_status.timeout_url');
-        $initiator          = $this->engine->getConfig()->get('mpesa.transaction_status.initiator_name');
-        $commandId          = $this->engine->getConfig()->get('mpesa.transaction_status.default_command_id');
-        $initiatorPass      = $this->engine->getConfig()->get('mpesa.transaction_status.initiator_password');
+        $shortCode          = $this->engine->getConfig()->get('mpesa.status.short_code');
+        $successCallback    = $this->engine->getConfig()->get('mpesa.status.result_url');
+        $timeoutCallback    = $this->engine->getConfig()->get('mpesa.status.timeout_url');
+        $initiator          = $this->engine->getConfig()->get('mpesa.status.initiator_name');
+        $commandId          = $this->engine->getConfig()->get('mpesa.status.default_command_id');
+        $initiatorPass      = $this->engine->getConfig()->get('mpesa.status.initiator_password');
         $securityCredential = $this->engine->computeSecurityCredential($initiatorPass);
-        $remarks            = $this->engine->getConfig()->get('mpesa.transaction_status.remarks');
-        $occasion           = $this->engine->getConfig()->get('mpesa.transaction_status.occasion');
-        $identifierType     = $this->engine->getConfig()->get('mpesa.transaction_status.identifier_type');
+        $remarks            = $this->engine->getConfig()->get('mpesa.status.remarks');
+        $occasion           = $this->engine->getConfig()->get('mpesa.status.occasion');
+        $identifierType     = $this->engine->getConfig()->get('mpesa.status.identifier_type');
 
         $configParams = [
             'Initiator'          => $initiator,

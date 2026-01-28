@@ -12,12 +12,12 @@ class ImageWidth extends AbstractRule
 
     const LABELED_MESSAGE = '{label} should be at least {min} pixels wide';
 
-    protected $options = array(
+    protected array $options = [
         self::OPTION_MAX => 1000000,
         self::OPTION_MIN => 0,
-    );
+    ];
 
-    public function validate($value, $valueIdentifier = null)
+    public function validate(mixed $value, mixed $valueIdentifier = null): bool
     {
         $this->value = $value;
         if (! is_array($value) || ! isset($value['tmp_name'])) {

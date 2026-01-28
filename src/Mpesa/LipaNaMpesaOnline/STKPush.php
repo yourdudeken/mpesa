@@ -32,14 +32,14 @@ class STKPush extends AbstractTransaction
     public function submit(array $params = [], string $appName = 'default'): mixed
     {
         $time      = $this->engine->getCurrentRequestTime();
-        $shortCode = $this->engine->getConfig()->get('mpesa.lnmo.short_code');
-        $passkey   = $this->engine->getConfig()->get('mpesa.lnmo.passkey');
+        $shortCode = $this->engine->getConfig()->get('mpesa.stk.short_code');
+        $passkey   = $this->engine->getConfig()->get('mpesa.stk.passkey');
         $password  = base64_encode($shortCode . $passkey . $time);
         
-        $accountReference = $this->engine->getConfig()->get('mpesa.lnmo.account_reference');
-        $callback         = $this->engine->getConfig()->get('mpesa.lnmo.callback');
-        $transactionType  = $this->engine->getConfig()->get('mpesa.lnmo.default_transaction_type');
-        $transactionDesc  = $this->engine->getConfig()->get('mpesa.lnmo.transaction_desc');
+        $accountReference = $this->engine->getConfig()->get('mpesa.stk.account_reference');
+        $callback         = $this->engine->getConfig()->get('mpesa.stk.callback');
+        $transactionType  = $this->engine->getConfig()->get('mpesa.stk.default_transaction_type');
+        $transactionDesc  = $this->engine->getConfig()->get('mpesa.stk.transaction_desc');
 
         $configParams = [
             'BusinessShortCode' => $shortCode,

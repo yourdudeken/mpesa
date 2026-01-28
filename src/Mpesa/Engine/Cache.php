@@ -64,9 +64,9 @@ class Cache implements CacheStore
      *
      * @param string $key
      * @param mixed  $value
-     * @param int|null $minutes
+     * @param int|float|null $seconds
      */
-    public function put(string $key, mixed $value, ?int $minutes = null): void
+    public function put(string $key, mixed $value, int|float|null $seconds = null): void
     {
         $location = $this->getCacheFile();
         $directory = dirname($location);
@@ -85,26 +85,60 @@ class Cache implements CacheStore
             $initial = $this->cleanCache($initial, $location);
         }
 
-        $expiry = $this->computeExpiryTime($minutes);
+        $expiry = $this->computeExpiryTime($seconds);
         $payload = array_merge($initial, [$key => ['v' => $value, 't' => $expiry]]);
         
         file_put_contents($location, serialize($payload));
     }
 
     /**
+     * Check if an item exists in the cache.
+     * 
+     * @param string $key
+     * @return bool
+     */
+    public function has(string $key): bool
+    {
+        return $this->get($key) !== null;
+    }
+
+    /**
+     * Remove an item from the cache.
+     * 
+     * @param string $key
+     * @return void
+     */
+    public function forget(string $key): void
+    {
+        $location = $this->getCacheFile();
+
+        if (!is_file($location)) {
+            return;
+        }
+
+        $content = file_get_contents($location);
+        $cache = $content ? @unserialize($content) : [];
+        
+        if (is_array($cache) && isset($cache[$key])) {
+            unset($cache[$key]);
+            file_put_contents($location, serialize($cache));
+        }
+    }
+
+    /**
      * Compute expiry time.
      * 
-     * @param int|null $minutes
+     * @param int|float|null $seconds
      * @return string|null
      */
-    public function computeExpiryTime(?int $minutes): ?string
+    public function computeExpiryTime(int|float|null $seconds): ?string
     {
-        if ($minutes === null) {
+        if ($seconds === null) {
             return null;
         }
         
         $date = new \DateTime();
-        return $date->modify("+{$minutes} minutes")->format('Y-m-d H:i:s');
+        return $date->modify("+". (int) $seconds ." seconds")->format('Y-m-d H:i:s');
     }
 
     /**

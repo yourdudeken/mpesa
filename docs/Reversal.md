@@ -84,7 +84,7 @@ The following parameters can be configured in `config/mpesa.php` under the `reve
 - **timeout_url** (optional): URL to receive timeout notifications. Falls back to global callback
 
 ### Request Parameters
-When calling the reversal method, you can pass the following parameters:
+When calling the reversal->submit() method, you can pass the following parameters:
 
 - **transactionID** (required): The M-Pesa transaction ID to reverse (e.g., 'NLJ7RT61SV')
 - **amount** (required): The amount to reverse (must match original transaction amount)

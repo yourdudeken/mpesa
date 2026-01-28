@@ -85,7 +85,7 @@ The following parameters can be configured in `config/mpesa.php` under the `b2po
 - **timeout_url** (optional): URL to receive timeout notifications. Falls back to global callback
 
 ### Request Parameters
-When calling the B2Pochi method, you can pass the following parameters:
+When calling the b2pochi->submit() method, you can pass the following parameters:
 
 - **amount** (required): The amount to send to the Pochi account
 - **partyB** (required): The phone number of the recipient (format: 254XXXXXXXXX)

@@ -37,6 +37,16 @@ interface HttpRequest
     public function error(): string;
 
     /**
+     * Reset the connection.
+     */
+    public function reset(): void;
+
+    /**
+     * Execute the prepared request.
+     */
+    public function execute(): mixed;
+
+    /**
      * Close the connection.
      */
     public function close(): void;

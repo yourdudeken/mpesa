@@ -85,7 +85,7 @@ The following parameters can be configured in `config/mpesa.php` under the `b2c`
 - **timeout_url** (optional): URL to receive timeout notifications. Falls back to global callback
 
 ### Request Parameters
-When calling the B2C method, you can pass the following parameters:
+When calling the b2c->submit() method, you can pass the following parameters:
 
 - **amount** (required): The amount to send to the customer
 - **partyB** (required): The phone number of the recipient (format: 254XXXXXXXXX)
