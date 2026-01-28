@@ -54,12 +54,6 @@ class Pay {
      * @throws \Exception
      */
     public function submit($params = [],$appName = 'default'){
-        // Make sure all the indexes are in Uppercases as shown in docs
-        $userParams = [];
-        foreach ($params as $key => $value) {
-            $userParams[ucwords($key)] = $value;
-        }
-
         $shortCode       = $this->engine->config->get('mpesa.b2c.short_code');
         $successCallback  = $this->engine->config->get('mpesa.b2c.result_url') ?: $this->engine->config->get('mpesa.callback');
         $timeoutCallback  = $this->engine->config->get('mpesa.b2c.timeout_url') ?: $this->engine->config->get('mpesa.callback');
@@ -67,14 +61,10 @@ class Pay {
         $initiatorPass = $this->engine->config->get('mpesa.b2c.initiator_password');
         $securityCredential  = $this->engine->computeSecurityCredential($initiatorPass);
         $commandId  = $this->engine->config->get('mpesa.b2c.default_command_id');
-        $remarks    = trim($this->engine->config->get('mpesa.b2c.remarks') ?: 'Transaction');
-        $occasion   = trim($this->engine->config->get('mpesa.b2c.occasion') ?: '');
+        $remarks    = $this->engine->config->get('mpesa.b2c.remarks');
+        $occasion   = $this->engine->config->get('mpesa.b2c.occasion');
 
-        // Safaricom Remarks limit is 100
-        $remarks = substr($remarks, 0, 100);
-        $occasion = substr($occasion, 0, 100);
-        
-        // Params coming from the config file
+        // Params coming from the config file (pre-normalized for M-Pesa API)
         $configParams = [
             'InitiatorName'     => $initiator,
             'SecurityCredential'=> $securityCredential,
@@ -83,11 +73,15 @@ class Pay {
             'QueueTimeOutURL'   => $timeoutCallback,
             'ResultURL'         => $successCallback,
             'Remarks'           => $remarks,
-            'Occasion'          => !empty($occasion) ? $occasion : null,
+            'Occasion'          => $occasion,
         ];
 
-        // This gives precedence to params coming from user allowing them to override config params
-        $body = array_merge($configParams,$userParams);
+        // Normalize user-provided params and merge with config defaults
+        $userParams = $this->engine->normalizeParams($params);
+        $body = array_merge($configParams, $userParams);
+
+        // Final normalization pass to ensure all merged fields are safe
+        $body = $this->engine->normalizeParams($body);
 
         // Send the request to mpesa
         return $this->engine->makePostRequest([

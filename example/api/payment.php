@@ -116,15 +116,12 @@ function handleSTKPush($request, $config) {
     $mpesa = new Mpesa($config);
     
     $params = [
-        'amount' => (float) $data['amount'],
-        'phoneNumber' => $phoneNumber,
-        'accountReference' => $data['account_reference'],
-        'transactionDesc' => $data['transaction_desc'] ?? 'Payment'
+        'amount'            => (float) $data['amount'],
+        'phone'             => $phoneNumber,
+        'reference'         => $data['account_reference'],
+        'description'       => $data['transaction_desc'] ?? 'Payment',
+        'callback_url'      => $data['callback_url'] ?? null
     ];
-
-    if (!empty($data['callback_url'])) {
-        $params['CallBackURL'] = $data['callback_url'];
-    }
     
     $response = $mpesa->STKPush($params);
 
@@ -173,7 +170,7 @@ function handleSTKStatus($request, $config) {
 
     $mpesa = new Mpesa($config);
     $response = $mpesa->STKStatus([
-        'checkoutRequestID' => $checkoutRequestId
+        'checkout_request_id' => $checkoutRequestId
     ]);
 
     echo json_encode([
@@ -193,23 +190,14 @@ function handleB2C($request, $config) {
     $mpesa = new Mpesa($config);
     
     $params = [
-        'Amount' => (float) $data['amount'],
-        'PartyB' => $phoneNumber,
-        'Remarks' => $data['remarks']
+        'amount'      => (float) $data['amount'],
+        'party_b'      => $phoneNumber,
+        'remarks'     => $data['remarks'],
+        'occasion'    => $data['occasion'] ?? null,
+        'command_id'  => $data['command_id'] ?? null,
+        'result_url'  => $data['result_url'] ?? null,
+        'timeout_url' => $data['timeout_url'] ?? null
     ];
-
-    if (!empty($data['command_id'])) {
-        $params['CommandID'] = $data['command_id'];
-    }
-    if (!empty($data['occasion'])) {
-        $params['Occasion'] = $data['occasion'];
-    }
-    if (!empty($data['result_url'])) {
-        $params['ResultURL'] = $data['result_url'];
-    }
-    if (!empty($data['timeout_url'])) {
-        $params['QueueTimeOutURL'] = $data['timeout_url'];
-    }
     
     $response = $mpesa->B2C($params);
 
@@ -230,21 +218,14 @@ function handleB2B($request, $config) {
     $mpesa = new Mpesa($config);
     
     $params = [
-        'Amount' => (float) $data['amount'],
-        'PartyB' => $data['party_b'],
-        'AccountReference' => $data['account_reference'],
-        'Remarks' => $data['remarks']
+        'amount'            => (float) $data['amount'],
+        'party_b'            => $data['party_b'],
+        'account_reference' => $data['account_reference'],
+        'remarks'           => $data['remarks'],
+        'command_id'        => $data['command_id'] ?? null,
+        'result_url'        => $data['result_url'] ?? null,
+        'timeout_url'       => $data['timeout_url'] ?? null
     ];
-
-    if (!empty($data['command_id'])) {
-        $params['CommandID'] = $data['command_id'];
-    }
-    if (!empty($data['result_url'])) {
-        $params['ResultURL'] = $data['result_url'];
-    }
-    if (!empty($data['timeout_url'])) {
-        $params['QueueTimeOutURL'] = $data['timeout_url'];
-    }
     
     $response = $mpesa->B2B($params);
 
@@ -266,17 +247,12 @@ function handleB2Pochi($request, $config) {
     $mpesa = new Mpesa($config);
     
     $params = [
-        'Amount' => (float) $data['amount'],
-        'PartyB' => $phoneNumber,
-        'Remarks' => $data['remarks']
+        'amount'      => (float) $data['amount'],
+        'party_b'      => $phoneNumber,
+        'remarks'     => $data['remarks'],
+        'result_url'  => $data['result_url'] ?? null,
+        'timeout_url' => $data['timeout_url'] ?? null
     ];
-
-    if (!empty($data['result_url'])) {
-        $params['ResultURL'] = $data['result_url'];
-    }
-    if (!empty($data['timeout_url'])) {
-        $params['QueueTimeOutURL'] = $data['timeout_url'];
-    }
     
     $response = $mpesa->B2Pochi($params);
 
@@ -298,13 +274,10 @@ function handleC2BRegister($request, $config) {
     $mpesa = new Mpesa($config);
     
     $params = [
-        'ValidationURL' => $data['validation_url'],
-        'ConfirmationURL' => $data['confirmation_url']
+        'validation_url'   => $data['validation_url'],
+        'confirmation_url' => $data['confirmation_url'],
+        'response_type'    => $data['response_type'] ?? null
     ];
-
-    if (!empty($data['response_type'])) {
-        $params['ResponseType'] = $data['response_type'];
-    }
 
     $response = $mpesa->C2BRegister($params);
 
@@ -326,10 +299,10 @@ function handleC2BSimulate($request, $config) {
     $mpesa = new Mpesa($config);
     
     $response = $mpesa->C2BSimulate([
-        'Amount' => (float) $data['amount'],
-        'Msisdn' => $phoneNumber,
-        'BillRefNumber' => $data['bill_ref_number'] ?? '',
-        'CommandID' => $data['command_id'] ?? null
+        'amount'          => (float) $data['amount'],
+        'msisdn'          => $phoneNumber,
+        'bill_ref_number' => $data['bill_ref_number'] ?? '',
+        'command_id'      => $data['command_id'] ?? null
     ]);
 
     echo json_encode([
@@ -347,15 +320,10 @@ function handleAccountBalance($request, $config) {
     $mpesa = new Mpesa($config);
     
     $params = [
-        'Remarks' => $data['remarks'] ?? 'Balance query'
+        'remarks'     => $data['remarks'] ?? 'Balance query',
+        'result_url'  => $data['result_url'] ?? null,
+        'timeout_url' => $data['timeout_url'] ?? null
     ];
-
-    if (!empty($data['result_url'])) {
-        $params['ResultURL'] = $data['result_url'];
-    }
-    if (!empty($data['timeout_url'])) {
-        $params['QueueTimeOutURL'] = $data['timeout_url'];
-    }
     
     $response = $mpesa->accountBalance($params);
 
@@ -376,16 +344,11 @@ function handleTransactionStatus($request, $config) {
     $mpesa = new Mpesa($config);
     
     $params = [
-        'TransactionID' => $data['transaction_id'],
-        'Remarks' => $data['remarks'] ?? 'Status check'
+        'transaction_id' => $data['transaction_id'],
+        'remarks'        => $data['remarks'] ?? 'Status check',
+        'result_url'     => $data['result_url'] ?? null,
+        'timeout_url'    => $data['timeout_url'] ?? null
     ];
-
-    if (!empty($data['result_url'])) {
-        $params['ResultURL'] = $data['result_url'];
-    }
-    if (!empty($data['timeout_url'])) {
-        $params['QueueTimeOutURL'] = $data['timeout_url'];
-    }
     
     $response = $mpesa->transactionStatus($params);
 
@@ -406,18 +369,13 @@ function handleReversal($request, $config) {
     $mpesa = new Mpesa($config);
     
     $params = [
-        'TransactionID' => $data['transaction_id'],
-        'Amount' => (float) $data['amount'],
-        'ReceiverParty' => $data['receiver_party'],
-        'Remarks' => $data['remarks']
+        'transaction_id' => $data['transaction_id'],
+        'amount'         => (float) $data['amount'],
+        'receiver_party' => $data['receiver_party'],
+        'remarks'        => $data['remarks'],
+        'result_url'     => $data['result_url'] ?? null,
+        'timeout_url'    => $data['timeout_url'] ?? null
     ];
-
-    if (!empty($data['result_url'])) {
-        $params['ResultURL'] = $data['result_url'];
-    }
-    if (!empty($data['timeout_url'])) {
-        $params['QueueTimeOutURL'] = $data['timeout_url'];
-    }
     
     $response = $mpesa->reversal($params);
 

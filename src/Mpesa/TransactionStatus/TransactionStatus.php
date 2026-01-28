@@ -41,11 +41,6 @@ class TransactionStatus {
      * @throws \Exception
      */
     public function submit($params = [],$appName='default'){
-        // Make sure all the indexes are in Uppercases as shown in docs
-        $userParams = [];
-        foreach ($params as $key => $value) {
-            $userParams[ucwords($key)] = $value;
-        }
         $shortCode        = $this->engine->config->get('mpesa.transaction_status.short_code');
         $successCallback   = $this->engine->config->get('mpesa.transaction_status.result_url') ?: $this->engine->config->get('mpesa.callback');
         $timeoutCallback   = $this->engine->config->get('mpesa.transaction_status.timeout_url') ?: $this->engine->config->get('mpesa.callback');
@@ -53,12 +48,9 @@ class TransactionStatus {
         $commandId  = $this->engine->config->get('mpesa.transaction_status.default_command_id');
         $initiatorPass = $this->engine->config->get('mpesa.transaction_status.initiator_password');
         $securityCredential  = $this->engine->computeSecurityCredential($initiatorPass);
-        $remarks           = trim($this->engine->config->get('mpesa.transaction_status.remarks') ?: 'None');
-        $occasion          = trim($this->engine->config->get('mpesa.transaction_status.occasion') ?: '');
+        $remarks           = $this->engine->config->get('mpesa.transaction_status.remarks');
+        $occasion          = $this->engine->config->get('mpesa.transaction_status.occasion');
         $identifierType    = $this->engine->config->get('mpesa.transaction_status.identifier_type');
-
-        $remarks = substr($remarks, 0, 100);
-        $occasion = substr($occasion, 0, 100);
 
         $configParams = [
             'Initiator'         => $initiator,
@@ -69,11 +61,21 @@ class TransactionStatus {
             'QueueTimeOutURL'   => $timeoutCallback,
             'ResultURL'         => $successCallback,
             'Remarks'           => $remarks,
-            'Occasion'          => !empty($occasion) ? $occasion : null,
+            'Occasion'          => $occasion,
         ];
 
-        // This gives precedence to params coming from user allowing them to override config params
-        $body = array_merge($configParams,$userParams);
+        // Normalize user-provided params and merge with config defaults
+        $userParams = $this->engine->normalizeParams($params, [
+            'initiator' => 'Initiator',
+            'transaction_id' => 'TransactionID',
+            'identifier_type' => 'IdentifierType',
+        ]);
+        $body = array_merge($configParams, $userParams);
+
+        // Final normalization pass to ensure all merged fields are safe
+        $body = $this->engine->normalizeParams($body, [
+            'InitiatorName' => 'Initiator', // Status uses 'Initiator'
+        ]);
 
         return $this->engine->makePostRequest([
             'endpoint' => $this->endpoint,

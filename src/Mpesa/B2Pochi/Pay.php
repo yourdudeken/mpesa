@@ -44,12 +44,6 @@ class Pay {
      * @throws \Exception
      */
     public function submit($params = [], $appName = 'default'){
-        // Make sure all the indexes are in Uppercases as shown in docs
-        $userParams = [];
-        foreach ($params as $key => $value) {
-            $userParams[ucwords($key)] = $value;
-        }
-
         $shortCode        = $this->engine->config->get('mpesa.b2pochi.short_code');
         $successCallback   = $this->engine->config->get('mpesa.b2pochi.result_url') ?: $this->engine->config->get('mpesa.callback');
         $timeoutCallback   = $this->engine->config->get('mpesa.b2pochi.timeout_url') ?: $this->engine->config->get('mpesa.callback');
@@ -57,11 +51,9 @@ class Pay {
         $initiatorPass     = $this->engine->config->get('mpesa.b2pochi.initiator_password');
         $securityCredential = $this->engine->computeSecurityCredential($initiatorPass);
         $commandId         = $this->engine->config->get('mpesa.b2pochi.default_command_id');
-        $remarks           = trim($this->engine->config->get('mpesa.b2pochi.remarks') ?: 'None');
+        $remarks           = $this->engine->config->get('mpesa.b2pochi.remarks');
         
-        $remarks = substr($remarks, 0, 100);
-
-        // Params coming from the config file
+        // Params coming from the config file (pre-normalized for M-Pesa API)
         $configParams = [
             'InitiatorName'     => $initiator,
             'SecurityCredential'=> $securityCredential,
@@ -72,8 +64,12 @@ class Pay {
             'Remarks'           => $remarks,
         ];
 
-        // This gives precedence to params coming from user allowing them to override config params
+        // Normalize user-provided params and merge with config defaults
+        $userParams = $this->engine->normalizeParams($params);
         $body = array_merge($configParams, $userParams);
+
+        // Final normalization pass to ensure all merged fields are safe
+        $body = $this->engine->normalizeParams($body);
 
         // Send the request to mpesa
         return $this->engine->makePostRequest([

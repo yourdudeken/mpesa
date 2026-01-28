@@ -45,12 +45,6 @@ class Reversal {
      * @throws \Exception
      */
     public function submit($params = [], $appName = 'default'){
-        // Make sure all the indexes are in Uppercases as shown in docs
-        $userParams = [];
-        foreach ($params as $key => $value) {
-            $userParams[ucwords($key)] = $value;
-        }
- 
         $shortCode        = $this->engine->config->get('mpesa.reversal.short_code');
         $successCallback   = $this->engine->config->get('mpesa.reversal.result_url') ?: $this->engine->config->get('mpesa.callback');
         $timeoutCallback   = $this->engine->config->get('mpesa.reversal.timeout_url') ?: $this->engine->config->get('mpesa.callback');
@@ -58,12 +52,9 @@ class Reversal {
         $commandId         = $this->engine->config->get('mpesa.reversal.default_command_id', 'TransactionReversal');
         $initiatorPass     = $this->engine->config->get('mpesa.reversal.initiator_password');
         $securityCredential = $this->engine->computeSecurityCredential($initiatorPass);
-        $remarks           = trim($this->engine->config->get('mpesa.reversal.remarks') ?: 'None');
-        $occasion          = trim($this->engine->config->get('mpesa.reversal.occasion') ?: '');
+        $remarks           = $this->engine->config->get('mpesa.reversal.remarks');
+        $occasion          = $this->engine->config->get('mpesa.reversal.occasion');
         $receiverIdentifierType = $this->engine->config->get('mpesa.reversal.reciever_identifier_type');
-
-        $remarks = substr($remarks, 0, 100);
-        $occasion = substr($occasion, 0, 100);
 
         $configParams = [
             'Initiator'              => $initiator,
@@ -74,11 +65,22 @@ class Reversal {
             'QueueTimeOutURL'        => $timeoutCallback,
             'ResultURL'              => $successCallback,
             'Remarks'                => $remarks,
-            'Occasion'               => !empty($occasion) ? $occasion : null,
+            'Occasion'               => $occasion,
         ];
 
-        // This gives precedence to params coming from user allowing them to override config params
+        // Normalize user-provided params and merge with config defaults
+        $userParams = $this->engine->normalizeParams($params, [
+            'initiator' => 'Initiator',
+            'transaction_id' => 'TransactionID',
+            'receiver_party' => 'ReceiverParty',
+            'receiver_identifier_type' => 'RecieverIdentifierType',
+        ]);
         $body = array_merge($configParams, $userParams);
+
+        // Final normalization pass to ensure all merged fields are safe
+        $body = $this->engine->normalizeParams($body, [
+            'InitiatorName' => 'Initiator', // Reversal uses 'Initiator'
+        ]);
 
         return $this->engine->makePostRequest([
             'endpoint' => $this->endpoint,

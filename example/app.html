@@ -306,6 +306,13 @@
                                         placeholder="Payment for..."></textarea>
                                 </div>
 
+                                <div class="form-group">
+                                    <label for="stkCallback">Callback URL</label>
+                                    <input type="url" id="stkCallback" name="callback_url"
+                                        placeholder="https://example.com/callback/stk">
+                                    <small>Optional: Overrides the global callback</small>
+                                </div>
+
                                 <button type="submit" class="btn btn-primary btn-block">
                                     <span class="btn-text">Send STK Push</span>
                                     <span class="btn-loader"></span>
@@ -394,6 +401,17 @@
                                         placeholder="Salary, Bonus, etc.">
                                 </div>
 
+                                <div class="form-grid-2">
+                                    <div class="form-group">
+                                        <label for="b2cResultUrl">Result URL</label>
+                                        <input type="url" id="b2cResultUrl" name="result_url" placeholder="https://example.com/b2c/result">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="b2cTimeoutUrl">Timeout URL</label>
+                                        <input type="url" id="b2cTimeoutUrl" name="timeout_url" placeholder="https://example.com/b2c/timeout">
+                                    </div>
+                                </div>
+
                                 <button type="submit" class="btn btn-primary btn-block">
                                     <span class="btn-text">Send B2C Payment</span>
                                     <span class="btn-loader"></span>
@@ -450,6 +468,17 @@
                                         placeholder="Payment for supplies">
                                 </div>
 
+                                <div class="form-grid-2">
+                                    <div class="form-group">
+                                        <label for="b2bResultUrl">Result URL</label>
+                                        <input type="url" id="b2bResultUrl" name="result_url" placeholder="https://example.com/b2b/result">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="b2bTimeoutUrl">Timeout URL</label>
+                                        <input type="url" id="b2bTimeoutUrl" name="timeout_url" placeholder="https://example.com/b2b/timeout">
+                                    </div>
+                                </div>
+
                                 <button type="submit" class="btn btn-primary btn-block">
                                     <span class="btn-text">Transfer Funds</span>
                                     <span class="btn-loader"></span>
@@ -491,6 +520,17 @@
                                     <label for="b2pochiRemarks">Remarks *</label>
                                     <input type="text" id="b2pochiRemarks" name="remarks" required
                                         placeholder="Savings deposit">
+                                </div>
+
+                                <div class="form-grid-2">
+                                    <div class="form-group">
+                                        <label for="b2pochiResultUrl">Result URL</label>
+                                        <input type="url" id="b2pochiResultUrl" name="result_url" placeholder="https://example.com/b2p/result">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="b2pochiTimeoutUrl">Timeout URL</label>
+                                        <input type="url" id="b2pochiTimeoutUrl" name="timeout_url" placeholder="https://example.com/b2p/timeout">
+                                    </div>
                                 </div>
 
                                 <button type="submit" class="btn btn-primary btn-block">
@@ -606,6 +646,17 @@
                                     <input type="text" id="balanceRemarks" name="remarks" placeholder="Balance query">
                                 </div>
 
+                                <div class="form-grid-2">
+                                    <div class="form-group">
+                                        <label for="balanceResultUrl">Result URL</label>
+                                        <input type="url" id="balanceResultUrl" name="result_url" placeholder="https://example.com/bal/result">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="balanceTimeoutUrl">Timeout URL</label>
+                                        <input type="url" id="balanceTimeoutUrl" name="timeout_url" placeholder="https://example.com/bal/timeout">
+                                    </div>
+                                </div>
+
                                 <button type="submit" class="btn btn-primary btn-block">
                                     <span class="btn-text">Check Balance</span>
                                     <span class="btn-loader"></span>
@@ -640,6 +691,17 @@
                                 <div class="form-group">
                                     <label for="statusRemarks">Remarks</label>
                                     <input type="text" id="statusRemarks" name="remarks" placeholder="Status check">
+                                </div>
+
+                                <div class="form-grid-2">
+                                    <div class="form-group">
+                                        <label for="statusResultUrl">Result URL</label>
+                                        <input type="url" id="statusResultUrl" name="result_url" placeholder="https://example.com/stat/result">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="statusTimeoutUrl">Timeout URL</label>
+                                        <input type="url" id="statusTimeoutUrl" name="timeout_url" placeholder="https://example.com/stat/timeout">
+                                    </div>
                                 </div>
 
                                 <button type="submit" class="btn btn-primary btn-block">
@@ -689,6 +751,17 @@
                                     <label for="reversalRemarks">Remarks *</label>
                                     <input type="text" id="reversalRemarks" name="remarks" required
                                         placeholder="Reversing duplicate payment">
+                                </div>
+
+                                <div class="form-grid-2">
+                                    <div class="form-group">
+                                        <label for="reversalResultUrl">Result URL</label>
+                                        <input type="url" id="reversalResultUrl" name="result_url" placeholder="https://example.com/rev/result">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="reversalTimeoutUrl">Timeout URL</label>
+                                        <input type="url" id="reversalTimeoutUrl" name="timeout_url" placeholder="https://example.com/rev/timeout">
+                                    </div>
                                 </div>
 
                                 <button type="submit" class="btn btn-primary btn-block">

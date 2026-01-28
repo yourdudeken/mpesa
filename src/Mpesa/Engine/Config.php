@@ -54,45 +54,6 @@ class Config implements ArrayAccess,ConfigurationStore
         if (isset($this->items['consumer_secret']) && !isset($this->items['apps']['default']['consumer_secret'])) {
             $this->items['apps']['default']['consumer_secret'] = $this->items['consumer_secret'];
         }
-
-        // Auto-generate callback URLs if a base callback is provided
-        $this->generateCallbackUrls();
-    }
-
-    /**
-     * Generate specific callback URLs from a base URL if not provided.
-     */
-    private function generateCallbackUrls() {
-        $baseCallback = $this->items['callback'] ?? null;
-        if (empty($baseCallback)) {
-            return;
-        }
-
-        $baseCallback = rtrim($baseCallback, '/');
-
-        // lnmo callback
-        if (!isset($this->items['lnmo']['callback'])) {
-            $this->items['lnmo']['callback'] = $baseCallback;
-        }
-
-        // C2B URLs
-        if (!isset($this->items['c2b']['confirmation_url'])) {
-            $this->items['c2b']['confirmation_url'] = $baseCallback . '/confirmation';
-        }
-        if (!isset($this->items['c2b']['validation_url'])) {
-            $this->items['c2b']['validation_url'] = $baseCallback . '/validation';
-        }
-
-        // Result and Timeout URLs for B2C, B2B, Reversal, AccountBalance, TransactionStatus
-        $endpoints = ['b2c', 'b2b', 'reversal', 'account_balance', 'transaction_status', 'b2pochi'];
-        foreach ($endpoints as $endpoint) {
-            if (!isset($this->items[$endpoint]['result_url'])) {
-                $this->items[$endpoint]['result_url'] = $baseCallback . '/result';
-            }
-            if (!isset($this->items[$endpoint]['timeout_url'])) {
-                $this->items[$endpoint]['timeout_url'] = $baseCallback . '/timeout';
-            }
-        }
     }
 
     /**

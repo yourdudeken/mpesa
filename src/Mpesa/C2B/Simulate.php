@@ -52,12 +52,6 @@ class Simulate
      * @throws \Exception
      */
     public function submit($params = [],$appName='default'){
-        // Make sure all the indexes are in Uppercases as shown in docs
-        $userParams = [];
-        foreach ($params as $key => $value) {
-            $userParams[ucwords($key)] = $value;
-        }
-
         $shortCode = $this->engine->config->get('mpesa.c2b.short_code');
         $commandId = $this->engine->config->get('mpesa.c2b.default_command_id');
 
@@ -66,8 +60,15 @@ class Simulate
             'ShortCode'         => intval($shortCode),
         ];
 
-        // Merge logic
+        // Normalize user-provided params and merge with config defaults
+        $userParams = $this->engine->normalizeParams($params, [
+            'msisdn' => 'Msisdn',
+            'bill_ref_number' => 'BillRefNumber',
+        ]);
         $body = array_merge($configParams, $userParams);
+
+        // Final normalization pass
+        $body = $this->engine->normalizeParams($body);
 
         // Safaricom Schema Fix: 
         // For CustomerBuyGoodsOnline (Till Number), BillRefNumber should not be sent
@@ -75,7 +76,7 @@ class Simulate
         if ($body['CommandID'] === 'CustomerBuyGoodsOnline') {
             unset($body['BillRefNumber']);
         } elseif (empty($body['BillRefNumber'])) {
-            $body['BillRefNumber'] = $shortCode; // Fallback
+            $body['BillRefNumber'] = (string)$shortCode; // Fallback
         }
 
         return $this->engine->makePostRequest([

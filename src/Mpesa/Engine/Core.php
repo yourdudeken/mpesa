@@ -207,6 +207,72 @@ class Core
     }
 
     /**
+     * Normalize user parameters to match Safaricom's expected keys and sanitize metadata.
+     *
+     * @param array $params
+     * @param array $mappings
+     * @return array
+     */
+    public function normalizeParams($params, $mappings = []) {
+        $normalized = [];
+
+        // Define common mappings to Safaricom's PascalCase
+        $commonMappings = [
+            'amount'            => 'Amount',
+            'phone'             => 'PhoneNumber',
+            'phoneNumber'       => 'PhoneNumber',
+            'callback_url'      => 'CallBackURL',
+            'result_url'        => 'ResultURL',
+            'timeout_url'       => 'QueueTimeOutURL',
+            'remarks'           => 'Remarks',
+            'description'       => 'TransactionDesc',
+            'transaction_desc'  => 'TransactionDesc',
+            'account_reference' => 'AccountReference',
+            'reference'         => 'AccountReference',
+            'occasion'          => 'Occasion',
+            'short_code'        => 'ShortCode',
+            'response_type'     => 'ResponseType',
+            'confirmation_url'  => 'ConfirmationURL',
+            'validation_url'    => 'ValidationURL',
+            'initiator'         => 'InitiatorName',
+            'initiator_name'    => 'InitiatorName',
+            'command_id'        => 'CommandID',
+            'party_a'           => 'PartyA',
+            'party_b'           => 'PartyB',
+        ];
+
+        // Merge common mappings with provided specific mappings
+        $allMappings = array_merge($commonMappings, $mappings);
+
+        foreach ($params as $key => $value) {
+            $normalizedKey = $allMappings[$key] ?? str_replace(' ', '', ucwords(str_replace(['_', '-'], ' ', $key)));
+            $normalized[$normalizedKey] = $value;
+        }
+
+        // Sanitize metadata fields if they exist (Safaricom limits)
+        if (isset($normalized['Remarks'])) {
+            $normalized['Remarks'] = substr(trim($normalized['Remarks']), 0, 100);
+            if (empty($normalized['Remarks'])) {
+                $normalized['Remarks'] = 'None';
+            }
+        }
+        if (isset($normalized['TransactionDesc'])) {
+            $normalized['TransactionDesc'] = substr(trim($normalized['TransactionDesc']), 0, 100);
+        }
+        if (isset($normalized['Occasion'])) {
+            $normalized['Occasion'] = substr(trim($normalized['Occasion']), 0, 100);
+            if (empty($normalized['Occasion'])) {
+                $normalized['Occasion'] = null; // Will be pruned by makePostRequest
+            }
+        }
+        if (isset($normalized['AccountReference'])) {
+            $normalized['AccountReference'] = substr(trim($normalized['AccountReference']), 0, 20);
+        }
+
+        return $normalized;
+    }
+
+    /**
      * Compute security credential
      * 
      */
