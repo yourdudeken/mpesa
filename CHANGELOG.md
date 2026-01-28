@@ -1,13 +1,3 @@
-# [1.5.0] (2026-01-28)
-
-### Features
-- **Identity-First Architecture**: Refactored the entire SDK to use service properties (`$mpesa->stk`, `$mpesa->b2c`, etc.) for better IDE discoverability and cleaner code.
-- **Modern PHP 8.0+ Support**: Implemented strict type hinting, constructor property promotion, and modern PHP features across the codebase.
-- **Consolidated Authentication**: Reorganized configuration to group authentication credentials (`auth.consumer_key`, `auth.consumer_secret`).
-- **Enhanced Type Safety**: Added return type declarations and argument types to all core classes and validation rules.
-- **Stabilized Testing Suite**: Fixed mock expectations and dependency injection in tests to ensure 100% passing rate on PHP 8.3.
-- **Standardized Exception Handling**: Unified error reporting across all service layers using `ConfigurationException` and `MpesaException`.
-
 # [1.4.0](https://github.com/yourdudeken/mpesa/compare/v1.3.0...v1.4.0) (2026-01-25)
 
 
