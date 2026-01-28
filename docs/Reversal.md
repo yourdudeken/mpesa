@@ -20,23 +20,30 @@ Note this package allows you to override preconfigured parameters for this endpo
 
 ```php
 <?php
-require "../src/autoload.php";
+require "vendor/autoload.php";
 
 use Yourdudeken\Mpesa\Init as Mpesa;
 
 $mpesa = new Mpesa([
-    'consumer_key'       => '...',
-    'consumer_secret'    => '...',
-    'initiator_name'     => 'testapi',
-    'initiator_password' => '...',
-    'short_code'         => '600000',
-    'callback'           => 'https://example.com/reversal'
+    'auth' => [
+        'consumer_key'    => '...',
+        'consumer_secret' => '...',
+    ],
+    'initiator' => [
+        'name'     => 'testapi',
+        'password' => '...',
+    ],
+    'reversal' => [
+        'short_code' => '600000',
+    ]
 ]);
 
 try {
-    $response = $mpesa->reversal([
+    $response = $mpesa->reversal->submit([
         'transactionID' => 'NLJ7RT61SV',
-        'amount'        => 100
+        'amount'        => 100,
+        'result_url'    => 'https://example.com/reversal/result',
+        'timeout_url'   => 'https://example.com/reversal/timeout',
     ]);
     
     echo json_encode($response);
@@ -54,9 +61,11 @@ class MpesaController {
    public function reverseTransaction($transactionId) {
       $mpesa = new Mpesa(config('mpesa'));
       
-      $response = $mpesa->reversal([
+      $response = $mpesa->reversal->submit([
           'transactionID' => $transactionId,
-          'amount'        => 100
+          'amount'        => 100,
+          'result_url'    => route('mpesa.reversal.result'),
+          'timeout_url'   => route('mpesa.reversal.timeout'),
       ]); 
       
       return response()->json($response);

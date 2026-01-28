@@ -8,7 +8,6 @@ use Yourdudeken\Mpesa\Contracts\CacheStore;
  * Class Cache
  *
  * @category PHP
- *
  * @author   Kennedy Muthengi <kenmwendwamuthengi@gmail.com>
  */
 class Cache implements CacheStore
@@ -16,7 +15,7 @@ class Cache implements CacheStore
     /**
      * @var Config
      */
-    private $config;
+    protected Config $config;
 
     /**
      * Cache constructor.
@@ -31,23 +30,29 @@ class Cache implements CacheStore
     /**
      * Get the cache value.
      *
-     * @param      $key
-     * @param null $default
+     * @param string $key
+     * @param mixed|null $default
      *
      * @return mixed|null
      */
-    public function get($key, $default = null)
+    public function get(string $key, mixed $default = null): mixed
     {
-        $location = \trim($this->config->get('mpesa.cache_location')) . '/.mpc';
+        $location = $this->getCacheFile();
 
-        if (! \is_file($location)) {
+        if (!is_file($location)) {
             return $default;
         }
 
-        $cache = \unserialize(\file_get_contents($location));
+        $content = file_get_contents($location);
+        $cache = $content ? @unserialize($content) : [];
+        
+        if (!is_array($cache)) {
+            $cache = [];
+        }
+
         $cache = $this->cleanCache($cache, $location);
 
-        if (! isset($cache[$key])) {
+        if (!isset($cache[$key])) {
             return $default;
         }
 
@@ -57,59 +62,90 @@ class Cache implements CacheStore
     /**
      * Store an item in the cache.
      *
-     * @param string                                     $key
-     * @param mixed                                      $value
-     * @param \DateTimeInterface|\DateInterval|float|int $minutes
+     * @param string $key
+     * @param mixed  $value
+     * @param int|null $minutes
      */
-    public function put($key, $value, $minutes = null)
+    public function put(string $key, mixed $value, ?int $minutes = null): void
     {
-        $directory = \trim($this->config->get('mpesa.cache_location'));
-        $location  = $directory . '/.mpc';
+        $location = $this->getCacheFile();
+        $directory = dirname($location);
 
-        if (! \is_dir($directory)) {
-            \mkdir($directory, 0755, true);
+        if (!is_dir($directory)) {
+            mkdir($directory, 0755, true);
         }
+
         $initial = [];
-        if (\is_file($location)) {
-            $initial = \unserialize(\file_get_contents($location));
+        if (is_file($location)) {
+            $content = file_get_contents($location);
+            $initial = $content ? @unserialize($content) : [];
+            if (!is_array($initial)) {
+                $initial = [];
+            }
             $initial = $this->cleanCache($initial, $location);
         }
 
-        $minutes = $this->computeExpiryTime($minutes);
-        $payload = [$key => ['v' => $value, 't' => $minutes]];
-        $payload = \serialize(\array_merge($payload, $initial));
-
-        \file_put_contents($location, $payload);
+        $expiry = $this->computeExpiryTime($minutes);
+        $payload = array_merge($initial, [$key => ['v' => $value, 't' => $expiry]]);
+        
+        file_put_contents($location, serialize($payload));
     }
 
-    public function computeExpiryTime($minutes){
-        if(empty($minutes)){
+    /**
+     * Compute expiry time.
+     * 
+     * @param int|null $minutes
+     * @return string|null
+     */
+    public function computeExpiryTime(?int $minutes): ?string
+    {
+        if ($minutes === null) {
             return null;
         }
+        
         $date = new \DateTime();
-        $expiry = $date->modify((int) $minutes.' minutes')->format('Y-m-d H:i:s');
-        return $expiry;
+        return $date->modify("+{$minutes} minutes")->format('Y-m-d H:i:s');
     }
 
-    private function cleanCache($initial, $location)
+    /**
+     * Get path to cache file.
+     * 
+     * @return string
+     */
+    protected function getCacheFile(): string
     {
-        
+        $directory = trim($this->config->get('mpesa.cache_location') ?: sys_get_temp_dir());
+        return rtrim($directory, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . '.mpc';
+    }
 
-        $initial = \array_filter($initial, function ($value) {
-            if (! $value['t']) {
+    /**
+     * Clean expired items from cache.
+     * 
+     * @param array $initial
+     * @param string $location
+     * @return array
+     */
+    private function cleanCache(array $initial, string $location): array
+    {
+        $currentDt = new \DateTime();
+        
+        $cleaned = array_filter($initial, function ($value) use ($currentDt) {
+            if (!isset($value['t']) || $value['t'] === null) {
                 return true;
             }
-            $expiry = new \DateTime($value['t']);
-            $currentDt = new \DateTime();
-            if ($currentDt > $expiry) {
+            
+            try {
+                $expiry = new \DateTime($value['t']);
+                return $currentDt <= $expiry;
+            } catch (\Exception $e) {
                 return false;
             }
-
-            return true;
         });
 
-        \file_put_contents($location, \serialize($initial));
+        if (count($cleaned) !== count($initial)) {
+            file_put_contents($location, serialize($cleaned));
+        }
 
-        return $initial;
+        return $cleaned;
     }
 }

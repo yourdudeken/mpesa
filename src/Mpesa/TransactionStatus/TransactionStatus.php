@@ -2,84 +2,68 @@
 
 namespace Yourdudeken\Mpesa\TransactionStatus;
 
-use Yourdudeken\Mpesa\Engine\Core;
+use Yourdudeken\Mpesa\Engine\AbstractTransaction;
 
-class TransactionStatus {
-
-    protected $endpoint = 'mpesa/transactionstatus/v1/query';
+class TransactionStatus extends AbstractTransaction
+{
+    protected string $endpoint = 'mpesa/transactionstatus/v1/query';
     
-    protected $engine;
-
-    protected $validationRules = [
-        'Initiator:Initiator' => 'required()({label} is required)',
+    protected array $validationRules = [
+        'Initiator:Initiator'                   => 'required()({label} is required)',
         'SecurityCredential:SecurityCredential' => 'required()({label} is required)',
-        'CommandID:CommandID' => 'required()({label} is required)',
-        'IdentifierType:IdentifierType' => 'required()({label} is required)',
-        'Remarks:Remarks' => 'required()({label} is required)',
-        'PartyA:Party A' => 'required()({label} is required)',
-        'QueueTimeOutURL:QueueTimeOutURL' => 'required()({label} is required) | website',
-        'ResultURL:ResultURL' => 'required()({label} is required) | website',
-        'TransactionID:TransactionID' => 'required()({label} is required)',
+        'CommandID:CommandID'                   => 'required()({label} is required)',
+        'IdentifierType:IdentifierType'         => 'required()({label} is required)',
+        'Remarks:Remarks'                       => 'required()({label} is required)',
+        'PartyA:Party A'                        => 'required()({label} is required)',
+        'QueueTimeOutURL:QueueTimeOutURL'       => 'required()({label} is required) | website',
+        'ResultURL:ResultURL'                   => 'required()({label} is required) | website',
+        'TransactionID:TransactionID'           => 'required()({label} is required)',
     ];
-    /**
-     * TransactionStatus constructor.
-     *
-     * @param Core $engine
-     */
-    public function __construct(Core $engine){
-        $this->engine       = $engine;
-        $this->engine->setValidationRules($this->validationRules);
-    }
 
     /**
-     * Initiate the balance query process.
+     * Initiate a Transaction Status query.
      *
-     * @param null $description
-     *
+     * @param array  $params
+     * @param string $appName
      * @return mixed
-     *
      * @throws \Exception
      */
-    public function submit($params = [],$appName='default'){
-        $shortCode        = $this->engine->config->get('mpesa.transaction_status.short_code');
-        $successCallback   = $this->engine->config->get('mpesa.transaction_status.result_url') ?: $this->engine->config->get('mpesa.callback');
-        $timeoutCallback   = $this->engine->config->get('mpesa.transaction_status.timeout_url') ?: $this->engine->config->get('mpesa.callback');
-        $initiator  = $this->engine->config->get('mpesa.transaction_status.initiator_name');
-        $commandId  = $this->engine->config->get('mpesa.transaction_status.default_command_id');
-        $initiatorPass = $this->engine->config->get('mpesa.transaction_status.initiator_password');
-        $securityCredential  = $this->engine->computeSecurityCredential($initiatorPass);
-        $remarks           = $this->engine->config->get('mpesa.transaction_status.remarks');
-        $occasion          = $this->engine->config->get('mpesa.transaction_status.occasion');
-        $identifierType    = $this->engine->config->get('mpesa.transaction_status.identifier_type');
+    public function submit(array $params = [], string $appName = 'default'): mixed
+    {
+        $shortCode          = $this->engine->getConfig()->get('mpesa.transaction_status.short_code');
+        $successCallback    = $this->engine->getConfig()->get('mpesa.transaction_status.result_url');
+        $timeoutCallback    = $this->engine->getConfig()->get('mpesa.transaction_status.timeout_url');
+        $initiator          = $this->engine->getConfig()->get('mpesa.transaction_status.initiator_name');
+        $commandId          = $this->engine->getConfig()->get('mpesa.transaction_status.default_command_id');
+        $initiatorPass      = $this->engine->getConfig()->get('mpesa.transaction_status.initiator_password');
+        $securityCredential = $this->engine->computeSecurityCredential($initiatorPass);
+        $remarks            = $this->engine->getConfig()->get('mpesa.transaction_status.remarks');
+        $occasion           = $this->engine->getConfig()->get('mpesa.transaction_status.occasion');
+        $identifierType     = $this->engine->getConfig()->get('mpesa.transaction_status.identifier_type');
 
         $configParams = [
-            'Initiator'         => $initiator,
-            'SecurityCredential'=> $securityCredential,
-            'CommandID'         => $commandId,
-            'PartyA'            => $shortCode,
-            'IdentifierType'    => $identifierType,
-            'QueueTimeOutURL'   => $timeoutCallback,
-            'ResultURL'         => $successCallback,
-            'Remarks'           => $remarks,
-            'Occasion'          => $occasion,
+            'Initiator'          => $initiator,
+            'SecurityCredential' => $securityCredential,
+            'CommandID'          => $commandId,
+            'PartyA'             => $shortCode,
+            'IdentifierType'     => $identifierType,
+            'QueueTimeOutURL'    => $timeoutCallback,
+            'ResultURL'          => $successCallback,
+            'Remarks'            => $remarks,
+            'Occasion'           => $occasion,
         ];
 
-        // Normalize user-provided params and merge with config defaults
-        $userParams = $this->engine->normalizeParams($params, [
-            'initiator' => 'Initiator',
-            'transaction_id' => 'TransactionID',
+        $mappings = [
+            'initiator'       => 'Initiator',
+            'transaction_id'  => 'TransactionID',
             'identifier_type' => 'IdentifierType',
-        ]);
-        $body = array_merge($configParams, $userParams);
+        ];
 
-        // Final normalization pass to ensure all merged fields are safe
-        $body = $this->engine->normalizeParams($body, [
-            'InitiatorName' => 'Initiator', // Status uses 'Initiator'
-        ]);
+        $body = $this->prepareBody($configParams, $params, $mappings);
 
         return $this->engine->makePostRequest([
             'endpoint' => $this->endpoint,
-            'body' => $body
-        ],$appName);
+            'body'     => $body
+        ], $appName);
     }
 }

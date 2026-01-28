@@ -2,57 +2,49 @@
 
 namespace Yourdudeken\Mpesa\LipaNaMpesaOnline;
 
-use Yourdudeken\Mpesa\Engine\Core;
+use Yourdudeken\Mpesa\Engine\AbstractTransaction;
 
-class STKStatusQuery{
+class STKStatusQuery extends AbstractTransaction
+{
+    protected string $endpoint = 'mpesa/stkpushquery/v1/query';
 
-    protected $endpoint = 'mpesa/stkpushquery/v1/query';
-
-    protected $engine;
-
-    protected $validationRules = [
+    protected array $validationRules = [
         'BusinessShortCode:BusinessShortCode' => 'required()({label} is required) | number',
-        'Password:Password' => 'required()({label} is required)',
-        'Timestamp:Timestamp' => 'required()({label} is required)',
+        'Password:Password'                   => 'required()({label} is required)',
+        'Timestamp:Timestamp'                 => 'required()({label} is required)',
         'CheckoutRequestID:CheckoutRequestID' => 'required()({label} is required)'
     ];
 
     /**
-     * STKStatusQuery constructor.
+     * Initiate an STK Status Query request.
      *
-     * @param Core $engine
+     * @param array  $params
+     * @param string $appName
+     * @return mixed
+     * @throws \Exception
      */
-    public function __construct(Core $engine)
+    public function submit(array $params = [], string $appName = 'default'): mixed
     {
-        $this->engine  = $engine;
-        $this->engine->setValidationRules($this->validationRules);
-    }
-
-    public function submit($params = [],$appName='default'){
         $time      = $this->engine->getCurrentRequestTime();
-        $shortCode = $this->engine->config->get('mpesa.lnmo.short_code');
-        $passkey   = $this->engine->config->get('mpesa.lnmo.passkey');
-        $password  = \base64_encode($shortCode . $passkey . $time);
+        $shortCode = $this->engine->getConfig()->get('mpesa.lnmo.short_code');
+        $passkey   = $this->engine->getConfig()->get('mpesa.lnmo.passkey');
+        $password  = base64_encode($shortCode . $passkey . $time);
 
-        // Computed and params from config file (pre-normalized for M-Pesa API)
         $configParams = [
             'BusinessShortCode' => $shortCode,
             'Password'          => $password,
             'Timestamp'         => $time,
         ];
 
-        // Normalize user-provided params and merge with config defaults
-        $userParams = $this->engine->normalizeParams($params, [
+        $mappings = [
             'checkout_request_id' => 'CheckoutRequestID',
-        ]);
-        $body = array_merge($configParams, $userParams);
+        ];
 
-        // Final normalization pass
-        $body = $this->engine->normalizeParams($body);
+        $body = $this->prepareBody($configParams, $params, $mappings);
 
         return $this->engine->makePostRequest([
             'endpoint' => $this->endpoint,
-            'body' => $body
-        ],$appName);
+            'body'     => $body
+        ], $appName);
     }
 }

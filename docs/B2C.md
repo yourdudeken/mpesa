@@ -20,23 +20,30 @@ Note this package allows you to override preconfigured parameters for this endpo
 
 ```php
 <?php
-require "../src/autoload.php";
+require "vendor/autoload.php";
 
 use Yourdudeken\Mpesa\Init as Mpesa;
 
 $mpesa = new Mpesa([
-    'consumer_key'       => '...',
-    'consumer_secret'    => '...',
-    'initiator_name'     => 'testapi',
-    'initiator_password' => '...',
-    'short_code'         => '600000',
-    'callback'           => 'https://example.com/b2c'
+    'auth' => [
+        'consumer_key'    => '...',
+        'consumer_secret' => '...',
+    ],
+    'initiator' => [
+        'name'     => 'testapi',
+        'password' => '...',
+    ],
+    'b2c' => [
+        'short_code' => '600000',
+    ]
 ]);
 
 try {
-    $response = $mpesa->B2C([
+    $response = $mpesa->b2c->submit([
         'amount' => 100,
-        'partyB' => '2547XXXXXXXX'
+        'phone'  => '2547XXXXXXXX',
+        'result_url'  => 'https://example.com/b2c/result',
+        'timeout_url' => 'https://example.com/b2c/timeout',
     ]);
     
     echo json_encode($response);
@@ -54,9 +61,11 @@ class PaymentController {
    public function payCustomer() {
       $mpesa = new Mpesa(config('mpesa'));
       
-      $response = $mpesa->B2C([
+      $response = $mpesa->b2c->submit([
           'amount' => 100,
-          'partyB' => '2547XXXXXXXX'
+          'phone'  => '2547XXXXXXXX',
+          'result_url'  => route('mpesa.b2c.result'),
+          'timeout_url' => route('mpesa.b2c.timeout'),
       ]); 
       
       return response()->json($response);

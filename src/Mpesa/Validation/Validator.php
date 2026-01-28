@@ -96,53 +96,47 @@ class Validator implements ValidatorInterface
     /**
      * @var boolean
      */
-    protected $wasValidated = false;
+    protected bool $wasValidated = false;
+
+    /**
+     * @var array<string, ValueValidator>
+     */
+    protected array $rules = [];
 
     /**
      * @var array
      */
-    protected $rules = array();
+    protected array $messages = [];
 
     /**
-     * @var array
+     * @var RuleFactory
      */
-    protected $messages = array();
-
-    /**
-     * @var \Yourdudeken\Mpesa\Validation\RuleFactory
-     */
-    protected $ruleFactory;
+    protected RuleFactory $ruleFactory;
 
     /**
      * @var ErrorMessage
      */
-    protected $errorMessagePrototype;
+    protected ErrorMessage $errorMessagePrototype;
 
     /**
      * The object that will contain the data
      *
-     * @var \Yourdudeken\Mpesa\Validation\DataWrapper\WrapperInterface
+     * @var DataWrapper\WrapperInterface|null
      */
-    protected $dataWrapper;
+    protected ?DataWrapper\WrapperInterface $dataWrapper = null;
 
     public function __construct(RuleFactory $ruleFactory = null, ErrorMessage $errorMessagePrototype = null)
     {
-        if (!$ruleFactory) {
-            $ruleFactory = new RuleFactory();
-        }
-        $this->ruleFactory = $ruleFactory;
-        if (!$errorMessagePrototype) {
-            $errorMessagePrototype = new ErrorMessage();
-        }
-        $this->errorMessagePrototype = $errorMessagePrototype;
+        $this->ruleFactory = $ruleFactory ?: new RuleFactory();
+        $this->errorMessagePrototype = $errorMessagePrototype ?: new ErrorMessage();
     }
 
     /**
      * Retrieve the rule factory
      *
-     * @return \Yourdudeken\Mpesa\Validation\RuleFactory
+     * @return RuleFactory
      */
-    public function getRuleFactory()
+    public function getRuleFactory(): RuleFactory
     {
         return $this->ruleFactory;
     }
@@ -150,11 +144,9 @@ class Validator implements ValidatorInterface
     /**
      * @param ErrorMessage $errorMessagePrototype
      *
-     * @throws \InvalidArgumentException
-     *
-     * @return \Yourdudeken\Mpesa\Validation\Rule\AbstractValidator
+     * @return $this
      */
-    public function setErrorMessagePrototype(ErrorMessage $errorMessagePrototype)
+    public function setErrorMessagePrototype(ErrorMessage $errorMessagePrototype): self
     {
         $this->errorMessagePrototype = $errorMessagePrototype;
 
@@ -166,45 +158,25 @@ class Validator implements ValidatorInterface
      *
      * @return ErrorMessage
      */
-    public function getErroMessagePrototype()
+    public function getErrorMessagePrototype(): ErrorMessage
     {
         return $this->errorMessagePrototype;
     }
 
     /**
-     * @example
-     * // add multiple rules at once
-     * $validator->add(array(
-     *   'field_a' => 'required',
-     *   'field_b' => array('required', array('email', null, '{label} must be an email', 'Field B')),
-     * ));
+     * Add rules
      *
-     * // add multiple rules using arrays
-     * $validator->add('field', array('required', 'email'));
-     *
-     * // add multiple rules using a string
-     * $validator->add('field', 'required | email');
-     *
-     * // add validator with options
-     * $validator->add('field:Label', 'minlength', array('min' => 2), '{label} should have at least {min} characters');
-     *
-     * // add validator with string and parameters as JSON string
-     * $validator->add('field:Label', 'minlength({"min": 2})({label} should have at least {min} characters)');
-     *
-     * // add validator with string and parameters as query string
-     * $validator->add('field:label', 'minlength(min=2)({label} should have at least {min} characters)');
-     *
-     * @param string $selector
-     * @param string|callback $name
-     * @param string|array $options
-     * @param string $messageTemplate
-     * @param string $label
+     * @param mixed $selector
+     * @param mixed|null $name
+     * @param mixed|null $options
+     * @param string|null $messageTemplate
+     * @param string|null $label
      *
      * @throws \InvalidArgumentException
      *
-     * @return Validator
+     * @return $this
      */
-    public function add($selector, $name = null, $options = null, $messageTemplate = null, $label = null)
+    public function add(mixed $selector, mixed $name = null, mixed $options = null, ?string $messageTemplate = null, ?string $label = null): self
     {
         // the $selector is an associative array with $selector => $rules
         if (func_num_args() == 1) {
@@ -215,13 +187,15 @@ class Validator implements ValidatorInterface
             return $this->addMultiple($selector);
         }
 
-        // check if the selector is in the form of 'selector:Label'
-        if (strpos($selector, ':') !== false) {
-            list($selector, $label) = explode(':', $selector, 2);
-        }
+        if (is_string($selector)) {
+            // check if the selector is in the form of 'selector:Label'
+            if (str_contains($selector, ':')) {
+                [$selector, $label] = explode(':', $selector, 2);
+            }
 
-        $this->ensureSelectorRulesExist($selector, $label);
-        call_user_func(array( $this->rules[$selector], 'add' ), $name, $options, $messageTemplate, $label);
+            $this->ensureSelectorRulesExist($selector, $label);
+            $this->rules[$selector]->add($name, $options, $messageTemplate, $label);
+        }
 
         return $this;
     }
@@ -229,13 +203,13 @@ class Validator implements ValidatorInterface
     /**
      * @param array $selectorRulesCollection
      *
-     * @return Validator
+     * @return $this
      */
-    public function addMultiple($selectorRulesCollection)
+    public function addMultiple(array $selectorRulesCollection): self
     {
         foreach ($selectorRulesCollection as $selector => $rules) {
             // a single rule was passed for the $valueSelector
-            if (! is_array($rules)) {
+            if (!is_array($rules)) {
                 $this->add($selector, $rules);
                 continue;
             }
@@ -245,13 +219,7 @@ class Validator implements ValidatorInterface
                 // the rule is an array, this means it contains $name, $options, $messageTemplate, $label
                 if (is_array($rule)) {
                     array_unshift($rule, $selector);
-                    call_user_func_array(
-                        array(
-                            $this,
-                            'add'
-                        ),
-                        $rule
-                    );
+                    call_user_func_array([$this, 'add'], $rule);
                     // the rule is only the name of the validator
                 } else {
                     $this->add($selector, $rule);
@@ -264,50 +232,45 @@ class Validator implements ValidatorInterface
 
     /**
      * @param string $selector
-     *            data selector
      * @param mixed $name
-     *            rule name or true if all rules should be deleted for that selector
-     * @param mixed $options
-     *            rule options, necessary for rules that depend on params for their ID
+     * @param mixed|null $options
      *
-     * @return self
+     * @return $this
      */
-    public function remove($selector, $name = true, $options = null)
+    public function remove(string $selector, mixed $name = true, mixed $options = null): self
     {
         if (!array_key_exists($selector, $this->rules)) {
             return $this;
         }
-        /* @var $collection \Yourdudeken\Mpesa\Validation\ValueValidator */
-        $collection = $this->rules[$selector];
-        $collection->remove($name, $options);
+        
+        $this->rules[$selector]->remove($name, $options);
 
         return $this;
     }
 
     /**
      * The data wrapper will be used to wrap around the data passed to the validator
-     * This way you can validate anything, not just arrays (which is the default)
      *
-     * @param mixed $data
+     * @param mixed|null $data
      *
-     * @return \Yourdudeken\Mpesa\Validation\DataWrapper\WrapperInterface
+     * @return DataWrapper\WrapperInterface
      */
-    public function getDataWrapper($data = null)
+    public function getDataWrapper(mixed $data = null): DataWrapper\WrapperInterface
     {
         // if $data is set reconstruct the data wrapper
-        if (!$this->dataWrapper || $data) {
+        if (!$this->dataWrapper || $data !== null) {
             $this->dataWrapper = new DataWrapper\ArrayWrapper($data);
         }
 
         return $this->dataWrapper;
     }
 
-    public function setData($data)
+    public function setData(mixed $data): self
     {
         $this->getDataWrapper($data);
         $this->wasValidated = false;
         // reset messages
-        $this->messages = array();
+        $this->messages = [];
 
         return $this;
     }
@@ -315,49 +278,51 @@ class Validator implements ValidatorInterface
     /**
      * Performs the validation
      *
-     * @param mixed $data
-     *            array to be validated
+     * @param mixed|null $data
      *
      * @return boolean
      */
-    public function validate($data = null)
+    public function validate(mixed $data = null): bool
     {
         if ($data !== null) {
             $this->setData($data);
         }
         // data was already validated, return the results immediately
         if ($this->wasValidated === true) {
-            return $this->wasValidated && count($this->messages) === 0;
+            return count($this->messages) === 0;
         }
+
+        if (!$this->dataWrapper) {
+            return true;
+        }
+
         foreach ($this->rules as $selector => $valueValidator) {
-            foreach ($this->getDataWrapper()->getItemsBySelector($selector) as $valueIdentifier => $value) {
-                /* @var $valueValidator \Yourdudeken\Mpesa\Validation\ValueValidator */
-                if (!$valueValidator->validate($value, $valueIdentifier, $this->getDataWrapper())) {
+            foreach ($this->dataWrapper->getItemsBySelector($selector) as $valueIdentifier => $value) {
+                if (!$valueValidator->validate($value, $valueIdentifier, $this->dataWrapper)) {
                     foreach ($valueValidator->getMessages() as $message) {
-                        $this->addMessage($valueIdentifier, $message);
+                        $this->addMessage((string) $valueIdentifier, $message);
                     }
                 }
             }
         }
         $this->wasValidated = true;
 
-        return $this->wasValidated && count($this->messages) === 0;
+        return count($this->messages) === 0;
     }
 
     /**
      * @param string $item
-     *            data identifier (eg: 'email', 'addresses[0][state]')
-     * @param string $message
+     * @param mixed|null $message
      *
-     * @return self
+     * @return $this
      */
-    public function addMessage($item, $message = null)
+    public function addMessage(string $item, mixed $message = null): self
     {
         if ($message === null || $message === '') {
             return $this;
         }
         if (!array_key_exists($item, $this->messages)) {
-            $this->messages[$item] = array();
+            $this->messages[$item] = [];
         }
         $this->messages[$item][] = $message;
 
@@ -367,53 +332,50 @@ class Validator implements ValidatorInterface
     /**
      * Clears the messages of an item
      *
-     * @param string $item
+     * @param string|null $item
      *
-     * @return self
+     * @return $this
      */
-    public function clearMessages($item = null)
+    public function clearMessages(?string $item = null): self
     {
-        if (is_string($item)) {
-            if (array_key_exists($item, $this->messages)) {
-                unset($this->messages[$item]);
-            }
-        } elseif ($item === null) {
-            $this->messages = array();
+        if ($item !== null) {
+            unset($this->messages[$item]);
+        } else {
+            $this->messages = [];
         }
 
         return $this;
     }
 
     /**
-     * @param string $item
-     *            key of the messages array (eg: 'password', 'addresses[0][line_1]')
+     * @param string|null $item
      *
      * @return array
      */
-    public function getMessages($item = null)
+    public function getMessages(?string $item = null): array
     {
-        if (is_string($item)) {
-            return array_key_exists($item, $this->messages) ? $this->messages[$item] : array();
+        if ($item !== null) {
+            return $this->messages[$item] ?? [];
         }
 
         return $this->messages;
     }
 
-    public function getRules()
+    public function getRules(): array
     {
         return $this->rules;
     }
 
     /**
      * @param string $selector
-     * @param string $label
+     * @param string|null $label
      */
-    protected function ensureSelectorRulesExist($selector, $label = null)
+    protected function ensureSelectorRulesExist(string $selector, ?string $label = null): void
     {
         if (!isset($this->rules[$selector])) {
             $this->rules[$selector] = new ValueValidator(
                 $this->getRuleFactory(),
-                $this->getErroMessagePrototype(),
+                $this->getErrorMessagePrototype(),
                 $label
             );
         }

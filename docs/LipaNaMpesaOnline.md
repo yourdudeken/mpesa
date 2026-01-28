@@ -21,22 +21,26 @@ Note this package allows you to override preconfigured parameters for this endpo
 
 ```php
 <?php
-require "../src/autoload.php";
+require "vendor/autoload.php";
 
 use Yourdudeken\Mpesa\Init as Mpesa;
 
 $mpesa = new Mpesa([
-    'consumer_key'    => '...',
-    'consumer_secret' => '...',
-    'short_code'      => '174379',
-    'passkey'         => '...',
-    'callback'        => 'https://example.com/stk'
+    'auth' => [
+        'consumer_key'    => '...',
+        'consumer_secret' => '...',
+    ],
+    'stk' => [
+        'short_code'      => '174379',
+        'passkey'         => '...',
+    ]
 ]);
 
 try {
-    $response = $mpesa->STKPush([
+    $response = $mpesa->stk->submit([
         'amount'      => 10,
-        'phoneNumber' => '2547XXXXXXXX'
+        'phone'       => '2547XXXXXXXX',
+        'callback_url' => 'https://example.com/stk/callback'
     ]);
     
     echo json_encode($response);
@@ -55,9 +59,10 @@ class CheckoutController {
       // Configuration can be central or passed here
       $mpesa = new Mpesa(config('mpesa'));
       
-      $response = $mpesa->STKPush([
+      $response = $mpesa->stk->submit([
           'amount'      => 10,
-          'phoneNumber' => '2547XXXXXXXX'
+          'phone'       => '2547XXXXXXXX',
+          'callback_url' => route('mpesa.callback')
       ]); 
       
       return response()->json($response);
@@ -223,10 +228,10 @@ echo json_encode(['ResultCode' => 0, 'ResultDesc' => 'Success']);
 ```
 
 ### STK Status Query
-You can also query the status of an STK Push request using the STKStatus method. All security parameters (ShortCode, Password, Timestamp) are generated automatically from your config:
+You can also query the status of an STK Push request using the stkStatus service. All security parameters (ShortCode, Password, Timestamp) are generated automatically from your config:
 
 ```php
-$response = $mpesa->STKStatus([
+$response = $mpesa->stkStatus->submit([
     'checkoutRequestID' => 'ws_CO_191220191020363925'
 ]);
 ```

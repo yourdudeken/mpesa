@@ -20,22 +20,29 @@ Note this package allows you to override preconfigured parameters for this endpo
 
 ```php
 <?php
-require "../src/autoload.php";
+require "vendor/autoload.php";
 
 use Yourdudeken\Mpesa\Init as Mpesa;
 
 $mpesa = new Mpesa([
-    'consumer_key'       => '...',
-    'consumer_secret'    => '...',
-    'initiator_name'     => 'testapi',
-    'initiator_password' => '...',
-    'short_code'         => '600000',
-    'callback'           => 'https://example.com/balance'
+    'auth' => [
+        'consumer_key'    => '...',
+        'consumer_secret' => '...',
+    ],
+    'initiator' => [
+        'name'     => 'testapi',
+        'password' => '...',
+    ],
+    'account_balance' => [
+        'short_code' => '600000',
+    ]
 ]);
 
 try {
-    // Everything is fetched from config
-    $response = $mpesa->accountBalance();
+    $response = $mpesa->balance->submit([
+        'result_url'  => 'https://example.com/balance/result',
+        'timeout_url' => 'https://example.com/balance/timeout',
+    ]);
     
     echo json_encode($response);
 } catch(\Exception $e) {
@@ -52,7 +59,10 @@ class MpesaController {
    public function checkBalance() {
       $mpesa = new Mpesa(config('mpesa'));
       
-      $response = $mpesa->accountBalance(); 
+      $response = $mpesa->balance->submit([
+          'result_url'  => route('mpesa.balance.result'),
+          'timeout_url' => route('mpesa.balance.timeout'),
+      ]); 
       
       return response()->json($response);
    }

@@ -1,0 +1,17 @@
+{
+    "name": "yourdudeken/mpesa-example",
+    "description": "Example usage of the yourdudeken/mpesa package",
+    "require": {
+        "yourdudeken/mpesa": "^1.5"
+    },
+    "autoload": {
+        "classmap": [
+            "models/",
+            "database/"
+        ]
+    },
+    "config": {
+        "sort-packages": true,
+        "optimize-autoloader": true
+    }
+}

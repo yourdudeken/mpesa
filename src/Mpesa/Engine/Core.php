@@ -2,221 +2,239 @@
 
 namespace Yourdudeken\Mpesa\Engine;
 
-use Yourdudeken\Mpesa\Validation\Validator;    
+use Exception;
 use Yourdudeken\Mpesa\Auth\Authenticator;
 use Yourdudeken\Mpesa\Contracts\CacheStore;
-use Yourdudeken\Mpesa\Exceptions\ConfigurationException;
-use Yourdudeken\Mpesa\Exceptions\MpesaException;
 use Yourdudeken\Mpesa\Contracts\ConfigurationStore;
 use Yourdudeken\Mpesa\Contracts\HttpRequest;
+use Yourdudeken\Mpesa\Exceptions\ConfigurationException;
+use Yourdudeken\Mpesa\Exceptions\MpesaException;
+use Yourdudeken\Mpesa\Validation\Validator;
 
 /**
  * Class Core.
  *
  * @category PHP
- *
  */
 class Core
 {
     /**
      * @var ConfigurationStore
      */
-    public $config;
+    protected ConfigurationStore $config;
 
     /**
      * @var CacheStore
      */
-    public $cache;
+    protected CacheStore $cache;
 
     /**
      * @var Core
      */
-    public static $instance;
+    protected static Core $instance;
 
     /**
      * @var Authenticator
      */
-    public $auth;
+    protected Authenticator $auth;
 
     /**
      * @var string
      */
-    public $baseUrl;
+    protected string $baseUrl;
 
     /**
      * @var Validator
-    */
-    public $validator;
-
-    /**
-     * @var validation rules
-     * 
-    */
-    public $validationRules;
-
-    /**
-     * @var HttpRequest curl
      */
-    protected $curl;
+    protected Validator $validator;
+
+    /**
+     * @var array
+     */
+    protected array $validationRules = [];
+
+    /**
+     * @var HttpRequest
+     */
+    protected HttpRequest $httpClient;
 
     /**
      * Core constructor.
      *
-     * @param ConfigurationStore $configStore
-     * @param CacheStore         $cacheStore
+     * @param ConfigurationStore $config
+     * @param CacheStore         $cache
+     * @param HttpRequest        $httpClient
+     * @param Authenticator      $auth
      */
     public function __construct(
-        ConfigurationStore $configStore, 
-        CacheStore $cacheStore,
-        HttpRequest $curl,
+        ConfigurationStore $config,
+        CacheStore $cache,
+        HttpRequest $httpClient,
         Authenticator $auth
-    ){
-        $this->config = $configStore;
-        $this->cache  = $cacheStore;
-        $this->curl = $curl;
+    ) {
+        $this->config = $config;
+        $this->cache = $cache;
+        $this->httpClient = $httpClient;
+        $this->auth = $auth;
+        
         $this->setBaseUrl();
         $this->validator = new Validator();
         self::$instance = $this;
-        $this->auth = $auth;
-        $this->auth->setEngine($this);
     }
 
     /**
-     * Validate the current package state.
+     * Set the API base URL from configuration.
      */
-    private function setBaseUrl(){
-        $apiRoot = $this->config->get('mpesa.apiUrl', '');
-        if (substr($apiRoot, strlen($apiRoot) - 1) !== '/') {
-            $apiRoot = $apiRoot . '/';
-        }
-        $this->baseUrl  = $apiRoot;
+    protected function setBaseUrl(): void
+    {
+        $apiRoot = $this->config->get('mpesa.apiUrl', 'https://sandbox.safaricom.co.ke/');
+        $this->baseUrl = rtrim($apiRoot, '/') . '/';
     }
 
-    public function setValidationRules($rules){
+    /**
+     * Set validation rules for the current request.
+     *
+     * @param array $rules
+     */
+    public function setValidationRules(array $rules): void
+    {
         $this->validationRules = $rules;
-        foreach($this->validationRules as $key => $value){
-            $this->validator->add($key,$value);
+        foreach ($this->validationRules as $key => $value) {
+            $this->validator->add($key, $value);
         }
     }
 
-    private function validateRequestBodyParams($params){
-        if ($this->validator->validate($params) == false) {
+    /**
+     * Validate request body parameters.
+     *
+     * @param array $params
+     * @return bool
+     * @throws ConfigurationException
+     */
+    protected function validateRequestBodyParams(array $params): bool
+    {
+        if (!$this->validator->validate($params)) {
             $errors = $this->validator->getMessages();
-            $finalErrors = [];
-            foreach($errors as $err){
-                foreach($err as $er){
-                    $finalErrors[] = $er->__toString();
+            $messages = [];
+            foreach ($errors as $fieldErrors) {
+                foreach ($fieldErrors as $error) {
+                    $messages[] = (string) $error;
                 }
             }
-            $this->throwApiConfException(\json_encode($finalErrors));
+            throw new ConfigurationException(json_encode($messages), 422);
         }
         return true;
     }
 
     /**
-     * Throw an exception that describes a missing param.
+     * Get current request time in YmdHis format.
      *
-     * @param $reason
-     *
-     * @return ConfigurationException
+     * @return string
      */
-    public function throwApiConfException($reason){
-        throw new ConfigurationException($reason,422);
-    }
-
-    /**
-     * Get current request time
-     * @return 
-     */
-    public function getCurrentRequestTime(){
-        date_default_timezone_set('UTC');
-        $date = new \DateTime();
+    public function getCurrentRequestTime(): string
+    {
+        $date = new \DateTime('now', new \DateTimeZone('UTC'));
         return $date->format('YmdHis');
     }
 
     /**
-    * Make a post request
-    *
-    * @param Array $options
-    *
-    * @return mixed|\Psr\Http\Message\ResponseInterface
-    **/
-    public function makePostRequest($options = [],$appName = 'default'){
-        // Filter out null values to prevent Safaricom schema rejection (400 Bad Request)
-        $body = array_filter($options['body'], function($value) {
-            return $value !== null;
-        });
+     * Make a POST request.
+     *
+     * @param array  $options
+     * @param string $appName
+     * @return mixed
+     * @throws Exception
+     */
+    public function makePostRequest(array $options = [], string $appName = 'default'): mixed
+    {
+        $body = array_filter($options['body'], fn($v) => $v !== null);
 
-        $response = $this->request('POST', $options['endpoint'], [
+        return $this->request('POST', $options['endpoint'], [
             'headers' => [
                 'Authorization: Bearer ' . $this->auth->authenticate($appName),
                 'Content-Type: application/json',
             ],
             'body' => $body,
         ]);
-
-        return $response;
-    }
-
-    private function request($method,$endpoint,$params){
-        // Validate params
-        if (!empty($this->validationRules) && isset($params['body'])) {
-            $this->validateRequestBodyParams($params['body']);
-        }
-        $url = $this->baseUrl.$endpoint;
-        $this->curl->reset();
-        $this->curl->setOption(CURLOPT_URL, $url);
-        $this->curl->setOption(CURLOPT_RETURNTRANSFER, true);
-        $this->curl->setOption(CURLOPT_HEADER, false);
-        $this->curl->setOption(CURLOPT_SSL_VERIFYPEER, false);
-        $this->curl->setOption(CURLOPT_HTTPHEADER, $params['headers']);
-
-        if($method === 'POST'){
-            $this->curl->setOption(CURLOPT_POST, true);
-            $this->curl->setOption(CURLOPT_POSTFIELDS, json_encode($params['body']));
-        }
-
-        $result = $this->curl->execute();
-        $httpCode = $this->curl->getInfo(CURLINFO_HTTP_CODE);
-
-        if( $result === false){ 
-            $error = $this->curl->error() ?: 'cURL request failed';
-            throw new \Exception($error);
-        }
-        if($httpCode != 200){
-            $message = $result ?: 'HTTP request failed with code ' . $httpCode;
-            throw new MpesaException($message,$httpCode);
-        } 
-        return json_decode($result); 
     }
 
     /**
-    * Make a GET request
-    *
-    * @param Array $options
-    *
-    * @return mixed|\Psr\Http\Message\ResponseInterface
-    **/
-    public function makeGetRequest($options = []){
+     * Make a GET request.
+     *
+     * @param array $options
+     * @return mixed
+     * @throws Exception
+     */
+    public function makeGetRequest(array $options = []): mixed
+    {
         return $this->request('GET', $options['endpoint'], [
             'headers' => [
-                'Authorization: Basic ' . $options['token'],
+                'Authorization: Basic ' . ($options['token'] ?? ''),
                 'Content-Type: application/json',
             ],
         ]);
     }
 
     /**
-     * Normalize user parameters to match Safaricom's expected keys and sanitize metadata.
+     * Execute HTTP request.
+     *
+     * @param string $method
+     * @param string $endpoint
+     * @param array  $params
+     * @return mixed
+     * @throws Exception
+     */
+    protected function request(string $method, string $endpoint, array $params): mixed
+    {
+        if (!empty($this->validationRules) && isset($params['body'])) {
+            $this->validateRequestBodyParams($params['body']);
+        }
+
+        $url = $this->baseUrl . ltrim($endpoint, '/');
+        
+        $this->httpClient->reset();
+        $this->httpClient->setOption(CURLOPT_URL, $url);
+        $this->httpClient->setOption(CURLOPT_RETURNTRANSFER, true);
+        $this->httpClient->setOption(CURLOPT_HTTPHEADER, $params['headers']);
+        
+        // Security: Enable SSL verification by default
+        $this->httpClient->setOption(CURLOPT_SSL_VERIFYPEER, true);
+        $this->httpClient->setOption(CURLOPT_SSL_VERIFYHOST, 2);
+
+        // Allow custom CA bundle if provided
+        if ($caPath = $this->config->get('mpesa.ca_bundle')) {
+            $this->httpClient->setOption(CURLOPT_CAINFO, $caPath);
+        }
+
+        if ($method === 'POST') {
+            $this->httpClient->setOption(CURLOPT_POST, true);
+            $this->httpClient->setOption(CURLOPT_POSTFIELDS, json_encode($params['body']));
+        }
+
+        $result = $this->httpClient->execute();
+        $httpCode = (int) $this->httpClient->getInfo(CURLINFO_HTTP_CODE);
+
+        if ($result === false) {
+            throw new Exception($this->httpClient->error() ?: 'HTTP request failed');
+        }
+
+        if ($httpCode >= 400) {
+            throw new MpesaException($result ?: "Request failed with status {$httpCode}", $httpCode);
+        }
+
+        return json_decode($result);
+    }
+
+    /**
+     * Normalize user parameters and sanitize metadata for Safaricom.
      *
      * @param array $params
      * @param array $mappings
      * @return array
      */
-    public function normalizeParams($params, $mappings = []) {
+    public function normalizeParams(array $params, array $mappings = []): array
+    {
         $normalized = [];
-
-        // Define common mappings to Safaricom's PascalCase
         $commonMappings = [
             'amount'            => 'Amount',
             'phone'             => 'PhoneNumber',
@@ -241,7 +259,6 @@ class Core
             'party_b'           => 'PartyB',
         ];
 
-        // Merge common mappings with provided specific mappings
         $allMappings = array_merge($commonMappings, $mappings);
 
         foreach ($params as $key => $value) {
@@ -249,21 +266,15 @@ class Core
             $normalized[$normalizedKey] = $value;
         }
 
-        // Sanitize metadata fields if they exist (Safaricom limits)
+        // Apply Safaricom length limits
         if (isset($normalized['Remarks'])) {
-            $normalized['Remarks'] = substr(trim($normalized['Remarks']), 0, 100);
-            if (empty($normalized['Remarks'])) {
-                $normalized['Remarks'] = 'None';
-            }
+            $normalized['Remarks'] = substr(trim($normalized['Remarks']), 0, 100) ?: 'None';
         }
         if (isset($normalized['TransactionDesc'])) {
             $normalized['TransactionDesc'] = substr(trim($normalized['TransactionDesc']), 0, 100);
         }
         if (isset($normalized['Occasion'])) {
-            $normalized['Occasion'] = substr(trim($normalized['Occasion']), 0, 100);
-            if (empty($normalized['Occasion'])) {
-                $normalized['Occasion'] = null; // Will be pruned by makePostRequest
-            }
+            $normalized['Occasion'] = substr(trim($normalized['Occasion']), 0, 100) ?: null;
         }
         if (isset($normalized['AccountReference'])) {
             $normalized['AccountReference'] = substr(trim($normalized['AccountReference']), 0, 20);
@@ -273,39 +284,47 @@ class Core
     }
 
     /**
-     * Compute security credential
-     * 
+     * Compute security credential using Safaricom's public certificate.
+     *
+     * @param string $initiatorPass
+     * @return string
+     * @throws Exception
      */
-    public function computeSecurityCredential($initiatorPass){
-        // Get certificate path from config based on environment
+    public function computeSecurityCredential(string $initiatorPass): string
+    {
         $isSandbox = $this->config->get('mpesa.is_sandbox', true);
         
-        // Try to get custom certificate path first
-        $pubKeyFile = $this->config->get('mpesa.certificate_path');
-        
-        // If no custom path, use environment-specific path from config
-        if (empty($pubKeyFile)) {
-            if ($isSandbox) {
-                $pubKeyFile = $this->config->get('mpesa.certificate_path_sandbox');
-            } else {
-                $pubKeyFile = $this->config->get('mpesa.certificate_path_production');
-            }
-        }
-        
-        // Final fallback to internal certificates (should always work due to internal config)
+        $pubKeyFile = $this->config->get('mpesa.certificate_path')
+            ?? ($isSandbox 
+                ? $this->config->get('mpesa.certificate_path_sandbox')
+                : $this->config->get('mpesa.certificate_path_production'));
+
         if (empty($pubKeyFile)) {
             $pubKeyFile = $isSandbox 
                 ? __DIR__ . '/../../config/SandboxCertificate.cer'
                 : __DIR__ . '/../../config/ProductionCertificate.cer';
         }
-        
-        $pubKey = '';
-        if(\is_file($pubKeyFile)){
-            $pubKey = file_get_contents($pubKeyFile);
-        }else{
-            throw new \Exception("Certificate file not found at: " . $pubKeyFile);
+
+        if (!is_file($pubKeyFile)) {
+            throw new Exception("Certificate file not found: {$pubKeyFile}");
         }
-        openssl_public_encrypt($initiatorPass, $encrypted, $pubKey, OPENSSL_PKCS1_PADDING);
+
+        $pubKey = file_get_contents($pubKeyFile);
+        
+        if (!openssl_public_encrypt($initiatorPass, $encrypted, $pubKey, OPENSSL_PKCS1_PADDING)) {
+            throw new Exception('Failed to encrypt initiator password');
+        }
+
         return base64_encode($encrypted);
+    }
+
+    /**
+     * Get configuration store.
+     *
+     * @return ConfigurationStore
+     */
+    public function getConfig(): ConfigurationStore
+    {
+        return $this->config;
     }
 }

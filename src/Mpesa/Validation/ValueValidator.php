@@ -6,63 +6,56 @@ use Yourdudeken\Mpesa\Validation\Rule\AbstractRule;
 
 class ValueValidator
 {
-
     /**
      * The error messages generated after validation or set manually
      *
      * @var array
      */
-    protected $messages = array();
+    protected array $messages = [];
 
     /**
      * Will be used to construct the rules
      *
-     * @var \Yourdudeken\Mpesa\Validation\RuleFactory
+     * @var RuleFactory
      */
-    protected $ruleFactory;
+    protected RuleFactory $ruleFactory;
 
     /**
      * The prototype that will be used to generate the error message
      *
-     * @var \Yourdudeken\Mpesa\Validation\ErrorMessage
+     * @var ErrorMessage
      */
-    protected $errorMessagePrototype;
+    protected ErrorMessage $errorMessagePrototype;
 
     /**
      * The rule collections for the validation
      *
-     * @var \Yourdudeken\Mpesa\Validation\RuleCollection
+     * @var RuleCollection
      */
-    protected $rules;
+    protected RuleCollection $rules;
 
     /**
      * The label of the value to be validated
      *
-     * @var string
+     * @var string|null
      */
-    protected $label;
+    protected ?string $label = null;
 
 
     public function __construct(
         RuleFactory $ruleFactory = null,
         ErrorMessage $errorMessagePrototype = null,
-        $label = null
+        ?string $label = null
     ) {
-        if (!$ruleFactory) {
-            $ruleFactory = new RuleFactory();
-        }
-        $this->ruleFactory = $ruleFactory;
-        if (!$errorMessagePrototype) {
-            $errorMessagePrototype = new ErrorMessage();
-        }
-        $this->errorMessagePrototype = $errorMessagePrototype;
+        $this->ruleFactory = $ruleFactory ?: new RuleFactory();
+        $this->errorMessagePrototype = $errorMessagePrototype ?: new ErrorMessage();
         if ($label) {
             $this->label = $label;
         }
-        $this->rules = new RuleCollection;
+        $this->rules = new RuleCollection();
     }
 
-    public function setLabel($label = null)
+    public function setLabel(?string $label = null): self
     {
         $this->label = $label;
 
@@ -72,45 +65,26 @@ class ValueValidator
     /**
      * Add 1 or more validation rules
      *
-     * @example
-     * // add multiple rules at once
-     * $validator->add(array(
-     *   'required',
-     *   array('required', array('email', null, '{label} must be an email', 'Field B')),
-     * ));
+     * @param mixed $name
+     * @param mixed $options
+     * @param string|null $messageTemplate
+     * @param string|null $label
      *
-     * // add multiple rules using a string
-     * $validator->add('required | email');
-     *
-     * // add validator with options
-     * $validator->add('minlength', array('min' => 2), '{label} should have at least {min} characters', 'Field label');
-     *
-     * // add validator with string and parameters as JSON string
-     * $validator->add('minlength({"min": 2})({label} should have at least {min} characters)(Field label)');
-     *
-     * // add validator with string and parameters as query string
-     * $validator->add('minlength(min=2)({label} should have at least {min} characters)(Field label)');
-     *
-     * @param string|callback $name
-     * @param string|array $options
-     * @param string $messageTemplate
-     * @param string $label
-     *
-     * @return ValueValidator
+     * @return $this
      */
-    public function add($name, $options = null, $messageTemplate = null, $label = null)
+    public function add(mixed $name, mixed $options = null, ?string $messageTemplate = null, ?string $label = null): self
     {
         if (is_array($name) && !is_callable($name)) {
             return $this->addMultiple($name);
         }
         if (is_string($name)) {
             // rule was supplied like 'required | email'
-            if (strpos($name, ' | ') !== false) {
+            if (str_contains($name, ' | ')) {
                 return $this->addMultiple(explode(' | ', $name));
             }
             // rule was supplied like this 'length(2,10)(error message template)(label)'
-            if (strpos($name, '(') !== false) {
-                list($name, $options, $messageTemplate, $label) = $this->parseRule($name);
+            if (str_contains($name, '(')) {
+                [$name, $options, $messageTemplate, $label] = $this->parseRule($name);
             }
         }
 
@@ -127,33 +101,27 @@ class ValueValidator
     /**
      * @param array $rules
      *
-     * @return ValueValidator
+     * @return $this
      */
-    public function addMultiple($rules)
+    public function addMultiple(array $rules): self
     {
         foreach ($rules as $singleRule) {
             // make sure the rule is an array (the parameters of subsequent calls);
             $singleRule = is_array($singleRule) ? $singleRule : array(
                 $singleRule
             );
-            call_user_func_array(
-                array(
-                    $this,
-                    'add'
-                ),
-                $singleRule
-            );
+            call_user_func_array([$this, 'add'], $singleRule);
         }
 
         return $this;
     }
 
     /**
-     * @param AbstractValidator $validationRule
+     * @param AbstractRule $validationRule
      *
-     * @return ValueValidator
+     * @return $this
      */
-    public function addRule(AbstractRule $validationRule)
+    public function addRule(AbstractRule $validationRule): self
     {
         $validationRule->setErrorMessagePrototype($this->errorMessagePrototype);
         $this->rules->attach($validationRule);
@@ -165,15 +133,11 @@ class ValueValidator
      * Remove validation rule
      *
      * @param mixed $name
-     *            rule name or true if all rules should be deleted for that selector
      * @param mixed $options
-     *            rule options, necessary for rules that depend on params for their ID
      *
-     * @throws \InvalidArgumentException
-     * @internal param string $selector data selector
-     * @return self
+     * @return $this
      */
-    public function remove($name = true, $options = null)
+    public function remove(mixed $name = true, mixed $options = null): self
     {
         if ($name === true) {
             $this->rules = new RuleCollection();
@@ -189,31 +153,20 @@ class ValueValidator
     /**
      * Converts a rule that was supplied as string into a set of options that define the rule
      *
-     * @example 'minLength({"min":2})({label} must have at least {min} characters)(Street)'
-     *
-     *          will be converted into
-     *
-     *          array(
-     *          'minLength', // validator name
-     *          array('min' => 2'), // validator options
-     *          '{label} must have at least {min} characters',
-     *          'Street' // label
-     *          )
-     *
      * @param string $ruleAsString
      *
      * @return array
      */
-    protected function parseRule($ruleAsString)
+    protected function parseRule(string $ruleAsString): array
     {
-        $ruleAsString    = trim($ruleAsString);
-        $options         = array();
+        $ruleAsString = trim($ruleAsString);
+        $options = [];
         $messageTemplate = null;
-        $label           = null;
+        $label = null;
 
-        $name         = substr($ruleAsString, 0, strpos($ruleAsString, '('));
+        $name = substr($ruleAsString, 0, strpos($ruleAsString, '('));
         $ruleAsString = substr($ruleAsString, strpos($ruleAsString, '('));
-        $matches      = array();
+        $matches = [];
         preg_match_all('/\(([^\)]*)\)/', $ruleAsString, $matches);
 
         if (isset($matches[1])) {
@@ -228,19 +181,14 @@ class ValueValidator
             }
         }
 
-        return array(
-            $name,
-            $options,
-            $messageTemplate,
-            $label
-        );
+        return [$name, $options, $messageTemplate, $label];
     }
 
 
-    public function validate($value, $valueIdentifier = null, DataWrapper\WrapperInterface $context = null)
+    public function validate(mixed $value, mixed $valueIdentifier = null, ?DataWrapper\WrapperInterface $context = null): bool
     {
-        $this->messages = array();
-        $isRequired     = false;
+        $this->messages = [];
+        $isRequired = false;
         foreach ($this->rules as $rule) {
             if ($rule instanceof Rule\Required) {
                 $isRequired = true;
@@ -252,7 +200,7 @@ class ValueValidator
             return true;
         }
 
-        /* @var $rule \Yourdudeken\Mpesa\Validation\Rule\AbstractValidator */
+        /* @var $rule AbstractRule */
         foreach ($this->rules as $rule) {
             $rule->setContext($context);
             if (!$rule->validate($value, $valueIdentifier)) {
@@ -268,19 +216,19 @@ class ValueValidator
         return count($this->messages) === 0;
     }
 
-    public function getMessages()
+    public function getMessages(): array
     {
         return $this->messages;
     }
 
-    public function addMessage($message)
+    public function addMessage(mixed $message): self
     {
         array_push($this->messages, $message);
 
         return $this;
     }
 
-    public function getRules()
+    public function getRules(): RuleCollection
     {
         return $this->rules;
     }

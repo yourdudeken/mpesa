@@ -45,6 +45,14 @@ echo ""
 echo "All requirements met!"
 echo ""
 
+# Install dependencies
+if [ ! -d "vendor" ]; then
+    echo "Installing Composer dependencies..."
+    composer install
+else
+    echo "Composer dependencies already installed."
+fi
+
 # Check if database exists
 if [ ! -f "database/mpesa.db" ]; then
     echo "Initializing database..."
