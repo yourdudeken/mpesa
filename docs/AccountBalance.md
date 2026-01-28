@@ -20,22 +20,29 @@ Note this package allows you to override preconfigured parameters for this endpo
 
 ```php
 <?php
-require "../src/autoload.php";
+require "vendor/autoload.php";
 
 use Yourdudeken\Mpesa\Init as Mpesa;
 
 $mpesa = new Mpesa([
-    'consumer_key'       => '...',
-    'consumer_secret'    => '...',
-    'initiator_name'     => 'testapi',
-    'initiator_password' => '...',
-    'short_code'         => '600000',
-    'callback'           => 'https://example.com/balance'
+    'auth' => [
+        'consumer_key'    => '...',
+        'consumer_secret' => '...',
+    ],
+    'initiator' => [
+        'name'     => 'testapi',
+        'password' => '...',
+    ],
+    'account_balance' => [
+        'short_code' => '600000',
+    ]
 ]);
 
 try {
-    // Everything is fetched from config
-    $response = $mpesa->accountBalance();
+    $response = $mpesa->balance->submit([
+        'result_url'  => 'https://example.com/balance/result',
+        'timeout_url' => 'https://example.com/balance/timeout',
+    ]);
     
     echo json_encode($response);
 } catch(\Exception $e) {
@@ -52,7 +59,10 @@ class MpesaController {
    public function checkBalance() {
       $mpesa = new Mpesa(config('mpesa'));
       
-      $response = $mpesa->accountBalance(); 
+      $response = $mpesa->balance->submit([
+          'result_url'  => route('mpesa.balance.result'),
+          'timeout_url' => route('mpesa.balance.timeout'),
+      ]); 
       
       return response()->json($response);
    }
@@ -60,7 +70,7 @@ class MpesaController {
 ````
 
 ### Configuration Parameters
-The following parameters can be configured in `config/mpesa.php` under the `account_balance` section:
+The following parameters can be configured in `config/mpesa.php` under the `balance` section:
 
 - **initiator_name**: The name of the initiator making the request
 - **initiator_password**: The encrypted password for the initiator
@@ -70,7 +80,7 @@ The following parameters can be configured in `config/mpesa.php` under the `acco
 - **timeout_url** (optional): URL to receive timeout notifications. Falls back to global callback
 
 ### Request Parameters
-When calling the accountBalance method, you can pass the following parameters:
+When calling the balance->submit() method, you can pass the following parameters:
 
 - **identifierType** (optional): Type of organization (default: 4 for organization shortcode)
 - **remarks** (optional): Comments sent along with the request. Falls back to config default

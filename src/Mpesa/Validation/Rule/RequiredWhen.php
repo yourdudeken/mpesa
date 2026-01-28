@@ -10,13 +10,13 @@ class RequiredWhen extends Required
     const MESSAGE = 'This field is required';
     const LABELED_MESSAGE = '{label} is required';
 
-    public function getItemRule()
+    public function getItemRule(): AbstractRule
     {
         /* @var $rule AbstractValidator */
         $rule        = false;
         $ruleOptions = (isset($this->options[self::OPTION_RULE_OPTIONS])) ?
             (array) $this->options[self::OPTION_RULE_OPTIONS] :
-            array();
+            [];
 
         if (is_string($this->options[self::OPTION_RULE])) {
             $ruleClass = $this->options[self::OPTION_RULE];
@@ -36,13 +36,13 @@ class RequiredWhen extends Required
                 'Validator for the other item is not valid or cannot be constructed based on the data provided'
             );
         }
-        $context = $this->context ? $this->context : array();
+        $context = $this->context ? $this->context : [];
         $rule->setContext($context);
 
         return $rule;
     }
 
-    public function validate($value, $valueIdentifier = null)
+    public function validate(mixed $value, mixed $valueIdentifier = null): bool
     {
         $this->value = $value;
 

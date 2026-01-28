@@ -12,11 +12,11 @@ class Extension extends AbstractRule
 
     const LABELED_MESSAGE = '{label} does not have an acceptable extension ({file_extensions})';
 
-    protected $options = array(
-        self::OPTION_ALLOWED_EXTENSIONS => array()
-    );
+    protected array $options = [
+        self::OPTION_ALLOWED_EXTENSIONS => []
+    ];
 
-    public function setOption($name, $value)
+    public function setOption(string $name, mixed $value): self
     {
         if ($name == self::OPTION_ALLOWED_EXTENSIONS) {
             if (is_string($value)) {
@@ -29,7 +29,7 @@ class Extension extends AbstractRule
         return parent::setOption($name, $value);
     }
 
-    public function validate($value, $valueIdentifier = null)
+    public function validate(mixed $value, mixed $valueIdentifier = null): bool
     {
         $this->value = $value;
         if (! is_array($value) || ! isset($value['tmp_name'])) {
@@ -47,7 +47,7 @@ class Extension extends AbstractRule
         return $this->success;
     }
 
-    public function getPotentialMessage()
+    public function getPotentialMessage(): \Yourdudeken\Mpesa\Validation\ErrorMessage
     {
         $message        = parent::getPotentialMessage();
         $fileExtensions = array_map('strtoupper', $this->options[self::OPTION_ALLOWED_EXTENSIONS]);

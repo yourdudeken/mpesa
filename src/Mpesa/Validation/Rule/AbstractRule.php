@@ -16,9 +16,9 @@ abstract class AbstractRule
     /**
      * The validation context
      * This is the data set that the data being validated belongs to
-     * @var \Yourdudeken\Mpesa\Validation\DataWrapper\WrapperInterface
+     * @var WrapperInterface|null
      */
-    protected $context;
+    protected ?WrapperInterface $context = null;
 
     /**
      * Options for the validator.
@@ -26,22 +26,22 @@ abstract class AbstractRule
      *
      * @var array
      */
-    protected $options = array();
+    protected array $options = [];
 
     /**
      * Custom error message template for the validator instance
      * If you don't agree with the default messages that were provided
      *
-     * @var string
+     * @var string|null
      */
-    protected $messageTemplate;
+    protected ?string $messageTemplate = null;
 
     /**
      * Result of the last validation
      *
      * @var boolean
      */
-    protected $success = false;
+    protected bool $success = false;
 
     /**
      * Last value validated with the validator.
@@ -50,26 +50,26 @@ abstract class AbstractRule
      *
      * @var mixed
      */
-    protected $value;
+    protected mixed $value = null;
 
     /**
      * The error message prototype that will be used to generate the error message
      *
-     * @var ErrorMessage
+     * @var ErrorMessage|null
      */
-    protected $errorMessagePrototype;
+    protected ?ErrorMessage $errorMessagePrototype = null;
 
     /**
      * Options map in case the options are passed as list instead of associative array
      *
      * @var array
      */
-    protected $optionsIndexMap = array();
+    protected array $optionsIndexMap = [];
 
-    public function __construct($options = array())
+    public function __construct(mixed $options = [])
     {
         $options = $this->normalizeOptions($options);
-        if (is_array($options) && ! empty($options)) {
+        if (is_array($options) && !empty($options)) {
             foreach ($options as $k => $v) {
                 $this->setOption($k, $v);
             }
@@ -88,10 +88,10 @@ abstract class AbstractRule
      * @return array
      * @throws \InvalidArgumentException
      */
-    protected function normalizeOptions($options)
+    protected function normalizeOptions(mixed $options): array
     {
-        if (! $options) {
-            return array();
+        if (!$options) {
+            return [];
         }
 
         if (is_array($options) && $this->arrayIsAssoc($options)) {
@@ -99,18 +99,18 @@ abstract class AbstractRule
         }
 
         $result = $options;
-        if ($options && is_string($options)) {
+        if (is_string($options)) {
             $startChar = substr($options, 0, 1);
             if ($startChar == '{') {
                 $result = json_decode($options, true);
-            } elseif (strpos($options, '=') !== false) {
+            } elseif (str_contains($options, '=')) {
                 $result = $this->parseHttpQueryString($options);
             } else {
                 $result = $this->parseCsvString($options);
             }
         }
 
-        if (! is_array($result)) {
+        if (!is_array($result)) {
             throw new \InvalidArgumentException('Validator options should be an array, JSON string or query string');
         }
 
@@ -120,11 +120,11 @@ abstract class AbstractRule
     /**
      * Converts a HTTP query string to an array
      *
-     * @param $str
+     * @param string $str
      *
      * @return array
      */
-    protected function parseHttpQueryString($str)
+    protected function parseHttpQueryString(string $str): array
     {
         parse_str($str, $arr);
 
@@ -134,14 +134,14 @@ abstract class AbstractRule
     /**
      * Converts 'true' and 'false' strings to TRUE and FALSE
      *
-     * @param $v
+     * @param mixed $v
      *
-     * @return bool|array
+     * @return mixed
      */
-    protected function convertBooleanStrings($v)
+    protected function convertBooleanStrings(mixed $v): mixed
     {
         if (is_array($v)) {
-            return array_map(array( $this, 'convertBooleanStrings' ), $v);
+            return array_map([$this, 'convertBooleanStrings'], $v);
         }
         if ($v === 'true') {
             return true;
@@ -157,13 +157,13 @@ abstract class AbstractRule
      * Parses a CSV string and converts the result into an "options" array
      * (an associative array that contains the options for the validation rule)
      *
-     * @param $str
+     * @param string $str
      *
      * @return array
      */
-    protected function parseCsvString($str)
+    protected function parseCsvString(string $str): array
     {
-        if (! isset($this->optionsIndexMap) || ! is_array($this->optionsIndexMap) || empty($this->optionsIndexMap)) {
+        if (empty($this->optionsIndexMap)) {
             throw new \InvalidArgumentException(sprintf(
                 'Class %s is missing the `optionsIndexMap` property',
                 get_class($this)
@@ -171,9 +171,9 @@ abstract class AbstractRule
         }
 
         $options = explode(',', $str);
-        $result  = array();
+        $result = [];
         foreach ($options as $k => $v) {
-            if (! isset($this->optionsIndexMap[$k])) {
+            if (!isset($this->optionsIndexMap[$k])) {
                 throw new \InvalidArgumentException(sprintf(
                     'Class %s does not have the index %d configured in the `optionsIndexMap` property',
                     get_class($this),
@@ -193,9 +193,12 @@ abstract class AbstractRule
      *
      * @return bool
      */
-    protected function arrayIsAssoc($arr)
+    protected function arrayIsAssoc(array $arr): bool
     {
-        return array_keys($arr) !== range(0, count($arr));
+        if ($arr === []) {
+            return false;
+        }
+        return array_keys($arr) !== range(0, count($arr) - 1);
     }
 
 
@@ -205,9 +208,11 @@ abstract class AbstractRule
      *
      * @return string
      */
-    public function getUniqueId()
+    public function getUniqueId(): string
     {
-        return get_called_class() . '|' . json_encode(ksort($this->options));
+        $options = $this->options;
+        ksort($options);
+        return get_called_class() . '|' . json_encode($options);
     }
 
     /**
@@ -218,9 +223,9 @@ abstract class AbstractRule
      * @param string $name
      * @param mixed $value
      *
-     * @return \Yourdudeken\Mpesa\Validation\Rule\AbstractRule
+     * @return $this
      */
-    public function setOption($name, $value)
+    public function setOption(string $name, mixed $value): self
     {
         $this->options[$name] = $value;
 
@@ -234,13 +239,9 @@ abstract class AbstractRule
      *
      * @return mixed
      */
-    public function getOption($name)
+    public function getOption(string $name): mixed
     {
-        if (isset($this->options[$name])) {
-            return $this->options[$name];
-        } else {
-            return null;
-        }
+        return $this->options[$name] ?? null;
     }
 
     /**
@@ -249,12 +250,12 @@ abstract class AbstractRule
      * For example, when you need to validate an email field matches another email field,
      * to confirm the email address
      *
-     * @param array|object $context
+     * @param mixed $context
      *
      * @throws \InvalidArgumentException
-     * @return \Yourdudeken\Mpesa\Validation\Rule\AbstractRule
+     * @return $this
      */
-    public function setContext($context = null)
+    public function setContext(mixed $context = null): self
     {
         if ($context === null) {
             return $this;
@@ -262,10 +263,9 @@ abstract class AbstractRule
         if (is_array($context)) {
             $context = new ArrayWrapper($context);
         }
-        if (! is_object($context) || ! $context instanceof WrapperInterface) {
+        if (!is_object($context) || !$context instanceof WrapperInterface) {
             throw new \InvalidArgumentException(
-                'Validator context must be either an array or an instance 
-                of Yourdudeken\Mpesa\Validator\DataWrapper\WrapperInterface'
+                'Validator context must be either an array or an instance of Yourdudeken\Mpesa\Validator\DataWrapper\WrapperInterface'
             );
         }
         $this->context = $context;
@@ -276,11 +276,11 @@ abstract class AbstractRule
     /**
      * Custom message for this validator to used instead of the the default one
      *
-     * @param string $messageTemplate
+     * @param string|null $messageTemplate
      *
-     * @return \Yourdudeken\Mpesa\Validation\Rule\AbstractRule
+     * @return $this
      */
-    public function setMessageTemplate($messageTemplate)
+    public function setMessageTemplate(?string $messageTemplate): self
     {
         $this->messageTemplate = $messageTemplate;
 
@@ -292,7 +292,7 @@ abstract class AbstractRule
      *
      * @return string
      */
-    public function getMessageTemplate()
+    public function getMessageTemplate(): string
     {
         if ($this->messageTemplate) {
             return $this->messageTemplate;
@@ -308,11 +308,11 @@ abstract class AbstractRule
      * Validates a value
      *
      * @param mixed $value
-     * @param null|mixed $valueIdentifier
+     * @param mixed|null $valueIdentifier
      *
-     * @return mixed
+     * @return bool
      */
-    abstract public function validate($value, $valueIdentifier = null);
+    abstract public function validate(mixed $value, mixed $valueIdentifier = null): bool;
 
     /**
      * Sets the error message prototype that will be used when returning the error message
@@ -321,10 +321,9 @@ abstract class AbstractRule
      *
      * @param ErrorMessage $errorMessagePrototype
      *
-     * @throws \InvalidArgumentException
-     * @return \Yourdudeken\Mpesa\Validation\Rule\AbstractRule
+     * @return $this
      */
-    public function setErrorMessagePrototype(ErrorMessage $errorMessagePrototype)
+    public function setErrorMessagePrototype(ErrorMessage $errorMessagePrototype): self
     {
         $this->errorMessagePrototype = $errorMessagePrototype;
 
@@ -337,9 +336,9 @@ abstract class AbstractRule
      *
      * @return ErrorMessage
      */
-    public function getErrorMessagePrototype()
+    public function getErrorMessagePrototype(): ErrorMessage
     {
-        if (! $this->errorMessagePrototype) {
+        if (!$this->errorMessagePrototype) {
             $this->errorMessagePrototype = new ErrorMessage();
         }
 
@@ -349,19 +348,17 @@ abstract class AbstractRule
     /**
      * Retrieve the error message if validation failed
      *
-     * @return NULL|\Yourdudeken\Mpesa\Validation\ErrorMessage
+     * @return ErrorMessage|null
      */
-    public function getMessage()
+    public function getMessage(): ?ErrorMessage
     {
         if ($this->success) {
             return null;
         }
         $message = $this->getPotentialMessage();
-        $message->setVariables(
-            array(
-                'value' => $this->value
-            )
-        );
+        $message->setVariables([
+            'value' => $this->value
+        ]);
 
         return $message;
     }
@@ -372,7 +369,7 @@ abstract class AbstractRule
      *
      * @return ErrorMessage
      */
-    public function getPotentialMessage()
+    public function getPotentialMessage(): ErrorMessage
     {
         $message = clone ($this->getErrorMessagePrototype());
         $message->setTemplate($this->getMessageTemplate());
@@ -386,29 +383,29 @@ abstract class AbstractRule
      * Eg: for `lines[5][price]` the related item `lines[*][quantity]`
      * has the value identifier as `lines[5][quantity]`
      *
-     * @param $valueIdentifier
-     * @param $relatedItem
+     * @param mixed $valueIdentifier
+     * @param string $relatedItem
      *
-     * @return string|null
+     * @return string
      */
-    protected function getRelatedValueIdentifier($valueIdentifier, $relatedItem)
+    protected function getRelatedValueIdentifier(mixed $valueIdentifier, string $relatedItem): string
     {
         // in case we don't have a related path
-        if (strpos($relatedItem, '*') === false) {
+        if (!str_contains($relatedItem, '*')) {
             return $relatedItem;
         }
 
         // lines[*][quantity] is converted to ['lines', '*', 'quantity']
         $relatedItemParts = explode('[', str_replace(']', '', $relatedItem));
         // lines[5][price] is ['lines', '5', 'price']
-        $valueIdentifierParts = explode('[', str_replace(']', '', $valueIdentifier));
+        $valueIdentifierParts = explode('[', str_replace(']', '', (string) $valueIdentifier));
 
         if (count($relatedItemParts) !== count($valueIdentifierParts)) {
             return $relatedItem;
         }
 
         // the result should be ['lines', '5', 'quantity']
-        $relatedValueIdentifierParts = array();
+        $relatedValueIdentifierParts = [];
         foreach ($relatedItemParts as $index => $part) {
             if ($part === '*' && isset($valueIdentifierParts[$index])) {
                 $relatedValueIdentifierParts[] = $valueIdentifierParts[$index];

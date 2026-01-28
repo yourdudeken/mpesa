@@ -8,11 +8,11 @@ class NotInList extends InList
     const MESSAGE = 'This input is one of the forbidden values';
     const LABELED_MESSAGE = '{label} is one of the forbidden values';
 
-    protected $optionsIndexMap = array(
+    protected array $optionsIndexMap = [
         0 => self::OPTION_LIST
-    );
+    ];
 
-    public function validate($value, $valueIdentifier = null)
+    public function validate(mixed $value, mixed $valueIdentifier = null): bool
     {
         $this->value = $value;
         if (! isset($this->options['list'])) {

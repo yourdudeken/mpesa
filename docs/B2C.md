@@ -20,23 +20,30 @@ Note this package allows you to override preconfigured parameters for this endpo
 
 ```php
 <?php
-require "../src/autoload.php";
+require "vendor/autoload.php";
 
 use Yourdudeken\Mpesa\Init as Mpesa;
 
 $mpesa = new Mpesa([
-    'consumer_key'       => '...',
-    'consumer_secret'    => '...',
-    'initiator_name'     => 'testapi',
-    'initiator_password' => '...',
-    'short_code'         => '600000',
-    'callback'           => 'https://example.com/b2c'
+    'auth' => [
+        'consumer_key'    => '...',
+        'consumer_secret' => '...',
+    ],
+    'initiator' => [
+        'name'     => 'testapi',
+        'password' => '...',
+    ],
+    'b2c' => [
+        'short_code' => '600000',
+    ]
 ]);
 
 try {
-    $response = $mpesa->B2C([
+    $response = $mpesa->b2c->submit([
         'amount' => 100,
-        'partyB' => '2547XXXXXXXX'
+        'phone'  => '2547XXXXXXXX',
+        'result_url'  => 'https://example.com/b2c/result',
+        'timeout_url' => 'https://example.com/b2c/timeout',
     ]);
     
     echo json_encode($response);
@@ -54,9 +61,11 @@ class PaymentController {
    public function payCustomer() {
       $mpesa = new Mpesa(config('mpesa'));
       
-      $response = $mpesa->B2C([
+      $response = $mpesa->b2c->submit([
           'amount' => 100,
-          'partyB' => '2547XXXXXXXX'
+          'phone'  => '2547XXXXXXXX',
+          'result_url'  => route('mpesa.b2c.result'),
+          'timeout_url' => route('mpesa.b2c.timeout'),
       ]); 
       
       return response()->json($response);
@@ -76,7 +85,7 @@ The following parameters can be configured in `config/mpesa.php` under the `b2c`
 - **timeout_url** (optional): URL to receive timeout notifications. Falls back to global callback
 
 ### Request Parameters
-When calling the B2C method, you can pass the following parameters:
+When calling the b2c->submit() method, you can pass the following parameters:
 
 - **amount** (required): The amount to send to the customer
 - **partyB** (required): The phone number of the recipient (format: 254XXXXXXXXX)

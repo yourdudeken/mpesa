@@ -6,7 +6,7 @@
 
 header('Content-Type: application/json');
 
-require_once __DIR__ . '/../models/Transaction.php';
+require "vendor/autoload.php";
 
 // Get callback data
 $input = file_get_contents('php://input');

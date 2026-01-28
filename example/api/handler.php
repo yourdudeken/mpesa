@@ -34,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 // Load M-Pesa SDK
-require_once __DIR__ . '/../../src/autoload.php';
+require "vendor/autoload.php";
 
 use Yourdudeken\Mpesa\Init as Mpesa;
 

@@ -4,18 +4,23 @@ namespace Yourdudeken\Mpesa\Validation;
 
 class RuleCollection extends \SplObjectStorage
 {
-    public function attach($rule, $data = null): void
+    /**
+     * @param Rule\AbstractRule $object
+     * @param mixed|null $info
+     */
+    public function attach(object $object, mixed $info = null): void
     {
-        if ($this->contains($rule)) {
+        if ($this->contains($object)) {
             return;
         }
-        if ($rule instanceof Rule\Required) {
-            $rules = array();
+
+        if ($object instanceof Rule\Required) {
+            $rules = [];
             foreach ($this as $r) {
                 $rules[] = $r;
                 $this->detach($r);
             }
-            array_unshift($rules, $rule);
+            array_unshift($rules, $object);
             foreach ($rules as $r) {
                 parent::attach($r);
             }
@@ -23,12 +28,15 @@ class RuleCollection extends \SplObjectStorage
             return;
         }
 
-        parent::attach($rule);
+        parent::attach($object);
     }
 
-    public function getHash(object $rule): string
+    /**
+     * @param Rule\AbstractRule $object
+     * @return string
+     */
+    public function getHash(object $object): string
     {
-        /* @var $rule Rule\AbstractValidator */
-        return $rule->getUniqueId();
+        return $object->getUniqueId();
     }
 }

@@ -12,12 +12,21 @@ namespace Yourdudeken\Mpesa\Contracts;
 interface ConfigurationStore
 {
     /**
-     * Get the configuration value from the store or a default value to be supplied.
+     * Get the configuration value from the store.
      *
-     * @param $key
-     * @param $default
+     * @param string $key
+     * @param mixed|null $default
      *
      * @return mixed
      */
-    public function get($key, $default = null);
+    public function get(string $key, mixed $default = null): mixed;
+
+    /**
+     * Set a configuration value.
+     * 
+     * @param string $key
+     * @param mixed $value
+     * @return void
+     */
+    public function set(string $key, mixed $value): void;
 }

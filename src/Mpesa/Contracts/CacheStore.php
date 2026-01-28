@@ -12,21 +12,39 @@ namespace Yourdudeken\Mpesa\Contracts;
 interface CacheStore
 {
     /**
-     * Get the cache value from the store or a default value to be supplied.
+     * Get the cache value from the store.
      *
-     * @param $key
-     * @param $default
+     * @param string $key
+     * @param mixed|null $default
      *
      * @return mixed
      */
-    public function get($key, $default = null);
+    public function get(string $key, mixed $default = null): mixed;
 
     /**
      * Store an item in the cache.
      *
-     * @param string                                     $key
-     * @param mixed                                      $value
-     * @param \DateTimeInterface|\DateInterval|float|int $minutes
+     * @param string $key
+     * @param mixed $value
+     * @param int|float|null $seconds
+     * 
+     * @return void
      */
-    public function put($key, $value, $minutes = null);
+    public function put(string $key, mixed $value, int|float|null $seconds = null): void;
+
+    /**
+     * Check if an item exists in the cache.
+     * 
+     * @param string $key
+     * @return bool
+     */
+    public function has(string $key): bool;
+
+    /**
+     * Remove an item from the cache.
+     * 
+     * @param string $key
+     * @return void
+     */
+    public function forget(string $key): void;
 }

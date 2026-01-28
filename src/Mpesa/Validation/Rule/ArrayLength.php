@@ -9,14 +9,14 @@ class ArrayLength extends AbstractRule
     const MESSAGE = 'This input should contain between {min} and {max} items';
     const LABELED_MESSAGE = '{label} should contain between {min} and {max} items';
 
-    protected $options = array();
+    protected array $options = [];
 
-    protected $optionsIndexMap = array(
+    protected array $optionsIndexMap = [
         0 => self::OPTION_MIN,
         1 => self::OPTION_MAX
-    );
+    ];
 
-    public function validate($value, $valueIdentifier = null)
+    public function validate(mixed $value, mixed $valueIdentifier = null): bool
     {
         $this->value  = $value;
         $maxValidator = new ArrayMaxLength();

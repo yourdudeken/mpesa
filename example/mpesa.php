@@ -1,53 +1,54 @@
 <?php
-require "../src/autoload.php";
+require "vendor/autoload.php";
 
 use Yourdudeken\Mpesa\Init as Mpesa;
 
-// Load explicit configuration from the local config file
-$configPath = __DIR__ . '/config/mpesa.php';
-$config = is_file($configPath) ? require $configPath : [];
+/**
+ * M-Pesa Integration Quick Start
+ * 
+ * This example demonstrates the Identity-First architecture where configuration
+ * and parameters are explicitly provided.
+ */
 
-$mpesa = new Mpesa($config);
+// 1. Initialize with your merchant profile
+$mpesa = new Mpesa([
+    'is_sandbox'      => true,
+    'consumer_key'    => 'your_key',
+    'consumer_secret' => 'your_secret',
+    'short_code'     => '174379',
+    'passkey'        => 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919',
+    'callback'       => 'https://example.com/mpesa' // Optional global callback
+]);
+
 try {
-    // 1. Initiate a B2C Payment
-    $response = $mpesa->B2C([
-        'amount'      => 10,
-        'party_b'      => '2547XXXXXXXX',
-        'remarks'     => 'Salary Payment',
-        'result_url'  => 'https://example.com/callback/result',
-        'timeout_url' => 'https://example.com/callback/timeout',
-    ]);
-
-    // 2. Initiate an STK Push (Lipa na M-Pesa Online)
-    /*
+    // 2. Initiate STK Push (Lipa na M-Pesa Online)
+    // Metadata fields like 'reference' and 'description' are now optional
     $response = $mpesa->STKPush([
-        'amount'            => 1,
-        'phone'             => '2547XXXXXXXX',
-        'reference'         => 'INV-123',
-        'description'       => 'Payment for Order #123',
-        'callback_url'      => 'https://example.com/callback/stk',
+        'amount'       => 10,
+        'phoneNumber'  => '2547XXXXXXXX',
+        'callback_url' => 'https://example.com/callback/stk' // Override global callback
     ]);
-    */
+    
+    // Set headers and output JSON
+    header('Content-Type: application/json');
+    echo json_encode($response, JSON_PRETTY_PRINT);
 
-    // 3. Register C2B URLs
-    /*
-    $response = $mpesa->C2BRegister([
-        'validation_url'   => 'https://example.com/c2b/validation',
-        'confirmation_url' => 'https://example.com/c2b/confirmation',
-    ]);
-    */
-
-    // 4. Simulate C2B Payment
-    /*
-    $response = $mpesa->C2BSimulate([
-        'amount'  => 100,
-        'msisdn'  => '2547XXXXXXXX',
-        'bill_ref_number' => 'ACC123'
-    ]);
-    */
-}catch(\Exception $e){
-    $response = json_decode($e->getMessage());
+} catch (\Exception $e) {
+    // Standard error handling
+    header('Content-Type: application/json', true, 400);
+    echo json_encode([
+        'success' => false,
+        'error'   => $e->getMessage()
+    ], JSON_PRETTY_PRINT);
 }
 
-header('Content-Type: application/json');
-echo json_encode($response);
+/**
+ * Pro Tip:
+ * You can also use snake_case for all parameters!
+ * 
+ * $mpesa->STKPush([
+ *    'amount'           => 10,
+ *    'phone_number'     => '2547XXXXXXXX',
+ *    'account_reference'=> 'INV-001'
+ * ]);
+ */

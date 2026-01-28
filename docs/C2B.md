@@ -17,20 +17,24 @@ Before you can receive payment notifications, you need to register your validati
 
 ```php
 <?php
-require "../src/autoload.php";
+require "vendor/autoload.php";
 
 use Yourdudeken\Mpesa\Init as Mpesa;
 
 $mpesa = new Mpesa([
-    'consumer_key'    => '...',
-    'consumer_secret' => '...',
-    'short_code'      => '600000',
-    'callback'        => 'https://example.com/c2b' // Specific URLs are generated automatically
+    'auth' => [
+        'consumer_key'    => '...',
+        'consumer_secret' => '...',
+    ],
+    'c2b' => [
+        'short_code'       => '600000',
+        'confirmation_url' => 'https://example.com/c2b/confirm',
+        'validation_url'   => 'https://example.com/c2b/validate',
+    ]
 ]);
 
 try {
-    // If you provided a 'callback' above, you don't even need parameters here
-    $response = $mpesa->C2BRegister();
+    $response = $mpesa->c2b->submit();
     
     echo json_encode($response);
 } catch(\Exception $e) {
@@ -47,8 +51,7 @@ class MpesaController {
    public function registerC2B() {
       $mpesa = new Mpesa(config('mpesa'));
       
-      // Zero parameters if config has 'callback' and 'short_code'
-      $response = $mpesa->C2BRegister(); 
+      $response = $mpesa->c2b->submit(); 
       
       return response()->json($response);
    }
@@ -63,19 +66,23 @@ In sandbox mode, you can simulate customer payments to test your integration.
 
 ```php
 <?php
-require "../src/autoload.php";
+require "vendor/autoload.php";
 
 use Yourdudeken\Mpesa\Init as Mpesa;
 
 $mpesa = new Mpesa([
-    'consumer_key'    => '...',
-    'consumer_secret' => '...',
-    'short_code'      => '600000',
-    'is_sandbox'      => true
+    'auth' => [
+        'consumer_key'    => '...',
+        'consumer_secret' => '...',
+    ],
+    'c2b' => [
+        'short_code'      => '600000',
+    ],
+    'is_sandbox' => true
 ]);
 
 try {
-    $response = $mpesa->C2BSimulate([
+    $response = $mpesa->c2bSimulate->submit([
         'amount' => 100,
         'msisdn' => '254722000000',
         'billRefNumber' => 'INV-001'
@@ -96,7 +103,7 @@ class MpesaController {
    public function simulateC2B() {
       $mpesa = new Mpesa(config('mpesa'));
       
-      $response = $mpesa->C2BSimulate([
+      $response = $mpesa->c2bSimulate->submit([
           'amount' => 100,
           'msisdn' => '254722000000',
           'billRefNumber' => 'INV-001'

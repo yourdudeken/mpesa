@@ -20,24 +20,31 @@ Note this package allows you to override preconfigured parameters for this endpo
 
 ```php
 <?php
-require "../src/autoload.php";
+require "vendor/autoload.php";
 
 use Yourdudeken\Mpesa\Init as Mpesa;
 
 $mpesa = new Mpesa([
-    'consumer_key'       => '...',
-    'consumer_secret'    => '...',
-    'initiator_name'     => 'testapi',
-    'initiator_password' => '...',
-    'short_code'         => '600000', // Sender
-    'callback'           => 'https://example.com/b2b'
+    'auth' => [
+        'consumer_key'    => '...',
+        'consumer_secret' => '...',
+    ],
+    'initiator' => [
+        'name'     => 'testapi',
+        'password' => '...',
+    ],
+    'b2b' => [
+        'short_code' => '600000',
+    ]
 ]);
 
 try {
-    $response = $mpesa->B2B([
-        'amount'           => 1000,
-        'partyB'           => '600001', // Recipient
-        'accountReference' => 'INV-001'
+    $response = $mpesa->b2b->submit([
+        'amount'      => 1000,
+        'short_code'  => '600001', // Recipient
+        'account_ref' => 'INV-001',
+        'result_url'  => 'https://example.com/b2b/result',
+        'timeout_url' => 'https://example.com/b2b/timeout',
     ]);
     
     echo json_encode($response);
@@ -55,10 +62,12 @@ class PaymentController {
    public function payBusiness() {
       $mpesa = new Mpesa(config('mpesa'));
       
-      $response = $mpesa->B2B([
-          'amount'           => 1000,
-          'partyB'           => '600001',
-          'accountReference' => 'INV-001'
+      $response = $mpesa->b2b->submit([
+          'amount'      => 1000,
+          'short_code'  => '600001',
+          'account_ref' => 'INV-001',
+          'result_url'  => route('mpesa.b2b.result'),
+          'timeout_url' => route('mpesa.b2b.timeout'),
       ]); 
       
       return response()->json($response);
@@ -78,7 +87,7 @@ The following parameters can be configured in `config/mpesa.php` under the `b2b`
 - **timeout_url** (optional): URL to receive timeout notifications. Falls back to global callback
 
 ### Request Parameters
-When calling the B2B method, you can pass the following parameters:
+When calling the b2b->submit() method, you can pass the following parameters:
 
 - **amount** (required): The amount to transfer to the business
 - **partyB** (required): The shortcode of the recipient business

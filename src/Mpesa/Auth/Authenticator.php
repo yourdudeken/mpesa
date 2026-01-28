@@ -2,129 +2,140 @@
 
 namespace Yourdudeken\Mpesa\Auth;
 
-use Yourdudeken\Mpesa\Engine\Core;
-use Yourdudeken\Mpesa\Exceptions\ErrorException;
+use Exception;
+use Yourdudeken\Mpesa\Contracts\CacheStore;
+use Yourdudeken\Mpesa\Contracts\ConfigurationStore;
+use Yourdudeken\Mpesa\Contracts\HttpRequest;
 use Yourdudeken\Mpesa\Exceptions\ConfigurationException;
+use Yourdudeken\Mpesa\Exceptions\ErrorException;
 
 /**
  * Class Authenticator.
  *
  * @category PHP
- *
  * @author   Kennedy Muthengi <kenmwendwamuthengi@gmail.com>
  */
 class Authenticator
 {
     /**
-     * Cache key.
+     * Cache key suffix.
      */
-    const AC_TOKEN = 'MP_AC_T';
+    protected const AC_TOKEN = 'MP_AC_T';
 
     /**
      * @var string
      */
-    protected $endpoint = 'oauth/v1/generate?grant_type=client_credentials';
+    protected string $endpoint = 'oauth/v1/generate?grant_type=client_credentials';
 
     /**
-     * @var Core
+     * @var ConfigurationStore
      */
-    protected $engine;
+    protected ConfigurationStore $config;
 
     /**
-     * @var Authenticator
+     * @var CacheStore
      */
-    protected static $instance;
+    protected CacheStore $cache;
+
+    /**
+     * @var HttpRequest
+     */
+    protected HttpRequest $httpClient;
 
     /**
      * Authenticator constructor.
      *
-     * @param Core $core
+     * @param ConfigurationStore $config
+     * @param CacheStore         $cache
+     * @param HttpRequest        $httpClient
      */
-    public function __construct(){
-        self::$instance = $this;
-    }
-
-    public function setEngine(Core $core){
-        $this->engine   = $core;
+    public function __construct(ConfigurationStore $config, CacheStore $cache, HttpRequest $httpClient)
+    {
+        $this->config = $config;
+        $this->cache = $cache;
+        $this->httpClient = $httpClient;
     }
 
     /**
      * Get the access token required to transact.
      *
-     * @return mixed
-     *
+     * @return string
      * @throws ConfigurationException
+     * @throws ErrorException
      */
-    public function authenticate($app = 'default')
+    public function authenticate(?string $appName = null): string
     {
-        // if ($token = $this->engine->cache->get(self::AC_TOKEN)) {
-        //     return $token;
-        // }
+        $cacheKey = self::AC_TOKEN;
+
+        if ($token = $this->cache->get($cacheKey)) {
+            return $token;
+        }
 
         try {
+            $key = $this->config->get('auth.consumer_key');
+            $secret = $this->config->get('auth.consumer_secret');
 
-            $credentials = $this->generateCredentials($app);
-            $response = $this->engine->makeGetRequest([
-                'endpoint' => $this->endpoint,
-                'token' => $credentials
-            ]);
-            /// $this->saveCredentials($response);
-            if(!empty($response->errorCode)){
-                throw new \Exception(json_encode($response));
+            if (empty($key) || empty($secret)) {
+                throw new ConfigurationException('Consumer key or secret missing from configuration.');
             }
-            return $response->access_token;
-        } catch (\Exception $exception) {
-            $message = $exception->getMessage();
-            
-            throw $this->generateException($message);
+
+            $baseUrl = $this->config->get('mpesa.apiUrl', 'https://sandbox.safaricom.co.ke');
+            $url = rtrim($baseUrl, '/') . '/' . $this->endpoint;
+
+            $response = $this->httpClient->request('GET', $url, [
+                'auth' => [$key, $secret]
+            ]);
+
+            $statusCode = ($response->getStatusCode)();
+            $body = ($response->getBody)();
+
+            if ($statusCode !== 200) {
+                throw new Exception($body ?: 'Failed to retrieve access token');
+            }
+
+            $data = json_decode($body);
+
+            if (!isset($data->access_token)) {
+                throw new Exception('Invalid response from Safaricom: access_token missing');
+            }
+
+            $this->saveCredentials($data);
+
+            return $data->access_token;
+
+        } catch (Exception $exception) {
+            throw $this->generateException($exception->getMessage());
         }
     }
 
     /**
      * Throw a contextual exception.
      *
-     * @param $reason
-     *
-     * @return ErrorException|ConfigurationException
+     * @param string $reason
+     * @return Exception
      */
-    private function generateException($reason)
+    private function generateException(string $reason): Exception
     {
-        switch (\strtolower($reason)) {
-            case 'bad request: invalid credentials':
-                return new ConfigurationException('Invalid consumer key and secret combination');
-            default:
-                return new ErrorException($reason);
+        if (str_contains(strtolower($reason), 'invalid credentials')) {
+            return new ConfigurationException('Invalid consumer key and secret combination');
         }
-    }
 
-    /**
-     * Generate the base64 encoded authorization key.
-     *
-     * @return string
-     */
-    private function generateCredentials($activeAppName = 'default'){
-        $safApps = $this->engine->config->get('mpesa.apps');
-        if (!isset($safApps[$activeAppName])) {
-            throw new ConfigurationException("You do not have such a Safaricom App on your config file. Make sure {$activeAppName} is set and filled ");
-        }
-        $activeApp = $safApps[$activeAppName];
-        $key    = $activeApp['consumer_key'];
-        $secret = $activeApp['consumer_secret'];
-        if (empty($key) || empty($secret)) {
-            throw new ConfigurationException("You have not set either consumer key or consumer secret for {$activeAppName} app");
-        }
-        return \base64_encode($key . ':' . $secret);
+        return new ErrorException($reason);
     }
 
     /**
      * Store the credentials in the cache.
      *
-     * @param $credentials
+     * @param object $credentials
      */
-    private function saveCredentials($credentials)
+    private function saveCredentials(object $credentials): void
     {
-        $ttl = ($credentials->expires_in / 60) - 2;
+        $cacheKey = self::AC_TOKEN;
+        // Expires in is in seconds. We cache for slightly less than that.
+        $seconds = (int) $credentials->expires_in - 60;
 
-        $this->engine->cache->put(self::AC_TOKEN, $credentials->access_token, $ttl);
+        if ($seconds > 0) {
+            $this->cache->put($cacheKey, $credentials->access_token, $seconds);
+        }
     }
 }

@@ -4,7 +4,6 @@
  * Handles all transaction-related database operations
  */
 
-require_once __DIR__ . '/../database/Database.php';
 
 class Transaction {
     private $db;

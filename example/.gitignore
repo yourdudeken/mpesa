@@ -1,0 +1,86 @@
+# Composer
+/vendor/
+composer.lock
+composer.phar
+
+# PHPUnit
+.phpunit.result.cache
+.phpunit.cache/
+/coverage/
+phpunit.xml.local
+
+# IDE and Editor Files
+/.idea/
+/.vscode/
+*.sublime-project
+*.sublime-workspace
+.project
+.buildpath
+.settings/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# PHP CS Fixer
+.php_cs.cache
+.php-cs-fixer.cache
+.php-cs-fixer.php
+
+# PHP CodeSniffer
+phpcs.xml
+
+# PHPStan
+.phpstan.cache/
+phpstan.neon.local
+.phpstan/
+
+# Psalm
+.psalm/
+psalm.xml.local
+.psalm.cache
+
+# Cache and Temporary Files
+/cache/
+*.cache
+.php-autoload-generator-cache.json
+/.phpintel/
+
+# Build and Distribution
+/build/
+/dist/
+
+# Environment Files
+.env
+.env.local
+.env.*.local
+
+# OS Files
+Thumbs.db
+Desktop.ini
+
+# Logs
+*.log
+/logs/
+
+# Test Files (if you want to ignore test artifacts)
+/tests/_output/
+/tests/_support/_generated/
+
+# Package Manager Lock Files (optional - uncomment if needed)
+# package-lock.json
+# yarn.lock
+
+# Documentation Build Files
+/docs/_build/
+
+# Backup Files
+*.bak
+*.backup
+*.old
+*.orig
+
+# Temporary Development Files
+index.php
+test.php
+debug.php

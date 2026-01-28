@@ -12,9 +12,9 @@ class Image extends AbstractRule
 
     const LABELED_MESSAGE = '{label} is not a valid image (only {image_types} are allowed)';
 
-    protected $options = array(
+    protected array $options = [
         self::OPTION_ALLOWED_IMAGES => array( 'jpg', 'png', 'gif' )
-    );
+    ];
 
     protected $imageTypesMap = array(
         IMAGETYPE_GIF      => 'gif',
@@ -26,7 +26,7 @@ class Image extends AbstractRule
         IMAGETYPE_ICO      => 'ico',
     );
 
-    public function setOption($name, $value)
+    public function setOption(string $name, mixed $value): self
     {
         if ($name == self::OPTION_ALLOWED_IMAGES) {
             if (is_string($value)) {
@@ -39,7 +39,7 @@ class Image extends AbstractRule
         return parent::setOption($name, $value);
     }
 
-    public function validate($value, $valueIdentifier = null)
+    public function validate(mixed $value, mixed $valueIdentifier = null): bool
     {
         $this->value = $value;
         if (! is_array($value) || ! isset($value['tmp_name'])) {
@@ -55,7 +55,7 @@ class Image extends AbstractRule
         return $this->success;
     }
 
-    public function getPotentialMessage()
+    public function getPotentialMessage(): \Yourdudeken\Mpesa\Validation\ErrorMessage
     {
         $message    = parent::getPotentialMessage();
         $imageTypes = array_map('strtoupper', $this->options[self::OPTION_ALLOWED_IMAGES]);

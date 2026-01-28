@@ -8,11 +8,11 @@ class Equal extends AbstractRule
     const MESSAGE = 'This input is not equal to {value}';
     const LABELED_MESSAGE = '{label} is not equal to {value}';
 
-    protected $optionsIndexMap = array(
+    protected array $optionsIndexMap = [
         0 => self::OPTION_VALUE
-    );
+    ];
 
-    public function validate($value, $valueIdentifier = null)
+    public function validate(mixed $value, mixed $valueIdentifier = null): bool
     {
         $this->value = $value;
         if (isset($this->options[self::OPTION_VALUE])) {

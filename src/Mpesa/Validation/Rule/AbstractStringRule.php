@@ -4,7 +4,7 @@ namespace Yourdudeken\Mpesa\Validation\Rule;
 
 abstract class AbstractStringRule extends AbstractRule
 {
-    protected function getStringLength($str)
+    protected function getStringLength(mixed $str): int
     {
         if (function_exists('mb_strlen')) {
             return mb_strlen(

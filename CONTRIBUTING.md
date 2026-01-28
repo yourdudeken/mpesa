@@ -18,7 +18,7 @@ Thank you for considering contributing to the M-PESA API Package! This document 
 
 ### Requirements
 
-- PHP 7.0 or higher
+- PHP 8.0 or higher
 - Composer
 - Git
 

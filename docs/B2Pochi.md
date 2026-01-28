@@ -20,23 +20,30 @@ Note this package allows you to override preconfigured parameters for this endpo
 
 ```php
 <?php
-require "../src/autoload.php";
+require "vendor/autoload.php";
 
 use Yourdudeken\Mpesa\Init as Mpesa;
 
 $mpesa = new Mpesa([
-    'consumer_key'       => '...',
-    'consumer_secret'    => '...',
-    'initiator_name'     => 'testapi',
-    'initiator_password' => '...',
-    'short_code'         => '600000',
-    'callback'           => 'https://example.com/pochi'
+    'auth' => [
+        'consumer_key'    => '...',
+        'consumer_secret' => '...',
+    ],
+    'initiator' => [
+        'name'     => 'testapi',
+        'password' => '...',
+    ],
+    'b2pochi' => [
+        'short_code' => '600000',
+    ]
 ]);
 
 try {
-    $response = $mpesa->B2Pochi([
-        'amount' => 100,
-        'partyB' => '2547XXXXXXXX'
+    $response = $mpesa->b2pochi->submit([
+        'amount'      => 100,
+        'phone'       => '2547XXXXXXXX',
+        'result_url'  => 'https://example.com/pochi/result',
+        'timeout_url' => 'https://example.com/pochi/timeout',
     ]);
     
     echo json_encode($response);
@@ -54,9 +61,11 @@ class PaymentController {
    public function sendToPochi() {
       $mpesa = new Mpesa(config('mpesa'));
       
-      $response = $mpesa->B2Pochi([
-          'amount' => 100,
-          'partyB' => '2547XXXXXXXX'
+      $response = $mpesa->b2pochi->submit([
+          'amount'      => 100,
+          'phone'       => '2547XXXXXXXX',
+          'result_url'  => route('mpesa.pochi.result'),
+          'timeout_url' => route('mpesa.pochi.timeout'),
       ]); 
       
       return response()->json($response);
@@ -76,7 +85,7 @@ The following parameters can be configured in `config/mpesa.php` under the `b2po
 - **timeout_url** (optional): URL to receive timeout notifications. Falls back to global callback
 
 ### Request Parameters
-When calling the B2Pochi method, you can pass the following parameters:
+When calling the b2pochi->submit() method, you can pass the following parameters:
 
 - **amount** (required): The amount to send to the Pochi account
 - **partyB** (required): The phone number of the recipient (format: 254XXXXXXXXX)

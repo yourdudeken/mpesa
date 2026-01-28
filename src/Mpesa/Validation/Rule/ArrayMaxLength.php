@@ -9,13 +9,13 @@ class ArrayMaxLength extends AbstractRule
 
     const LABELED_MESSAGE = '{label} should contain less than {min} items';
 
-    protected $options = array();
+    protected array $options = [];
 
-    protected $optionsIndexMap = array(
+    protected array $optionsIndexMap = [
         self::OPTION_MAX
-    );
+    ];
 
-    public function validate($value, $valueIdentifier = null)
+    public function validate(mixed $value, mixed $valueIdentifier = null): bool
     {
         $this->value = $value;
         if (! isset($this->options['max'])) {

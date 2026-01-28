@@ -7,7 +7,7 @@ class DateTime extends Date
 
     const LABELED_MESSAGE = '{label} must be a date having the format {format}';
 
-    protected $options = array(
+    protected array $options = [
         'format' => 'Y-m-d H:i:s'
-    );
+    ];
 }

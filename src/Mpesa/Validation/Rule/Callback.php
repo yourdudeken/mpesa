@@ -10,7 +10,7 @@ class Callback extends AbstractRule
     const MESSAGE = 'This input does not meet the validation criteria';
     const LABELED_MESSAGE = '{label} does not meet the validation criteria';
 
-    public function getUniqueId()
+    public function getUniqueId(): string
     {
         $uniqueId = get_called_class();
         // the callback is a function name (eg: is_int) or a static class method (eg: MyClass::method)
@@ -38,13 +38,13 @@ class Callback extends AbstractRule
         return $uniqueId;
     }
 
-    public function validate($value, $valueIdentifier = null)
+    public function validate(mixed $value, mixed $valueIdentifier = null): bool
     {
         $this->value = $value;
         if (! isset($this->options['callback']) || ! is_callable($this->options['callback'])) {
             $this->success = true;
         } else {
-            $args = (isset($this->options['arguments'])) ? (array) $this->options['arguments'] : array();
+            $args = (isset($this->options['arguments'])) ? (array) $this->options['arguments'] : [];
             array_unshift($args, $value);
             array_push($args, $valueIdentifier, $this->context);
             $this->success = (bool) call_user_func_array($this->options['callback'], $args);

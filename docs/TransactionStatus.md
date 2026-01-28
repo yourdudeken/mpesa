@@ -20,22 +20,29 @@ Note this package allows you to override preconfigured parameters for this endpo
 
 ```php
 <?php
-require "../src/autoload.php";
+require "vendor/autoload.php";
 
 use Yourdudeken\Mpesa\Init as Mpesa;
 
 $mpesa = new Mpesa([
-    'consumer_key'       => '...',
-    'consumer_secret'    => '...',
-    'initiator_name'     => 'testapi',
-    'initiator_password' => '...',
-    'short_code'         => '600000',
-    'callback'           => 'https://example.com/status'
+    'auth' => [
+        'consumer_key'    => '...',
+        'consumer_secret' => '...',
+    ],
+    'initiator' => [
+        'name'     => 'testapi',
+        'password' => '...',
+    ],
+    'transaction_status' => [
+        'short_code' => '600000',
+    ]
 ]);
 
 try {
-    $response = $mpesa->transactionStatus([
-        'transactionID' => 'NLJ7RT61SV'
+    $response = $mpesa->status->submit([
+        'transactionID' => 'NLJ7RT61SV',
+        'result_url'    => 'https://example.com/status/result',
+        'timeout_url'   => 'https://example.com/status/timeout',
     ]);
     
     echo json_encode($response);
@@ -53,8 +60,10 @@ class MpesaController {
    public function checkTransactionStatus($transactionId) {
       $mpesa = new Mpesa(config('mpesa'));
       
-      $response = $mpesa->transactionStatus([
-          'transactionID' => $transactionId
+      $response = $mpesa->status->submit([
+          'transactionID' => $transactionId,
+          'result_url'    => route('mpesa.status.result'),
+          'timeout_url'   => route('mpesa.status.timeout'),
       ]); 
       
       return response()->json($response);
@@ -63,7 +72,7 @@ class MpesaController {
 ````
 
 ### Configuration Parameters
-The following parameters can be configured in `config/mpesa.php` under the `transaction_status` section:
+The following parameters can be configured in `config/mpesa.php` under the `status` section:
 
 - **initiator_name**: The name of the initiator making the request
 - **initiator_password**: The encrypted password for the initiator
@@ -73,7 +82,7 @@ The following parameters can be configured in `config/mpesa.php` under the `tran
 - **timeout_url** (optional): URL to receive timeout notifications. Falls back to global callback
 
 ### Request Parameters
-When calling the transactionStatus method, you can pass the following parameters:
+When calling the status->submit() method, you can pass the following parameters:
 
 - **transactionID** (required): The M-Pesa transaction ID to query (e.g., 'NLJ7RT61SV')
 - **identifierType** (optional): Type of organization (default: 4 for organization shortcode)

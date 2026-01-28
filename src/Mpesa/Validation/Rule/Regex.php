@@ -8,11 +8,11 @@ class Regex extends AbstractRule
     const MESSAGE = 'This input does not match the regular expression {pattern}';
     const LABELED_MESSAGE = '{label} does not match the regular expression {pattern}';
 
-    protected $optionsIndexMap = array(
+    protected array $optionsIndexMap = [
         0 => self::OPTION_PATTERN
-    );
+    ];
 
-    public function validate($value, $valueIdentifier = null)
+    public function validate(mixed $value, mixed $valueIdentifier = null): bool
     {
         $this->value = $value;
         if (isset($this->options['pattern'])) {

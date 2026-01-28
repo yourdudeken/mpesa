@@ -9,11 +9,11 @@ class InList extends AbstractRule
     const MESSAGE = 'This input is not one of the accepted values';
     const LABELED_MESSAGE = '{label} is not one of the accepted values';
 
-    protected $optionsIndexMap = array(
+    protected array $optionsIndexMap = [
         0 => self::OPTION_LIST
-    );
+    ];
 
-    public function validate($value, $valueIdentifier = null)
+    public function validate(mixed $value, mixed $valueIdentifier = null): bool
     {
         $this->value = $value;
         if (! isset($this->options['list'])) {
