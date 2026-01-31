@@ -33,7 +33,9 @@ $mpesa = new Mpesa([
     'stk' => [
         'short_code'      => '174379',
         'passkey'         => '...',
-    ]
+        'transaction_type' => 'CustomerPayBillOnline', // Default for PayBill
+    ],
+    'cache_location' => '/path/to/cache' // Optional: default is ./
 ]);
 
 try {
@@ -76,7 +78,7 @@ The following parameters can be configured in `config/mpesa.php` under the `stk`
 - **short_code**: Your business shortcode (Paybill or Till Number)
 - **passkey**: The SAG Passkey provided by Safaricom upon registration
 - **callback** (optional): Default callback URL to receive payment notifications. Falls back to global callback
-- **default_transaction_type**: Default is 'CustomerPayBillOnline' for Paybill, or 'CustomerBuyGoodsOnline' for Till Number
+- **transaction_type**: Default is 'CustomerPayBillOnline' for Paybill, or 'CustomerBuyGoodsOnline' for Till Number
 
 ### Request Parameters
 When calling the stk->submit() method, you can pass the following parameters:
@@ -250,14 +252,15 @@ This is useful when:
 6. **Point of Sale**: Quick payments at physical stores
 
 ### Best Practices
-1. **Store CheckoutRequestID**: Always save the CheckoutRequestID for status queries
-2. **Implement Timeouts**: Handle cases where users don't respond to the prompt
-3. **User Feedback**: Show clear instructions to users about the STK prompt
-4. **Retry Logic**: Allow users to retry if they cancel or timeout
-5. **Idempotency**: Handle duplicate callbacks gracefully
-6. **Error Messages**: Provide clear, user-friendly error messages
-7. **Testing**: Thoroughly test with different scenarios (success, cancel, timeout)
-8. **Callback Security**: Validate that callbacks are from Safaricom (IP whitelisting, etc.)
+1. **Store CheckoutRequestID**: Always save the CheckoutRequestID for status queries.
+2. **Implement Timeouts**: Handle cases where users don't respond to the prompt (Safaricom timeout is ~60s).
+3. **User Feedback**: Show clear instructions to users about the STK prompt.
+4. **Retry Logic**: Allow users to retry if they cancel or timeout. Wait at least 60 seconds between requests to the same number to avoid STK prompt delivery issues.
+5. **Idempotency**: Handle duplicate callbacks gracefully.
+6. **Error Messages**: Provide clear, user-friendly error messages based on Safaricom ResultCodes.
+7. **Testing**: Thoroughly test with different scenarios (success, cancel, timeout).
+8. **Callback Security**: Validate that callbacks are from Safaricom. Note that the package enables SSL verification for all outgoing requests by default.
+9. **Data Validation**: The package uses a robust validation engine. Ensure your inputs match the requirements (e.g., phone format 254XXXXXXXXX).
 
 ### Known issues with this endpoint
 1. **STK DS Timeout**: Some SIM cards are not yet supported by STK Push. Requests to such SIM cards will fail with `[STK DS timeout]`. This is a Safaricom limitation.

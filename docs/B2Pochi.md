@@ -9,9 +9,10 @@ B2Pochi (Business to Pochi) is an M-Pesa API that enables businesses to send mon
 ### How to consume B2Pochi endpoint with this package.
 
 #### Payment flow involved with this endpoint.
-1. Your system initiates a payment request to send money to a customer's Pochi account.
+1. Your system initiates a payment request to send money to a customer's Pochi account. The package automatically computes the `SecurityCredential`.
 2. Safaricom processes the request and transfers the funds to the specified Pochi account.
-3. Safaricom sends a response to your system with details regarding the transaction via the ResultURL and QueueTimeOutURL callbacks.
+3. The engine normalizes parameters like `Remarks` using internal character limits.
+4. Safaricom sends a response to your system with details regarding the transaction via the ResultURL and QueueTimeOutURL callbacks.
 
 #### Usage
 Note this package allows you to override preconfigured parameters for this endpoint. For all supported options check the Safaricom API documentation.
@@ -78,7 +79,7 @@ The following parameters can be configured in `config/mpesa.php` under the `b2po
 
 - **initiator_name**: The name of the initiator making the request
 - **initiator_password**: The password for the initiator
-- **default_command_id**: Default is 'BusinessPayToPochi'
+- **command_id**: Default is 'BusinessPayToPochi'
 - **short_code**: Your business shortcode
 
 - **result_url** (optional): URL to receive successful transaction results. Falls back to global callback
@@ -110,7 +111,9 @@ The API returns an immediate response with the following structure:
 
 The actual transaction result will be sent to your configured `result_url` callback.
 
-### Known issues with this endpoint
+### Known issues and Security
 1. Ensure the recipient's phone number has an active M-Pesa Pochi account.
 2. The transaction may fail if the recipient's Pochi account has restrictions.
 3. Always implement proper error handling for timeout scenarios.
+4. **Security**: RSA encryption for credentials is handled transparently by the engine using PEM/CER certificates.
+5. **Validation**: The `B2Pochi\Pay` service utilizes the `Yourdudeken\Mpesa\Validation\Validator` to ensure all mandatory fields are present and correctly formatted.

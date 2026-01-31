@@ -39,7 +39,7 @@ class Pay extends AbstractTransaction
         $initiator              = $this->engine->getConfig()->get('mpesa.b2b.initiator_name');
         $initiatorPass          = $this->engine->getConfig()->get('mpesa.b2b.initiator_password');
         $securityCredential     = $this->engine->computeSecurityCredential($initiatorPass);
-        $commandId              = $this->engine->getConfig()->get('mpesa.b2b.default_command_id');
+        $commandId              = $this->engine->getConfig()->get('mpesa.b2b.command_id');
         $remarks                = $this->engine->getConfig()->get('mpesa.b2b.remarks');
         $accountReference       = $this->engine->getConfig()->get('mpesa.b2b.account_reference');
         $senderIdentifierType   = $this->engine->getConfig()->get('mpesa.b2b.sender_identifier_type');

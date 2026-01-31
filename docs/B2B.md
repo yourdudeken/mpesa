@@ -9,9 +9,10 @@ B2B (Business to Business) is an M-Pesa API that enables businesses to transfer 
 ### How to consume B2B endpoint with this package.
 
 #### Payment flow involved with this endpoint.
-1. Your system initiates a transfer request from your business account to another business account.
+1. Your system initiates a transfer request from your business account to another business account. The package calculates the `SecurityCredential` automatically.
 2. Safaricom processes the request and transfers the funds between the business accounts.
-3. Safaricom sends a response to your system with details regarding the transaction via the ResultURL and QueueTimeOutURL callbacks.
+3. The package normalizes parameters such as `Remarks` to ensure they meet Safaricom's character requirements.
+4. Safaricom sends a response to your system with details regarding the transaction via the ResultURL and QueueTimeOutURL callbacks.
 
 #### Usage
 Note this package allows you to override preconfigured parameters for this endpoint. For all supported options check the Safaricom API documentation at https://developer.safaricom.co.ke/docs#b2b-api
@@ -80,7 +81,7 @@ The following parameters can be configured in `config/mpesa.php` under the `b2b`
 
 - **initiator_name**: The name of the initiator making the request
 - **initiator_password**: The encrypted password for the initiator
-- **default_command_id**: Default is 'BusinessPayBill'. Other options include 'BusinessBuyGoods', 'DisburseFundsToBusiness', 'BusinessToBusinessTransfer', 'MerchantToMerchantTransfer'
+- **command_id**: Default is 'BusinessPayBill'. Other options include 'BusinessBuyGoods', 'DisburseFundsToBusiness', 'BusinessToBusinessTransfer', 'MerchantToMerchantTransfer'
 - **short_code**: Your business shortcode (sender)
 
 - **result_url** (optional): URL to receive successful transaction results. Falls back to global callback
@@ -182,10 +183,11 @@ The actual transaction result will be sent to your configured `result_url` callb
 }
 ```
 
-### Known issues with this endpoint
+### Known issues and Security
 1. **Recipient Validation**: Ensure the recipient business shortcode is valid and active.
 2. **Insufficient Funds**: Ensure your business account has sufficient balance before initiating B2B transactions.
-3. **Command ID Selection**: Use the correct command ID based on the recipient type (PayBill vs Till Number).
+3. **Command ID Selection**: Use the correct command ID based on the recipient type. Default mappings are provided in `src/config/mpesa.php`.
 4. **Daily Limits**: Be aware of daily transaction limits set by Safaricom for your account.
-5. **Callback Timeouts**: Implement proper timeout handling as network issues may delay callbacks.
-6. **Account Reference**: Some businesses may require specific account reference formats for reconciliation.
+5. **Callback Timeouts**: Implement proper timeout handling.
+6. **Automated Credentials**: Initiator passwords are encrypted using RSA 2048-bit encryption with Safaricom's public certificates.
+7. **Input Validation**: The `B2B\Pay` class validates all inputs including `Amount`, `PartyB`, and URLs before the request is even sent.

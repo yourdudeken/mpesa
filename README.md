@@ -13,8 +13,8 @@ A comprehensive PHP package for integrating with Safaricom's M-Pesa DARAJA API. 
 ## Features
 
 - **Identity-First Architecture** - Explicit control over credentials and callbacks per request or configuration group.
-- **Complete API Coverage** - All 10 M-Pesa API endpoints supported including B2Pochi and STK Status.
-- **Service Properties** - Direct, type-hinted access to services (e.g. $mpesa->stk, $mpesa->b2c).
+- **Complete Transaction Support** - Covers STK Push, B2C, B2B, B2Pochi, C2B, Reversal, Account Balance, and Transaction Status.
+- **Service Properties** - Direct, type-hinted access to services (e.g., $mpesa->stk, $mpesa->b2c).
 - **Smart Validation** - Automatic metadata sanitization, field trimming, and parameter normalization.
 - **Universal Callbacks** - Simplified logic for handling STK, C2B, and result notifications.
 - **Modern PHP** - Built for PHP 8.0+ with strict typing and dependency injection.
@@ -38,8 +38,8 @@ composer require yourdudeken/mpesa
 
 ### Manual Installation
 
-1. Download the source code as a zip file
-2. Extract to your project directory
+1. Download the source code as a zip file.
+2. Extract it to your project directory.
 3. Include the autoloader in your code:
 
 ```php
@@ -129,8 +129,15 @@ return [
     'stk' => [
         'short_code'   => '174379',
         'passkey'      => 'bfb27...',
-        'callback_url' => 'https://api.com/mpesa/stk',
+        'callback'     => 'https://api.com/mpesa/stk', // Note: key is 'callback', not 'callback_url'
+        'transaction_type' => 'CustomerPayBillOnline',
     ],
+    'c2b' => [
+        'command_id'    => 'CustomerPayBillOnline',
+        'response_type' => 'Completed',
+    ],
+    // Certificate Paths (Optional override)
+    'certificate_path_production' => '/path/to/ProductionCertificate.cer',
 ];
 ```
 
@@ -233,6 +240,7 @@ Detailed documentation for each endpoint is available in the docs folder:
 6. [Transaction Status](docs/TransactionStatus.md)
 7. [Reversal](docs/Reversal.md)
 8. [Account Balance](docs/AccountBalance.md)
+9. [Detailed Package Overview](docs/package.md)
 
 ## Example Code
 

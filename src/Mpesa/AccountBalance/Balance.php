@@ -33,7 +33,7 @@ class Balance extends AbstractTransaction
         $successCallback    = $this->engine->getConfig()->get('mpesa.balance.result_url');
         $timeoutCallback    = $this->engine->getConfig()->get('mpesa.balance.timeout_url');
         $initiator          = $this->engine->getConfig()->get('mpesa.balance.initiator_name');
-        $commandId          = $this->engine->getConfig()->get('mpesa.balance.default_command_id');
+        $commandId          = $this->engine->getConfig()->get('mpesa.balance.command_id');
         $initiatorPass      = $this->engine->getConfig()->get('mpesa.balance.initiator_password');
         $securityCredential = $this->engine->computeSecurityCredential($initiatorPass);
         $identifierType     = $this->engine->getConfig()->get('mpesa.balance.identifier_type');

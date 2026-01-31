@@ -9,9 +9,10 @@ The Account Balance API enables businesses to query the balance of their M-Pesa 
 ### How to consume Account Balance endpoint with this package.
 
 #### Query flow involved with this endpoint.
-1. Your system initiates a balance query request for your business account.
+1. Your system initiates a balance query request for your business account. The package automatically computes the `SecurityCredential` using the initiator password and the appropriate Safaricom public certificate.
 2. Safaricom processes the request and retrieves the current account balance.
-3. Safaricom sends a response to your system with balance details via the ResultURL and QueueTimeOutURL callbacks.
+3. The engine uses defaults from `src/config/mpesa.php` if `remarks` or `identifierType` are not provided.
+4. Safaricom sends a response to your system with balance details via the ResultURL and QueueTimeOutURL callbacks.
 
 #### Usage
 Note this package allows you to override preconfigured parameters for this endpoint. For all supported options check the Safaricom API documentation at https://developer.safaricom.co.ke/docs#account-balance-api
@@ -74,7 +75,7 @@ The following parameters can be configured in `config/mpesa.php` under the `bala
 
 - **initiator_name**: The name of the initiator making the request
 - **initiator_password**: The encrypted password for the initiator
-- **default_command_id**: Default is 'AccountBalance'
+- **command_id**: Default is 'AccountBalance'
 - **short_code**: Your business shortcode
 - **result_url** (optional): URL to receive balance query results. Falls back to global callback
 - **timeout_url** (optional): URL to receive timeout notifications. Falls back to global callback
@@ -180,9 +181,11 @@ foreach ($accounts as $account) {
 4. **Reporting**: Generate financial reports with current account balances
 5. **Audit Trail**: Maintain historical balance records for auditing
 
-### Known issues with this endpoint
+### Known issues and Security
 1. **Callback Dependency**: Balance information is only available via the callback URL, not in the immediate response.
 2. **Parsing Required**: The balance response requires parsing to extract individual account balances.
 3. **Rate Limiting**: Avoid making excessive balance queries. Implement caching if you need frequent balance checks.
 4. **Permissions**: Ensure your initiator credentials have permission to query account balances.
 5. **Timeout Handling**: Implement proper timeout handling as network issues may delay callbacks.
+6. **Automated Security**: Security credentials are computed internally using `openssl_public_encrypt`. The package looks for `.cer` files in the `src/config/` directory.
+7. **Validation**: The `AccountBalance\Balance` service enforces validation on `ResultURL` and `QueueTimeOutURL` using the package's internal `Validator`.

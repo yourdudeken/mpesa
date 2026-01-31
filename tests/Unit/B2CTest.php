@@ -2,57 +2,83 @@
 
 namespace Yourdudeken\Mpesa\Tests\Unit;
 
+use Mockery;
 use Yourdudeken\Mpesa\Tests\TestCase;
 use Yourdudeken\Mpesa\B2C\Pay;
-use Yourdudeken\Mpesa\Auth\Authenticator;
 use Yourdudeken\Mpesa\Engine\Core;
-use Yourdudeken\Mpesa\Contracts\ConfigurationStore;
-use Yourdudeken\Mpesa\Exceptions\ConfigurationException;
-use Yourdudeken\Mpesa\Exceptions\MpesaException;
+use Yourdudeken\Mpesa\Engine\Config;
 
-class B2CTest extends TestCase{
+class B2CTest extends TestCase
+{
+    protected $core;
+    protected $config;
+    protected $b2c;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->cleanCache();
-    }
-
-    private function cleanCache(){
-        $file = __DIR__ . '/../../cache/.mpc';
-        if (\is_file($file)) {
-            \unlink($file);
-        }
-    }
-
-    /**
-     * Test submitting payment request without params throws an error.
-     * 
-     */
-    public function testSubmitWithoutParams(){
-        $b2c = new Pay($this->engine);
-        $this->expectException(ConfigurationException::class);
-        $results = $b2c->submit();
-    }
-
-    /**
-     * Test submitting payment request with appropriate param works.
-     * 
-     */
-    public function testSubmitWithParams(){
-        $b2c = new Pay($this->engine);
-        $this->httpClient->method('getInfo')
-        ->will($this->returnValue(500));
         
-        $this->expectException(MpesaException::class);
-        // Test with null params should throw an error.
-        $results = $b2c->submit([
-            'amount' => 20,
-            'partyB' => '254723731241',
-            'remarks' => "User X consultation fee",
-            'resultURL' => "https://example.com/v1/payments/callback",
-            'queueTimeOutURL' => "https://example.com/v1/payments/callback"
+        $this->config = Mockery::mock(Config::class);
+        $this->core = Mockery::mock(Core::class);
+        $this->core->shouldReceive('getConfig')->andReturn($this->config);
+    }
+
+    public function testSubmitB2CSuccessfully()
+    {
+        // Define expected configuration values
+        $this->config->shouldReceive('get')->with('mpesa.b2c.short_code')->andReturn('600000');
+        $this->config->shouldReceive('get')->with('mpesa.b2c.initiator_name')->andReturn('user');
+        $this->config->shouldReceive('get')->with('mpesa.b2c.initiator_password')->andReturn('password');
+        $this->config->shouldReceive('get')->with('mpesa.b2c.command_id')->andReturn('BusinessPayment');
+        $this->config->shouldReceive('get')->with('mpesa.b2c.result_url')->andReturn('http://result.url');
+        $this->config->shouldReceive('get')->with('mpesa.b2c.timeout_url')->andReturn('http://timeout.url');
+        $this->config->shouldReceive('get')->with('mpesa.b2c.remarks')->andReturn('Remarks');
+        $this->config->shouldReceive('get')->with('mpesa.b2c.occasion')->andReturn('Occasion');
+
+        // Mock methods called during execution
+        $this->core->shouldReceive('computeSecurityCredential')->with('password')->andReturn('encrypted_password');
+        $this->core->shouldReceive('setValidationRules')->once();
+        
+        // Mock parameter normalization
+        // The first call normalizes user params
+        $this->core->shouldReceive('normalizeParams')->with(['amount' => 100, 'phone' => '254700000000'], [])->andReturn([]);
+        
+        $expectedBody = [
+            'InitiatorName'      => 'user',
+            'SecurityCredential' => 'encrypted_password',
+            'CommandID'          => 'BusinessPayment',
+            'Amount'             => 100,
+            'PartyA'             => '600000',
+            'PartyB'             => '254700000000',
+            'Remarks'            => 'Remarks',
+            'QueueTimeOutURL'    => 'http://timeout.url',
+            'ResultURL'          => 'http://result.url',
+            'Occasion'           => 'Occasion',
+        ];
+
+        // The second call normalizes the merged body
+        $this->core->shouldReceive('normalizeParams')
+            ->with(Mockery::on(function ($arg) {
+                 return isset($arg['InitiatorName']) && $arg['InitiatorName'] === 'user';
+            }), [])
+            ->andReturn($expectedBody);
+
+        // Mock the POST request
+        $this->core->shouldReceive('makePostRequest')
+            ->once()
+            ->with([
+                'endpoint' => 'mpesa/b2c/v1/paymentrequest',
+                'body'     => $expectedBody
+            ], 'default')
+            ->andReturn(['ResponseCode' => '0', 'ResponseDescription' => 'Success']);
+
+        // Instantiate and run
+        $b2c = new Pay($this->core);
+        $response = $b2c->submit([
+            'amount' => 100,
+            'phone' => '254700000000'
         ]);
-        fwrite(STDERR, print_r($results, TRUE));
+
+        $this->assertEquals(['ResponseCode' => '0', 'ResponseDescription' => 'Success'], $response);
     }
 }

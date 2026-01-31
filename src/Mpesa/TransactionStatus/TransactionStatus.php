@@ -34,7 +34,7 @@ class TransactionStatus extends AbstractTransaction
         $successCallback    = $this->engine->getConfig()->get('mpesa.status.result_url');
         $timeoutCallback    = $this->engine->getConfig()->get('mpesa.status.timeout_url');
         $initiator          = $this->engine->getConfig()->get('mpesa.status.initiator_name');
-        $commandId          = $this->engine->getConfig()->get('mpesa.status.default_command_id');
+        $commandId          = $this->engine->getConfig()->get('mpesa.status.command_id');
         $initiatorPass      = $this->engine->getConfig()->get('mpesa.status.initiator_password');
         $securityCredential = $this->engine->computeSecurityCredential($initiatorPass);
         $remarks            = $this->engine->getConfig()->get('mpesa.status.remarks');

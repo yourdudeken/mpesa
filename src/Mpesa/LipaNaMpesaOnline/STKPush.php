@@ -38,7 +38,7 @@ class STKPush extends AbstractTransaction
         
         $accountReference = $this->engine->getConfig()->get('mpesa.stk.account_reference');
         $callback         = $this->engine->getConfig()->get('mpesa.stk.callback');
-        $transactionType  = $this->engine->getConfig()->get('mpesa.stk.default_transaction_type');
+        $transactionType  = $this->engine->getConfig()->get('mpesa.stk.transaction_type');
         $transactionDesc  = $this->engine->getConfig()->get('mpesa.stk.transaction_desc');
 
         $configParams = [
