@@ -1,3 +1,11 @@
+# [1.6.0](https://github.com/yourdudeken/mpesa/compare/v1.5.0...v1.6.0) (2026-01-31)
+
+
+### Features
+
+* Add comprehensive unit tests for various M-Pesa API functionalities including Reversal, STK Push, C2B, B2C, B2B, and Account Balance. ([4b487e9](https://github.com/yourdudeken/mpesa/commit/4b487e91eb2464d56c1ef19437851defa692c122))
+* Automate security credential generation and parameter normalization across M-Pesa services, and enhance documentation with security details and a package overview. ([2a1032f](https://github.com/yourdudeken/mpesa/commit/2a1032ff590fda3bfab40937929384a9150fe519))
+
 # [1.5.0](https://github.com/yourdudeken/mpesa/compare/v1.4.0...v1.5.0) (2026-01-28)
 
 
