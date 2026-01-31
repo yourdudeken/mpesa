@@ -15,7 +15,6 @@ return [
     'consumer_secret'    => 'lUf3z...',
     'short_code'         => '174379',
     'passkey'            => 'bfb27...',
-    'callback'           => 'https://webhook.site/...',
     'initiator_name'     => 'testapi',
     'initiator_password' => 'Safaricom123!!',
 ];
