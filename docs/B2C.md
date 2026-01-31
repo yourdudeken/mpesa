@@ -9,9 +9,10 @@ B2C (Business to Customer) is an M-Pesa API that enables businesses to make paym
 ### How to consume B2C endpoint with this package.
 
 #### Payment flow involved with this endpoint.
-1. Your system initiates a payment request to send money to a customer's M-Pesa account.
+1. Your system initiates a payment request to send money to a customer's M-Pesa account. The package automatically computes the `SecurityCredential` using the initiator password and the appropriate Safaricom public certificate (Sandbox or Production).
 2. Safaricom processes the request and transfers the funds to the specified phone number.
-3. Safaricom sends a response to your system with details regarding the transaction via the ResultURL and QueueTimeOutURL callbacks.
+3. The engine performs parameter normalization, ensuring fields like `Remarks` and `Occasion` do not exceed Safaricom's character limits.
+4. Safaricom sends a response to your system with details regarding the transaction via the ResultURL and QueueTimeOutURL callbacks.
 
 #### Usage
 Note this package allows you to override preconfigured parameters for this endpoint. For all supported options check the Safaricom API documentation at https://developer.safaricom.co.ke/docs#b2c-api
@@ -78,7 +79,7 @@ The following parameters can be configured in `config/mpesa.php` under the `b2c`
 
 - **initiator_name**: The name of the initiator making the request
 - **initiator_password**: The encrypted password for the initiator
-- **default_command_id**: Default is 'BusinessPayment'. Other options include 'SalaryPayment', 'BusinessPayment', 'PromotionPayment'
+- **command_id**: Default is 'BusinessPayment'. Other options include 'SalaryPayment', 'BusinessPayment', 'PromotionPayment'
 - **short_code**: Your business shortcode
 
 - **result_url** (optional): URL to receive successful transaction results. Falls back to global callback
@@ -167,9 +168,11 @@ The actual transaction result will be sent to your configured `result_url` callb
 }
 ```
 
-### Known issues with this endpoint
+### Known issues and Security
 1. **Sandbox Mode**: In sandbox mode, the package automatically uses the configured test phone number to ensure requests succeed.
 2. **Insufficient Funds**: Ensure your paybill/till account has sufficient balance before initiating B2C transactions.
 3. **Daily Limits**: Be aware of daily transaction limits set by Safaricom for your account.
-4. **Recipient Validation**: The recipient's phone number must be a valid, registered M-Pesa number.
+4. **Recipient Validation**: The recipient's phone number must be a valid, registered M-Pesa number. Use the package's internal validator to check your data before submission.
 5. **Callback Timeouts**: Implement proper timeout handling as network issues may delay callbacks.
+6. **Automated Encryption**: This package handles RSA encryption of the `InitiatorPassword` automatically. It uses `SandboxCertificate.cer` and `ProductionCertificate.cer` located in `src/config/`.
+7. **Character Limits**: Safaricom has strict character limits for `Remarks` (100 chars) and `Occasion` (100 chars). The engine will automatically truncate or normalize these values to prevent API errors.

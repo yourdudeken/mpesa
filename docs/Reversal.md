@@ -9,9 +9,10 @@ The Reversal API enables businesses to reverse erroneous M-Pesa transactions (B2
 ### How to consume Reversal endpoint with this package.
 
 #### Reversal flow involved with this endpoint.
-1. Your system initiates a reversal request for a specific transaction using its Transaction ID.
+1. Your system initiates a reversal request for a specific transaction using its Transaction ID. The package automatically computes the `SecurityCredential` using the initiator password and RSA encryption.
 2. Safaricom processes the reversal request and returns the funds to the original sender.
-3. Safaricom sends a response to your system with reversal details via the ResultURL and QueueTimeOutURL callbacks.
+3. The engine enforces validation on `amount`, `transactionID`, and URLs using its internal validation system.
+4. Safaricom sends a response to your system with reversal details via the ResultURL and QueueTimeOutURL callbacks.
 
 #### Usage
 Note this package allows you to override preconfigured parameters for this endpoint. For all supported options check the Safaricom API documentation at https://developer.safaricom.co.ke/docs#reversal
@@ -78,7 +79,7 @@ The following parameters can be configured in `config/mpesa.php` under the `reve
 
 - **initiator_name**: The name of the initiator making the request
 - **initiator_password**: The encrypted password for the initiator
-- **default_command_id**: Default is 'TransactionReversal'
+- **command_id**: Default is 'TransactionReversal'
 - **short_code**: Your business shortcode
 - **result_url** (optional): URL to receive reversal results. Falls back to global callback
 - **timeout_url** (optional): URL to receive timeout notifications. Falls back to global callback
@@ -241,12 +242,12 @@ The actual reversal result will be sent to your configured `result_url` callback
 7. **Approval Workflow**: Implement approval workflows for reversals to prevent unauthorized reversals
 8. **Audit Trail**: Log all reversal attempts and their outcomes
 
-### Known issues with this endpoint
-1. **Transaction ID Required**: You must have the exact M-Pesa transaction ID to reverse a transaction
-2. **Time Constraints**: Reversals may only be possible within a limited time window
-3. **Amount Must Match**: The reversal amount must exactly match the original transaction amount
-4. **No Partial Reversals**: You cannot reverse part of a transaction
-5. **Permissions Required**: Your account must have reversal permissions enabled
-6. **Already Reversed**: Transactions that have already been reversed cannot be reversed again
-7. **Callback Dependency**: Reversal confirmation is only available via the callback URL
-8. **Recipient Balance**: Reversal may fail if the recipient's account has insufficient balance
+### Known issues and Security
+1. **Transaction ID Required**: You must have the exact M-Pesa transaction ID.
+2. **Time Constraints**: Reversals may only be possible within a limited time window.
+3. **Amount Must Match**: The reversal amount must exactly match the original transaction amount. The package's validator enforces that `amount` is a valid number.
+4. **No Partial Reversals**: You cannot reverse part of a transaction.
+5. **Permissions Required**: Your account must have reversal permissions enabled.
+6. **Automated Security**: The package performs automated RSA encryption of the initiator password using the `SandboxCertificate.cer` or `ProductionCertificate.cer` certificates.
+7. **Callback Dependency**: Reversal confirmation is only available via the callback URL.
+8. **Recipient Balance**: Reversal may fail if the recipient's account has insufficient balance.

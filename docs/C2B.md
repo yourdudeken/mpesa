@@ -122,7 +122,7 @@ The following parameters can be configured in `config/mpesa.php` under the `c2b`
 - **response_type**: What to use as response type ('Completed' or 'Cancelled')
 - **short_code**: Your business shortcode (PayBill or Till Number)
 
-- **default_command_id**: Default is 'CustomerPayBillOnline' or 'CustomerBuyGoodsOnline'
+- **command_id**: Default is 'CustomerPayBillOnline' or 'CustomerBuyGoodsOnline'
 
 ### C2B Register Parameters
 When calling the C2BRegister method:
@@ -137,8 +137,8 @@ When calling the C2BSimulate method (sandbox only):
 
 - **amount** (required): The amount being paid
 - **msisdn** (required): Customer's phone number (format: 254XXXXXXXXX)
-- **billRefNumber** (optional): Account reference/invoice number. Mandatory for PayBill, should be omitted for Buy Goods (the package handles this automatically)
-- **commandID** (optional): 'CustomerPayBillOnline' for PayBill or 'CustomerBuyGoodsOnline' for Till Number. Defaults to PayBill.
+- **billRefNumber** (optional): Account reference/invoice number. Mandatory for PayBill. Note: The package automatically handles the logic for Buy Goods (where this field should ideally be omitted or handled specifically).
+- **commandID** (optional): 'CustomerPayBillOnline' for PayBill or 'CustomerBuyGoodsOnline' for Till Number. Defaults to PayBill as configured in `src/config/mpesa.php`.
 
 ### Payment Flow
 1. Customer initiates payment via M-Pesa SIM toolkit to your PayBill/Till number
@@ -221,9 +221,10 @@ Your confirmation response should be:
 - **CustomerPayBillOnline**: For PayBill payments
 - **CustomerBuyGoodsOnline**: For Till Number/Buy Goods payments
 
-### Known issues with this endpoint
+### Known issues and Security
 1. **URL Registration**: You must register your URLs before you can receive payment notifications. Registration is per shortcode.
 2. **HTTPS Required**: Both validation and confirmation URLs must use HTTPS in production.
-3. **Simulation Limitations**: C2B Simulate only works in sandbox mode. In production, use actual M-Pesa payments for testing.
-4. **Duplicate Notifications**: Implement idempotency checks as you may receive duplicate confirmation requests.
-5. **IP Whitelisting**: Consider whitelisting Safaricom's IP addresses for added security.
+3. **Simulation Limitations**: C2B Simulate only works in sandbox mode.
+4. **Duplicate Notifications**: Implement idempotency checks.
+5. **Security**: The `C2B\Register` and `C2B\Simulate` services use the package's internal `Validator` to ensure all parameters (like `Amount`, `ShortCode`, and `Msisdn`) conform to Safaricom's required formats.
+6. **Error Handling**: The package throws specific exceptions (e.g., `MpesaException`) if the API returns an error code.

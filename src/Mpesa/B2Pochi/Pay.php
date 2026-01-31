@@ -36,7 +36,7 @@ class Pay extends AbstractTransaction
         $initiator          = $this->engine->getConfig()->get('mpesa.b2pochi.initiator_name');
         $initiatorPass      = $this->engine->getConfig()->get('mpesa.b2pochi.initiator_password');
         $securityCredential = $this->engine->computeSecurityCredential($initiatorPass);
-        $commandId          = $this->engine->getConfig()->get('mpesa.b2pochi.default_command_id');
+        $commandId          = $this->engine->getConfig()->get('mpesa.b2pochi.command_id');
         $remarks            = $this->engine->getConfig()->get('mpesa.b2pochi.remarks');
         
         $configParams = [

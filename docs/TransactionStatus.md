@@ -9,9 +9,10 @@ The Transaction Status API enables businesses to query the status of M-Pesa tran
 ### How to consume Transaction Status endpoint with this package.
 
 #### Query flow involved with this endpoint.
-1. Your system initiates a status query request for a specific transaction using its Transaction ID.
+1. Your system initiates a status query request for a specific transaction using its Transaction ID. The package automatically computes the `SecurityCredential`.
 2. Safaricom processes the request and retrieves the transaction status.
-3. Safaricom sends a response to your system with transaction details via the ResultURL and QueueTimeOutURL callbacks.
+3. The engine uses defaults from `src/config/mpesa.php` for `remarks` and `occasion` if they are not provided, and normalizes them for length.
+4. Safaricom sends a response to your system with transaction details via the ResultURL and QueueTimeOutURL callbacks.
 
 #### Usage
 Note this package allows you to override preconfigured parameters for this endpoint. For all supported options check the Safaricom API documentation at https://developer.safaricom.co.ke/docs#transaction-status
@@ -76,7 +77,7 @@ The following parameters can be configured in `config/mpesa.php` under the `stat
 
 - **initiator_name**: The name of the initiator making the request
 - **initiator_password**: The encrypted password for the initiator
-- **default_command_id**: Default is 'TransactionStatusQuery'
+- **command_id**: Default is 'TransactionStatusQuery'
 - **short_code**: Your business shortcode
 - **result_url** (optional): URL to receive transaction status results. Falls back to global callback
 - **timeout_url** (optional): URL to receive timeout notifications. Falls back to global callback
@@ -238,10 +239,10 @@ The actual transaction status will be sent to your configured `result_url` callb
 4. **Rate Limiting**: Don't query the same transaction repeatedly in short intervals
 5. **Logging**: Log all status queries and responses for audit purposes
 
-### Known issues with this endpoint
-1. **Transaction ID Required**: You must have the exact M-Pesa transaction ID to query status
-2. **Callback Dependency**: Status details are only available via the callback URL, not in the immediate response
-3. **Transaction Age**: Very old transactions may not be available for status queries
-4. **Permissions**: Ensure your initiator credentials have permission to query transaction status
-5. **Not Real-time**: There may be a slight delay before transaction status is available
-6. **Limited History**: Status queries may only work for transactions within a certain time period
+### Known issues and Security
+1. **Transaction ID Required**: You must have the exact M-Pesa transaction ID.
+2. **Callback Dependency**: Status details are only available via the callback URL.
+3. **Transaction Age**: Very old transactions may not be available.
+4. **Permissions**: Ensure your initiator credentials have permission.
+5. **Security**: RSA encryption for initiator credentials is handled automatically by the package using certificates in `src/config/`.
+6. **Validation**: The `TransactionStatus\TransactionStatus` service runs comprehensive checks using the internal `Validator` before transmission.

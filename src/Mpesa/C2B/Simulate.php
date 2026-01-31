@@ -36,7 +36,7 @@ class Simulate extends AbstractTransaction
     public function submit(array $params = [], string $appName = 'default'): mixed
     {
         $shortCode = $this->engine->getConfig()->get('mpesa.c2b.short_code');
-        $commandId = $this->engine->getConfig()->get('mpesa.c2b.default_command_id');
+        $commandId = $this->engine->getConfig()->get('mpesa.c2b.command_id');
 
         $configParams = [
             'CommandID' => $commandId,

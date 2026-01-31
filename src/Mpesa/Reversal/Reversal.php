@@ -35,7 +35,7 @@ class Reversal extends AbstractTransaction
         $successCallback        = $this->engine->getConfig()->get('mpesa.reversal.result_url');
         $timeoutCallback        = $this->engine->getConfig()->get('mpesa.reversal.timeout_url');
         $initiator              = $this->engine->getConfig()->get('mpesa.reversal.initiator_name');
-        $commandId              = $this->engine->getConfig()->get('mpesa.reversal.default_command_id', 'TransactionReversal');
+        $commandId              = $this->engine->getConfig()->get('mpesa.reversal.command_id', 'TransactionReversal');
         $initiatorPass          = $this->engine->getConfig()->get('mpesa.reversal.initiator_password');
         $securityCredential     = $this->engine->computeSecurityCredential($initiatorPass);
         $remarks                = $this->engine->getConfig()->get('mpesa.reversal.remarks');
