@@ -79,6 +79,9 @@
                 <nav class="flex px-4" id="mainTabs">
                     <button onclick="switchTab('stk')" class="tab-btn px-6 py-4 text-sm whitespace-nowrap tab-active"
                         data-tab="stk">STK Push</button>
+                    <button onclick="switchTab('stkStatus')"
+                        class="tab-btn px-6 py-4 text-sm whitespace-nowrap text-gray-500 hover:text-mpesa-green transition-colors"
+                        data-tab="stkStatus">STK Status</button>
                     <button onclick="switchTab('b2c')"
                         class="tab-btn px-6 py-4 text-sm whitespace-nowrap text-gray-500 hover:text-mpesa-green transition-colors"
                         data-tab="b2c">B2C (Payout)</button>
@@ -88,6 +91,12 @@
                     <button onclick="switchTab('c2b')"
                         class="tab-btn px-6 py-4 text-sm whitespace-nowrap text-gray-500 hover:text-mpesa-green transition-colors"
                         data-tab="c2b">C2B Simulation</button>
+                    <button onclick="switchTab('c2bRegister')"
+                        class="tab-btn px-6 py-4 text-sm whitespace-nowrap text-gray-500 hover:text-mpesa-green transition-colors"
+                        data-tab="c2bRegister">C2B Register</button>
+                    <button onclick="switchTab('b2pochi')"
+                        class="tab-btn px-6 py-4 text-sm whitespace-nowrap text-gray-500 hover:text-mpesa-green transition-colors"
+                        data-tab="b2pochi">B2Pochi</button>
                     <button onclick="switchTab('utils')"
                         class="tab-btn px-6 py-4 text-sm whitespace-nowrap text-gray-500 hover:text-mpesa-green transition-colors"
                         data-tab="utils">Utilities</button>
@@ -111,6 +120,24 @@
                             <input type="number" name="amount" value="1" min="1" required
                                 class="flex-1 w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-mpesa-green focus:outline-none font-bold">
                         </div>
+                        <div class="space-y-2">
+                            <label class="block text-xs font-bold text-gray-400 uppercase">Account Ref</label>
+                            <input type="text" name="reference" placeholder="Order-123" required
+                                class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-mpesa-green focus:outline-none">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="block text-xs font-bold text-gray-400 uppercase">Trans. Description</label>
+                            <input type="text" name="description" placeholder="Payment for goods" required
+                                class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-mpesa-green focus:outline-none">
+                        </div>
+                        <div class="md:col-span-2 space-y-2">
+                            <label class="block text-xs font-bold text-gray-400 uppercase">Transaction Type</label>
+                            <select name="transaction_type"
+                                class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-mpesa-green focus:outline-none text-sm font-medium">
+                                <option value="CustomerPayBillOnline">CustomerPayBillOnline (Paybill)</option>
+                                <option value="CustomerBuyGoodsOnline">CustomerBuyGoodsOnline (Till)</option>
+                            </select>
+                        </div>
                         <div class="md:col-span-2">
                             <button type="submit"
                                 class="w-full bg-mpesa-green text-white py-4 rounded-xl font-bold shadow-lg hover:bg-green-600 transition-all flex items-center justify-center gap-2">
@@ -121,6 +148,22 @@
                                 </svg>
                             </button>
                         </div>
+                    </form>
+                </div>
+
+                <!-- STK Status Tab -->
+                <div id="stkStatusTab" class="tab-content">
+                    <h2 class="text-xl font-bold mb-4">STK Status Query</h2>
+                    <p class="text-gray-500 text-sm mb-6">Check the final status of an STK Push request.</p>
+                    <form onsubmit="handleForm(event, 'stk_status')" class="space-y-6">
+                        <div class="space-y-2">
+                            <label class="block text-xs font-bold text-gray-400 uppercase">Checkout Request ID</label>
+                            <input type="text" name="checkout_request_id" placeholder="ws_CO_... " required
+                                class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-mpesa-green focus:outline-none font-medium">
+                        </div>
+                        <button type="submit"
+                            class="w-full bg-indigo-600 text-white py-4 rounded-xl font-bold shadow-lg hover:bg-indigo-700 transition-all">Check
+                            Status</button>
                     </form>
                 </div>
 
@@ -140,9 +183,14 @@
                             <input type="number" name="amount" placeholder="50.00" required
                                 class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-mpesa-green focus:outline-none font-bold">
                         </div>
-                        <div class="md:col-span-2 space-y-2">
+                        <div class="space-y-2 border-b border-gray-50 pb-4 md:col-span-2">
                             <label class="block text-xs font-bold text-gray-400 uppercase">Remarks</label>
                             <input type="text" name="remarks" placeholder="Salary Payment"
+                                class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-mpesa-green focus:outline-none">
+                        </div>
+                        <div class="md:col-span-2 space-y-2">
+                            <label class="block text-xs font-bold text-gray-400 uppercase">Occasion</label>
+                            <input type="text" name="occasion" placeholder="Xmas Bonus"
                                 class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-mpesa-green focus:outline-none">
                         </div>
                         <div class="md:col-span-2">
@@ -167,6 +215,16 @@
                             <label class="block text-xs font-bold text-gray-400 uppercase">Amount (KES)</label>
                             <input type="number" name="amount" placeholder="1000" required
                                 class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-mpesa-green focus:outline-none font-bold">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="block text-xs font-bold text-gray-400 uppercase">Remarks</label>
+                            <input type="text" name="remarks" placeholder="Payment for services"
+                                class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-mpesa-green focus:outline-none">
+                        </div>
+                        <div class="space-y-2 md:col-span-2">
+                            <label class="block text-xs font-bold text-gray-400 uppercase">Account Reference</label>
+                            <input type="text" name="account_ref" placeholder="B2B-123456"
+                                class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-mpesa-green focus:outline-none">
                         </div>
                         <div class="md:col-span-2">
                             <button type="submit"
@@ -201,6 +259,71 @@
                             <button type="submit"
                                 class="w-full bg-orange-500 text-white py-4 rounded-xl font-bold shadow-lg hover:bg-orange-600 transition-all">Simulate
                                 Payment</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- C2B Register Tab -->
+                <div id="c2bRegisterTab" class="tab-content">
+                    <h2 class="text-xl font-bold mb-4">C2B URL Registration</h2>
+                    <p class="text-gray-500 text-sm mb-6">Register your validation and confirmation URLs with Safaricom.
+                    </p>
+                    <form onsubmit="handleForm(event, 'c2b_register')" class="grid grid-cols-1 gap-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="space-y-2">
+                                <label class="block text-xs font-bold text-gray-400 uppercase">Short Code</label>
+                                <input type="text" name="short_code" placeholder="600000"
+                                    class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-mpesa-green">
+                            </div>
+                            <div class="space-y-2">
+                                <label class="block text-xs font-bold text-gray-400 uppercase">Response Type</label>
+                                <select name="response_type"
+                                    class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-mpesa-green outline-none">
+                                    <option value="Completed">Completed</option>
+                                    <option value="Cancelled">Cancelled</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="space-y-2">
+                            <label class="block text-xs font-bold text-gray-400 uppercase">Confirmation URL</label>
+                            <input type="url" name="confirmation_url" placeholder="https://domain.com/confirm"
+                                class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-mpesa-green">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="block text-xs font-bold text-gray-400 uppercase">Validation URL</label>
+                            <input type="url" name="validation_url" placeholder="https://domain.com/validate"
+                                class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-mpesa-green">
+                        </div>
+                        <button type="submit"
+                            class="w-full bg-green-700 text-white py-4 rounded-xl font-bold shadow-lg hover:bg-green-800 transition-all">Register
+                            URLs</button>
+                    </form>
+                </div>
+
+                <!-- B2Pochi Tab -->
+                <div id="b2pochiTab" class="tab-content">
+                    <h2 class="text-xl font-bold mb-4">Business to Pochi</h2>
+                    <p class="text-gray-500 text-sm mb-6">Send money directly to an M-Pesa Pochi wallet.</p>
+                    <form onsubmit="handleForm(event, 'b2pochi')" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <label class="block text-xs font-bold text-gray-400 uppercase">Recipient Phone</label>
+                            <input type="tel" name="phone" placeholder="712345678" required
+                                class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-mpesa-green focus:outline-none font-medium">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="block text-xs font-bold text-gray-400 uppercase">Amount (KES)</label>
+                            <input type="number" name="amount" placeholder="10.00" required
+                                class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-mpesa-green focus:outline-none font-bold">
+                        </div>
+                        <div class="md:col-span-2 space-y-2">
+                            <label class="block text-xs font-bold text-gray-400 uppercase">Remarks</label>
+                            <input type="text" name="remarks" placeholder="Gift"
+                                class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-mpesa-green focus:outline-none">
+                        </div>
+                        <div class="md:col-span-2">
+                            <button type="submit"
+                                class="w-full bg-teal-600 text-white py-4 rounded-xl font-bold shadow-lg hover:bg-teal-700 transition-all">Send
+                                to Pochi</button>
                         </div>
                     </form>
                 </div>

@@ -17,11 +17,12 @@ if (!isset($input['phone']) || !isset($input['amount'])) {
 
 try {
     $response = $mpesa->stk->submit([
-        'amount'       => (int) $input['amount'],
-        'phone'        => $input['phone'],
-        'reference'    => 'TEST-' . time(),
-        'description'  => 'Test Payment',
-        'callback_url' => 'https://example.com/api/callback.php' // In local dev, use ngrok url
+        'amount'           => (int) $input['amount'],
+        'phone'            => $input['phone'],
+        'reference'        => $input['reference'] ?? 'TEST-' . time(),
+        'description'      => $input['description'] ?? 'Test Payment',
+        'transaction_type' => $input['transaction_type'] ?? 'CustomerPayBillOnline',
+        'callback_url'     => $input['callback_url'] ?? 'https://example.com/api/callback.php'
     ]);
 
     echo json_encode(['success' => true, 'data' => $response]);

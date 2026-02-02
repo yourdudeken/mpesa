@@ -56,6 +56,9 @@ $config = [
         'result_url'  => 'https://example.com/api/callback.php',
         'timeout_url' => 'https://example.com/api/callback.php',
     ],
+    'b2pochi' => [
+        'short_code' => '600000',
+    ],
 ];
 
 try {

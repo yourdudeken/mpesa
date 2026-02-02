@@ -9,17 +9,12 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 $input = json_decode(file_get_contents('php://input'), true);
 
-if (!isset($input['phone']) || !isset($input['amount'])) {
-    echo json_encode(['error' => 'Phone and amount are required']);
-    exit;
-}
-
 try {
-    $response = $mpesa->b2c->submit([
-        'amount'   => (int) $input['amount'],
-        'phone'    => $input['phone'],
-        'remarks'  => $input['remarks'] ?? 'B2C Test Payment',
-        'occasion' => $input['occasion'] ?? 'B2C Demo'
+    $response = $mpesa->c2b->submit([
+        'short_code'       => $input['short_code'] ?? null,
+        'response_type'    => $input['response_type'] ?? 'Completed',
+        'confirmation_url' => $input['confirmation_url'] ?? null,
+        'validation_url'   => $input['validation_url'] ?? null,
     ]);
 
     echo json_encode(['success' => true, 'data' => $response]);
