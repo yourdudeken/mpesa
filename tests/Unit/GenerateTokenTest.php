@@ -1,0 +1,22 @@
+<?php
+
+namespace Yourdudeken\Mpesa\Tests\Unit;
+
+use Yourdudeken\Mpesa\Mpesa;
+use Illuminate\Support\Facades\Http;
+
+it('can generate token', function () {
+
+    $expectedResponse = [
+        'access_token' => 'Test Token',
+        'expires_in' => '3599',
+    ];
+
+    Http::fake([
+        'https://sandbox.safaricom.co.ke/*' => Http::response($expectedResponse),
+    ]);
+
+    $response = (new Mpesa())->generateAccessToken("C2B");
+
+    expect($response)->toBe('Test Token');
+});

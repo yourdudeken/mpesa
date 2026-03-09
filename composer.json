@@ -1,0 +1,61 @@
+{
+  "name": "yourdudeken/mpesa",
+  "description": "A package that helps integrate the Mpesa APIs to your Laravel Project",
+  "type": "library",
+  "license": "MIT",
+  "keywords": [
+    "mpesa",
+    "laravel",
+    "laravel mpesa",
+    "laravel-mpesa"
+  ],
+  "autoload": {
+    "psr-4": {
+      "Yourdudeken\\Mpesa\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Yourdudeken\\Mpesa\\Tests\\": "tests/"
+    }
+  },
+  "authors": [
+    {
+      "name": "Kennedy Muthengi",
+      "email": "ken@yourdudeken.com",
+      "homepage": "https://www.yourdudeken.com",
+      "role": "Developer"
+    }
+  ],
+  "homepage": "https://github.com/Yourdudeken/mpesa",
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Yourdudeken\\Mpesa\\MpesaServiceProvider"
+      ],
+      "aliases": {
+        "Mpesa": "Yourdudeken\\Mpesa\\Facades\\Mpesa"
+      }
+    }
+  },
+  "scripts": {
+    "test": "vendor/bin/pest"
+  },
+  "require-dev": {
+    "orchestra/testbench": "^8.0 |^9.0 | ^10.0",
+    "pestphp/pest": "^2.3| ^3.0"
+  },
+  "require": {
+    "php": "^8.2 | ^8.3 | ^8.4",
+    "illuminate/support": "^10.0 | ^11.0 | ^12.0",
+    "illuminate/http": "^10.0 | ^11.0 | ^12.0",
+    "guzzlehttp/guzzle": "^7.5"
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "config": {
+    "allow-plugins": {
+      "pestphp/pest-plugin": true
+    }
+  }
+}

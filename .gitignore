@@ -1,0 +1,12 @@
+vendor
+composer.lock
+.phpunit.result.cache
+.idea
+.github
+.vscode
+coverage
+build
+example
+.fleet
+.DS_Store
+.phpunit.cache
