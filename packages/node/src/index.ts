@@ -1,3 +1,12 @@
-export { Mpesa, default } from './core/MpesaClient';
+export { Mpesa } from './core/MpesaClient';
 export * from './core/Config';
+export * from './core/Auth';
 export * from './types';
+export * from './errors/MpesaError';
+export { HttpClient } from './http/httpClient';
+export { STKPushService } from './services/stkPush';
+export { B2CService } from './services/b2c';
+export { C2BService } from './services/c2b';
+export { B2BService } from './services/b2b';
+export { AccountService } from './services/account';
+export { Helpers } from './utils/helpers';
