@@ -38,13 +38,6 @@ Please be respectful and professional when contributing. We aim to foster an inc
 
 ## Development Setup
 
-### PHP (Laravel)
-```bash
-cd packages/php
-composer install
-composer test
-```
-
 ### Node.js
 ```bash
 cd packages/node
@@ -58,19 +51,6 @@ cd packages/python
 pip install -e .
 pytest
 ```
-
-### Java
-```bash
-cd packages/java
-mvn test
-```
-
-### C#
-```bash
-cd packages/dotnet
-dotnet test
-```
-
 ### Go
 ```bash
 cd packages/go

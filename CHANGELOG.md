@@ -6,11 +6,8 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 - Initial release of multi-language Mpesa Daraja SDK
-- PHP (Laravel) package with complete Daraja API support
 - Node.js (TypeScript) package with complete Daraja API support
 - Python package with complete Daraja API support
-- Java package with complete Daraja API support
-- C# (.NET) package with complete Daraja API support
 - Go package with complete Daraja API support
 
 ### Services Included
@@ -19,10 +16,10 @@ All notable changes to this project will be documented in this file.
 - B2C (Business to Customer)
 - B2B (Business to Business)
 - C2B (Customer to Business)
+- B2Pochi (Business to Pochi)
 - Account Balance
 - Transaction Status
 - Reversal
-- B2Pochi (Business to Pochi)
 
 ### Package Structure
 Each language package includes:
