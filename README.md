@@ -57,6 +57,22 @@ mpesa.c2bregisterURLS(shortcode, confirm_url, validate_url)
 mpesa.transaction_status(shortcode, transaction_id, identifier_type, remarks)
 ```
 
+```go
+// Go
+mpesa.Stkpush(map[string]interface{}{
+    "phonenumber": "254712345678", "amount": 100, "accountNumber": "12345",
+})
+mpesa.B2c(map[string]interface{}{
+    "phonenumber": "254712345678", "commandId": "BusinessPayment", "amount": 100, "remarks": "Test payment",
+})
+mpesa.C2bregisterURLS(map[string]interface{}{
+    "shortcode": "600000", "confirmUrl": "https://...", "validateUrl": "https://...",
+})
+mpesa.TransactionStatus(map[string]interface{}{
+    "shortcode": "600000", "transactionId": "123456789", "identifierType": 1, "remarks": "Check status",
+})
+```
+
 ## Supported APIs
 
 - **STK Push** - Lipa na Mpesa Online
