@@ -1,5 +1,12 @@
 import { Mpesa } from "mpesa-sdk";
 
+const RAW_SHORTCODE = process.env.MPESA_SHORTCODE;
+if (!RAW_SHORTCODE) throw new Error("MPESA_SHORTCODE is required");
+const SHORTCODE = parseInt(RAW_SHORTCODE, 10);
+if (isNaN(SHORTCODE) || SHORTCODE <= 0) {
+  throw new Error(`Invalid MPESA_SHORTCODE: ${RAW_SHORTCODE}`);
+}
+
 const mpesa = new Mpesa({
   consumerKey: process.env.MPESA_CONSUMER_KEY!,
   consumerSecret: process.env.MPESA_CONSUMER_SECRET!,
@@ -12,11 +19,11 @@ const mpesa = new Mpesa({
 
 export async function stkPush() {
   const response = await mpesa.stkPush.initiate({
-    BusinessShortCode: parseInt(process.env.MPESA_SHORTCODE!),
+    BusinessShortCode: SHORTCODE,
     TransactionType: "CustomerPayBillOnline",
     Amount: 1,
     PartyA: 254722000000,
-    PartyB: parseInt(process.env.MPESA_SHORTCODE!),
+    PartyB: SHORTCODE,
     PhoneNumber: 254722000000,
     CallBackURL: "https://your-domain.com/api/mpesa/callback",
     AccountReference: "INV-001",
@@ -49,7 +56,7 @@ export async function c2bRegisterURL() {
 
 export async function c2bSimulate() {
   const response = await mpesa.c2b.simulate({
-    ShortCode: parseInt(process.env.MPESA_SHORTCODE!),
+    ShortCode: SHORTCODE,
     CommandID: "CustomerPayBillOnline",
     Amount: 100,
     Msisdn: 254708374149,
@@ -64,7 +71,7 @@ export async function b2cPayment() {
     SecurityCredential: process.env.MPESA_SECURITY_CREDENTIAL!,
     CommandID: "BusinessPayment",
     Amount: 100,
-    PartyA: parseInt(process.env.MPESA_SHORTCODE!),
+    PartyA: SHORTCODE,
     PartyB: 254705912645,
     Remarks: "Salary disbursement",
     QueueTimeOutURL: "https://your-domain.com/api/b2c/queue",
@@ -97,7 +104,7 @@ export async function reverseTransaction(transactionId: string) {
     CommandID: "TransactionReversal",
     TransactionID: transactionId,
     Amount: 100,
-    ReceiverParty: parseInt(process.env.MPESA_SHORTCODE!),
+    ReceiverParty: SHORTCODE,
     QueueTimeOutURL: "https://your-domain.com/api/reversal/queue",
     ResultURL: "https://your-domain.com/api/reversal/result",
     Remarks: "Customer initiated reversal",
@@ -111,10 +118,8 @@ export async function checkTransactionStatus(transactionId: string) {
     SecurityCredential: process.env.MPESA_SECURITY_CREDENTIAL!,
     CommandID: "TransactionStatusQuery",
     TransactionID: transactionId,
-    PartyA: parseInt(process.env.MPESA_SHORTCODE!),
+    PartyA: SHORTCODE,
     IdentifierType: 4,
-    ResultURL: "https://your-domain.com/api/status/result",
-    QueueTimeOutURL: "https://your-domain.com/api/status/queue",
     Remarks: "Status check",
   });
   return response;
@@ -125,7 +130,7 @@ export async function checkAccountBalance() {
     Initiator: process.env.MPESA_INITIATOR_NAME!,
     SecurityCredential: process.env.MPESA_SECURITY_CREDENTIAL!,
     CommandID: "AccountBalance",
-    PartyA: parseInt(process.env.MPESA_SHORTCODE!),
+    PartyA: SHORTCODE,
     IdentifierType: 4,
     Remarks: "Daily balance check",
     QueueTimeOutURL: "https://your-domain.com/api/balance/queue",
@@ -140,7 +145,7 @@ export async function generateQR() {
     RefNo: "INV-2024-001",
     Amount: 1500,
     TrxCode: "BG",
-    CPI: process.env.MPESA_SHORTCODE!,
+    CPI: String(SHORTCODE),
     Size: "300",
   });
   return response;

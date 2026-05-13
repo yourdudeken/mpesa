@@ -24,7 +24,15 @@ func main() {
 	wh.On(webhooks.EventSTKCallback, func(et webhooks.EventType, payload interface{}) {
 		if result, ok := payload.(types.STKCallbackResult); ok {
 			if result.Success {
-				fmt.Printf("[STK] Payment: %s KES %.0f\n", *result.ReceiptNumber, *result.Amount)
+				receipt := "<nil>"
+				if result.ReceiptNumber != nil {
+					receipt = *result.ReceiptNumber
+				}
+				amount := 0.0
+				if result.Amount != nil {
+					amount = *result.Amount
+				}
+				fmt.Printf("[STK] Payment: %s KES %.0f\n", receipt, amount)
 			} else {
 				fmt.Printf("[STK] Failed: %s (code: %d)\n", result.ResultDescription, result.ResultCode)
 			}
@@ -51,7 +59,6 @@ func main() {
 		fmt.Println("[C2B] Validation request received")
 	})
 
-	// Simulate receiving an STK callback webhook
 	ctx := context.Background()
 	resp, err := mpesa.STKPush(ctx, types.STKPushRequest{
 		BusinessShortCode: 174379,
@@ -69,7 +76,6 @@ func main() {
 	}
 	fmt.Printf("Order initiated: %s\n", resp.CheckoutRequestID)
 
-	// Parse a callback payload directly
 	payload := types.STKCallbackPayload{}
 	payload.Body.StkCallback.MerchantRequestID = resp.MerchantRequestID
 	payload.Body.StkCallback.CheckoutRequestID = resp.CheckoutRequestID
@@ -90,8 +96,19 @@ func main() {
 		},
 	}
 
+	// Parse and dispatch through the webhook manager
 	result := client.ParseSTKCallback(payload)
+	wh.Emit(webhooks.EventSTKCallback, result)
+
 	if result.Success {
-		fmt.Printf("Payment confirmed: %s KES %.0f\n", *result.ReceiptNumber, *result.Amount)
+		receipt := "<nil>"
+		if result.ReceiptNumber != nil {
+			receipt = *result.ReceiptNumber
+		}
+		amount := 0.0
+		if result.Amount != nil {
+			amount = *result.Amount
+		}
+		fmt.Printf("Payment confirmed: %s KES %.0f\n", receipt, amount)
 	}
 }

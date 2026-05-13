@@ -1,5 +1,12 @@
 import { Mpesa } from "mpesa-sdk";
 
+const RAW_SHORTCODE = process.env.MPESA_SHORTCODE;
+if (!RAW_SHORTCODE) throw new Error("MPESA_SHORTCODE is required");
+const SHORTCODE = parseInt(RAW_SHORTCODE, 10);
+if (isNaN(SHORTCODE) || SHORTCODE <= 0) {
+  throw new Error(`Invalid MPESA_SHORTCODE: ${RAW_SHORTCODE}`);
+}
+
 const mpesa = new Mpesa({
   consumerKey: process.env.MPESA_CONSUMER_KEY!,
   consumerSecret: process.env.MPESA_CONSUMER_SECRET!,
@@ -17,14 +24,13 @@ const mpesa = new Mpesa({
   },
 });
 
-async function productionWorkflow() {
-  // 1. Initiate STK Push
+export async function productionWorkflow() {
   const stkResponse = await mpesa.stkPush.initiate({
-    BusinessShortCode: parseInt(process.env.MPESA_SHORTCODE!),
+    BusinessShortCode: SHORTCODE,
     TransactionType: "CustomerPayBillOnline",
     Amount: 5000,
     PartyA: 254722000000,
-    PartyB: parseInt(process.env.MPESA_SHORTCODE!),
+    PartyB: SHORTCODE,
     PhoneNumber: 254722000000,
     CallBackURL: "https://api.yourdomain.com/mpesa/callback",
     AccountReference: "ORDER-12345",
@@ -34,22 +40,20 @@ async function productionWorkflow() {
   });
   console.log("STK Push sent:", stkResponse.CheckoutRequestID);
 
-  // 2. Query STK status after delay
   await new Promise((r) => setTimeout(r, 5000));
   const status = await mpesa.stkPush.query({
-    BusinessShortCode: process.env.MPESA_SHORTCODE!,
+    BusinessShortCode: String(SHORTCODE),
     CheckoutRequestID: stkResponse.CheckoutRequestID,
     Password: "",
     Timestamp: "",
   });
   console.log("Payment status:", status.ResultDesc);
 
-  // 3. Check account balance
   const balance = await mpesa.accountBalance.query({
     Initiator: process.env.MPESA_INITIATOR_NAME!,
     SecurityCredential: process.env.MPESA_SECURITY_CREDENTIAL!,
     CommandID: "AccountBalance",
-    PartyA: parseInt(process.env.MPESA_SHORTCODE!),
+    PartyA: SHORTCODE,
     IdentifierType: 4,
     Remarks: "Reconcile balance",
     QueueTimeOutURL: "https://api.yourdomain.com/mpesa/queue",
@@ -58,4 +62,6 @@ async function productionWorkflow() {
   console.log("Balance query sent:", balance.OriginatorConversationID);
 }
 
-productionWorkflow();
+if (process.env.RUN_PRODUCTION_WORKFLOW === "1") {
+  productionWorkflow().catch((err) => console.error("Workflow failed:", err));
+}

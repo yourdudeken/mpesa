@@ -24,7 +24,9 @@ func init() {
 	})
 }
 
-func stkPush(ctx context.Context) {
+func stkPush() {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
 	resp, err := mpesa.STKPush(ctx, types.STKPushRequest{
 		BusinessShortCode: 174379,
 		TransactionType:   types.CustomerPayBillOnline,
@@ -42,7 +44,9 @@ func stkPush(ctx context.Context) {
 	fmt.Printf("STK Push: %s\n", resp.CheckoutRequestID)
 }
 
-func stkQuery(ctx context.Context, checkoutID string) {
+func stkQuery(checkoutID string) {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
 	resp, err := mpesa.STKQuery(ctx, types.STKQueryRequest{
 		BusinessShortCode: "174379",
 		CheckoutRequestID: checkoutID,
@@ -53,7 +57,9 @@ func stkQuery(ctx context.Context, checkoutID string) {
 	fmt.Printf("STK Query: %s (code: %s)\n", resp.ResultDesc, resp.ResultCode)
 }
 
-func c2bRegisterURL(ctx context.Context) {
+func c2bRegisterURL() {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
 	resp, err := mpesa.C2BRegisterURL(ctx, types.C2BRegisterURLRequest{
 		ShortCode:       "174379",
 		ResponseType:    types.ResponseCompleted,
@@ -66,7 +72,9 @@ func c2bRegisterURL(ctx context.Context) {
 	fmt.Printf("C2B Register: %s\n", resp.ResponseDescription)
 }
 
-func c2bSimulate(ctx context.Context) {
+func c2bSimulate() {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
 	resp, err := mpesa.C2BSimulate(ctx, types.C2BSimulateRequest{
 		ShortCode:     174379,
 		CommandID:     types.C2BPayBill,
@@ -80,7 +88,9 @@ func c2bSimulate(ctx context.Context) {
 	fmt.Printf("C2B Simulate: %s\n", resp.ResponseDescription)
 }
 
-func b2cPayment(ctx context.Context) {
+func b2cPayment() {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
 	resp, err := mpesa.B2C(ctx, types.B2CRequest{
 		InitiatorName:      os.Getenv("MPESA_INITIATOR_NAME"),
 		SecurityCredential: os.Getenv("MPESA_SECURITY_CREDENTIAL"),
@@ -99,7 +109,9 @@ func b2cPayment(ctx context.Context) {
 	fmt.Printf("B2C: %s\n", resp.OriginatorConversationID)
 }
 
-func b2bPayment(ctx context.Context) {
+func b2bPayment() {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
 	resp, err := mpesa.B2B(ctx, types.B2BRequest{
 		Initiator:              os.Getenv("MPESA_INITIATOR_NAME"),
 		SecurityCredential:     os.Getenv("MPESA_SECURITY_CREDENTIAL"),
@@ -120,7 +132,9 @@ func b2bPayment(ctx context.Context) {
 	fmt.Printf("B2B: %s\n", resp.OriginatorConversationID)
 }
 
-func reversal(ctx context.Context, txnID string) {
+func reversal(txnID string) {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
 	resp, err := mpesa.Reversal(ctx, types.ReversalRequest{
 		Initiator:              os.Getenv("MPESA_INITIATOR_NAME"),
 		SecurityCredential:     os.Getenv("MPESA_SECURITY_CREDENTIAL"),
@@ -139,7 +153,9 @@ func reversal(ctx context.Context, txnID string) {
 	fmt.Printf("Reversal: %s\n", resp.ResponseDescription)
 }
 
-func transactionStatus(ctx context.Context, txnID string) {
+func transactionStatus(txnID string) {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
 	resp, err := mpesa.TransactionStatus(ctx, types.TransactionStatusRequest{
 		Initiator:          os.Getenv("MPESA_INITIATOR_NAME"),
 		SecurityCredential: os.Getenv("MPESA_SECURITY_CREDENTIAL"),
@@ -157,7 +173,9 @@ func transactionStatus(ctx context.Context, txnID string) {
 	fmt.Printf("Status: %s\n", resp.ResponseDescription)
 }
 
-func accountBalance(ctx context.Context) {
+func accountBalance() {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
 	resp, err := mpesa.AccountBalance(ctx, types.AccountBalanceRequest{
 		Initiator:          os.Getenv("MPESA_INITIATOR_NAME"),
 		SecurityCredential: os.Getenv("MPESA_SECURITY_CREDENTIAL"),
@@ -174,7 +192,9 @@ func accountBalance(ctx context.Context) {
 	fmt.Printf("Balance: %s\n", resp.OriginatorConversationID)
 }
 
-func dynamicQR(ctx context.Context) {
+func dynamicQR() {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
 	resp, err := mpesa.DynamicQR(ctx, types.DynamicQRRequest{
 		MerchantName: "Your Business Name",
 		RefNo:        "INV-2024-001",
@@ -190,19 +210,16 @@ func dynamicQR(ctx context.Context) {
 }
 
 func main() {
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
-
 	fmt.Println("=== M-Pesa All APIs Demo ===\n")
 
-	stkPush(ctx)
-	stkQuery(ctx, "ws_CO_0000000000")
-	c2bRegisterURL(ctx)
-	c2bSimulate(ctx)
-	b2cPayment(ctx)
-	b2bPayment(ctx)
-	reversal(ctx, "NLA12345XX")
-	transactionStatus(ctx, "NLA12345XX")
-	accountBalance(ctx)
-	dynamicQR(ctx)
+	stkPush()
+	stkQuery("ws_CO_0000000000")
+	c2bRegisterURL()
+	c2bSimulate()
+	b2cPayment()
+	b2bPayment()
+	reversal("NLA12345XX")
+	transactionStatus("NLA12345XX")
+	accountBalance()
+	dynamicQR()
 }

@@ -45,7 +45,8 @@ def handle_reversal(event_type, payload):
 
 @webhooks.on("c2b:validation")
 def handle_c2b_validation(event_type, payload):
-    print(f"[C2B] Validation: {payload['TransID']}")
+    trans_id = payload.get("TransID", "<missing>")
+    print(f"[C2B] Validation: {trans_id}")
     return webhooks.parse_c2b_validation_response(accept=True)
 
 

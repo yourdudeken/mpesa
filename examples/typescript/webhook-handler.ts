@@ -54,22 +54,46 @@ webhooks.on("c2b:validation", (event) => {
   return webhooks.createC2BValidationResponse(true);
 });
 
-export async function handleWebhook(body: unknown) {
-  let event: any;
-
-  if ((body as any).Body?.stkCallback) {
-    event = { type: "stk:callback" as const, payload: body };
-  } else if ((body as any).Result?.ResultParameters?.ResultParameter) {
-    const params = (body as any).Result.ResultParameters.ResultParameter;
-    const hasBalance = params.some((p: any) => p.Key === "AccountBalance");
-    const hasStatus = params.some((p: any) => p.Key === "TransactionStatus");
-
-    if (hasBalance) event = { type: "account:balance" as const, payload: body };
-    else if (hasStatus) event = { type: "transaction:status" as const, payload: body };
-    else event = { type: "b2c:result" as const, payload: body };
-  } else if ((body as any).TransactionType) {
-    event = { type: "c2b:validation" as const, payload: body };
+function detectEvent(body: Record<string, any>):
+  | { type: "stk:callback"; payload: unknown }
+  | { type: "account:balance"; payload: unknown }
+  | { type: "transaction:status"; payload: unknown }
+  | { type: "b2b:result"; payload: unknown }
+  | { type: "reversal:result"; payload: unknown }
+  | { type: "b2c:result"; payload: unknown }
+  | { type: "c2b:validation"; payload: unknown }
+  | null {
+  if (body.Body?.stkCallback) {
+    return { type: "stk:callback", payload: body };
   }
 
+  if (body.Result?.ResultParameters?.ResultParameter) {
+    const params: Array<{ Key: string }> = body.Result.ResultParameters.ResultParameter;
+    const keys = new Set(params.map((p: any) => p.Key));
+
+    if (keys.has("AccountBalance")) {
+      return { type: "account:balance", payload: body };
+    }
+    if (keys.has("TransactionStatus")) {
+      return { type: "transaction:status", payload: body };
+    }
+    if (keys.has("B2BRecipientPartyPublicName") || keys.has("B2BSenderPartyPublicName")) {
+      return { type: "b2b:result", payload: body };
+    }
+    if (keys.has("OriginalTransactionID")) {
+      return { type: "reversal:result", payload: body };
+    }
+    return { type: "b2c:result", payload: body };
+  }
+
+  if (body.TransactionType) {
+    return { type: "c2b:validation", payload: body };
+  }
+
+  return null;
+}
+
+export async function handleWebhook(body: unknown) {
+  const event = detectEvent(body as Record<string, any>);
   if (event) await webhooks.handleEvent(event);
 }
