@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-05-13
+
+### Changed
+
+- Renamed npm package from `mpesa-sdk` to `@yourdudeken/mpesa-sdk` (scoped)
+- Renamed PyPI package from `mpesa-sdk` to `yourdudeken-mpesa-sdk`
+- Docusaurus docs: fixed ProgressPlugin build error (pinned webpack 5.94.0)
+- Docusaurus docs: fixed broken links with root redirect page
+- Added missing docs: typescript/README.md, go/README.md, CHANGELOG.md
+- All version badges in README and docs now auto-fetch from registry
+- Python SDK refactored into package-per-module structure
+- Expanded interactive examples for all APIs across all three SDKs
+- CI/CD: Fixed npm publish access for scoped packages, Go tag push permissions
+
 ## [0.1.0] - 2024-07-20
 
 ### Added
