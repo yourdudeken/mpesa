@@ -26,11 +26,11 @@ sidebar_position: 1
 
 ## Supported Languages
 
-| Language | Package | Status |
+| Language | Package | Version |
 |----------|---------|--------|
-| TypeScript | `@yourdudeken/mpesa-sdk` | Beta |
-| Python | `yourdudeken-mpesa-sdk` | Beta |
-| Go | `github.com/yourdudeken/mpesa-sdk` | Beta |
+| TypeScript | `@yourdudeken/mpesa-sdk` | ![npm](https://img.shields.io/npm/v/@yourdudeken/mpesa-sdk) |
+| Python | `yourdudeken-mpesa-sdk` | ![pypi](https://img.shields.io/pypi/v/yourdudeken-mpesa-sdk) |
+| Go | `github.com/yourdudeken/mpesa-sdk` | ![go](https://img.shields.io/github/v/tag/yourdudeken/mpesa-sdk?filter=go/v*) |
 
 ## Quick Comparison
 
