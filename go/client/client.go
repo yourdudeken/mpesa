@@ -10,8 +10,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yourdudeken/mpesa-sdk/errors"
-	"github.com/yourdudeken/mpesa-sdk/types"
+	"github.com/yourdudeken/mpesa-sdk/go/errors"
+	"github.com/yourdudeken/mpesa-sdk/go/types"
 )
 
 var retryableStatusCodes = map[int]bool{

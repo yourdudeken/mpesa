@@ -3,9 +3,9 @@ package services
 import (
 	"context"
 
-	"github.com/yourdudeken/mpesa-sdk/client"
-	svctypes "github.com/yourdudeken/mpesa-sdk/services/types"
-	"github.com/yourdudeken/mpesa-sdk/types"
+	"github.com/yourdudeken/mpesa-sdk/go/client"
+	svctypes "github.com/yourdudeken/mpesa-sdk/go/services/types"
+	"github.com/yourdudeken/mpesa-sdk/go/types"
 )
 
 type Service struct {
