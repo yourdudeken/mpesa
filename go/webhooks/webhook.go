@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/yourdudeken/mpesa-sdk/client"
-	"github.com/yourdudeken/mpesa-sdk/types"
+	"github.com/yourdudeken/mpesa-sdk/go/client"
+	"github.com/yourdudeken/mpesa-sdk/go/types"
 )
 
 type EventType string
