@@ -56,6 +56,7 @@ export interface RequestLog {
   headers?: Record<string, string>;
   body?: unknown;
   timestamp: Date;
+  requestId: string;
 }
 
 export interface ResponseLog {
@@ -63,12 +64,14 @@ export interface ResponseLog {
   body: unknown;
   durationMs: number;
   timestamp: Date;
+  requestId: string;
 }
 
 export interface ErrorLog {
   error: unknown;
   context?: string;
   timestamp: Date;
+  requestId?: string;
 }
 
 // ============================================================

@@ -1,31 +1,24 @@
-from mpesa.middleware.flask import create_flask_blueprint
-from mpesa.middleware.django import create_django_view
 from mpesa.webhooks import WebhookManager
 
 
-__all__ = [
-    "create_fastapi_router",
-    "create_flask_blueprint",
-    "create_django_view",
-]
-
-
-def create_fastapi_router(webhook_manager: WebhookManager, secret: str = "") -> "APIRouter":
+def create_flask_blueprint(webhook_manager: WebhookManager, secret: str = ""):
     try:
-        from fastapi import APIRouter, HTTPException, Request
+        from flask import Blueprint, abort, jsonify, request
     except ImportError:
-        raise ImportError("fastapi is required. Install with: pip install yourdudeken-mpesa-sdk[fastapi]")
+        raise ImportError("flask is required. Install with: pip install yourdudeken-mpesa-sdk[flask]")
 
-    router = APIRouter()
+    bp = Blueprint("mpesa", __name__, url_prefix="/mpesa")
 
-    @router.post("/mpesa/webhook")
-    async def handle_webhook(request: Request):
-        body = await request.json()
+    @bp.route("/webhook", methods=["POST"])
+    def handle_webhook():
+        body = request.get_json(silent=True)
+        if body is None:
+            abort(400, description="Invalid JSON body")
 
         if secret:
             signature = request.headers.get("x-mpesa-signature", "")
             if not signature:
-                raise HTTPException(status_code=401, detail="Missing signature")
+                abort(401, description="Missing signature")
 
         if body.get("Body", {}).get("stkCallback"):
             result = webhook_manager.parse_stk_callback(body)
@@ -44,8 +37,8 @@ def create_fastapi_router(webhook_manager: WebhookManager, secret: str = "") -> 
         elif body.get("TransactionType"):
             webhook_manager.emit("c2b:validation", body)
         else:
-            raise HTTPException(status_code=400, detail="Unknown webhook event type")
+            abort(400, description="Unknown webhook event type")
 
-        return {"received": True}
+        return jsonify({"received": True})
 
-    return router
+    return bp

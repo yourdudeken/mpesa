@@ -1,31 +1,28 @@
-from mpesa.middleware.flask import create_flask_blueprint
-from mpesa.middleware.django import create_django_view
 from mpesa.webhooks import WebhookManager
 
 
-__all__ = [
-    "create_fastapi_router",
-    "create_flask_blueprint",
-    "create_django_view",
-]
-
-
-def create_fastapi_router(webhook_manager: WebhookManager, secret: str = "") -> "APIRouter":
+def create_django_view(webhook_manager: WebhookManager, secret: str = ""):
     try:
-        from fastapi import APIRouter, HTTPException, Request
+        from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
+        from django.views.decorators.csrf import csrf_exempt
+        from django.views.decorators.http import require_POST
     except ImportError:
-        raise ImportError("fastapi is required. Install with: pip install yourdudeken-mpesa-sdk[fastapi]")
+        raise ImportError("django is required. Install with: pip install yourdudeken-mpesa-sdk[django]")
 
-    router = APIRouter()
+    @csrf_exempt
+    @require_POST
+    def handle_webhook(request):
+        import json
 
-    @router.post("/mpesa/webhook")
-    async def handle_webhook(request: Request):
-        body = await request.json()
+        try:
+            body = json.loads(request.body)
+        except (ValueError, AttributeError):
+            return HttpResponseBadRequest("Invalid JSON body")
 
         if secret:
             signature = request.headers.get("x-mpesa-signature", "")
             if not signature:
-                raise HTTPException(status_code=401, detail="Missing signature")
+                return HttpResponse("Missing signature", status=401)
 
         if body.get("Body", {}).get("stkCallback"):
             result = webhook_manager.parse_stk_callback(body)
@@ -44,8 +41,8 @@ def create_fastapi_router(webhook_manager: WebhookManager, secret: str = "") -> 
         elif body.get("TransactionType"):
             webhook_manager.emit("c2b:validation", body)
         else:
-            raise HTTPException(status_code=400, detail="Unknown webhook event type")
+            return HttpResponseBadRequest("Unknown webhook event type")
 
-        return {"received": True}
+        return JsonResponse({"received": True})
 
-    return router
+    return handle_webhook

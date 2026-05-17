@@ -31,12 +31,14 @@ export function setupRetryInterceptor(
       if (!config) return Promise.reject(error);
 
       const attempt = (config.retryCount ?? 0) + 1;
+      const requestId = (config.headers?.["X-Request-ID"] as string) ?? "";
 
       if (attempt > retryConfig.maxRetries) {
         logger.warn("Max retries exceeded", {
           url: config.url,
           attempt: attempt - 1,
           maxRetries: retryConfig.maxRetries,
+          requestId,
         });
         return Promise.reject(error);
       }
@@ -57,6 +59,7 @@ export function setupRetryInterceptor(
         code: error.code,
         attempt,
         maxRetries: retryConfig.maxRetries,
+        requestId,
       });
 
       if (error.response?.status === 429) {
@@ -64,7 +67,7 @@ export function setupRetryInterceptor(
           error.response.headers["retry-after"] ?? "5",
           10,
         );
-        logger.warn("Rate limited, backing off", { retryAfter });
+        logger.warn("Rate limited, backing off", { retryAfter, requestId });
         await delay(retryAfter * 1000);
       } else {
         const backoff = calculateBackoff(
@@ -75,6 +78,7 @@ export function setupRetryInterceptor(
         logger.warn("Backing off before retry", {
           backoffMs: backoff,
           attempt,
+          requestId,
         });
         await delay(backoff);
       }

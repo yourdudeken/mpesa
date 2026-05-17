@@ -17,6 +17,12 @@ def _get_logger(logger: Optional[Logger] = None) -> Logger:
     return logging.getLogger("mpesa")
 
 
+class RetryConfig(BaseModel):
+    max_retries: int = 3
+    base_delay_ms: int = 1000
+    max_delay_ms: int = 30000
+
+
 class MpesaConfig(BaseModel):
     consumer_key: str
     consumer_secret: str
@@ -26,8 +32,15 @@ class MpesaConfig(BaseModel):
     initiator_password: Optional[str] = None
     security_credential: Optional[str] = None
     timeout: int = 30
-    max_retries: int = 3
+    max_retries: Optional[int] = None
+    retry_config: RetryConfig = RetryConfig()
+    circuit_breaker_config: Optional[dict] = None
+    rate_limiter_config: Optional[dict] = None
     logger: Optional[Logger] = None
+
+    def model_post_init(self, __context: Any) -> None:
+        if self.max_retries is not None:
+            self.retry_config.max_retries = self.max_retries
 
 
 class AccessTokenResponse(BaseModel):

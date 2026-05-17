@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import uuid
 from typing import Any, Optional
 
 import httpx
@@ -39,6 +40,10 @@ from mpesa.models import (
 from mpesa.utils import generate_password, generate_timestamp
 
 RETRYABLE_STATUS_CODES = {408, 429, 500, 502, 503, 504}
+
+
+def _generate_request_id() -> str:
+    return f"mpesa-{uuid.uuid4().hex[:16]}"
 
 
 class _AsyncTokenManager:
@@ -103,7 +108,7 @@ class AsyncMpesa:
         self._logger.info("Async M-Pesa client initialized", extra={
             "environment": config.environment,
             "timeout": config.timeout,
-            "max_retries": config.max_retries,
+            "max_retries": config.retry_config.max_retries,
         })
 
     def _log_request(self, request: httpx.Request) -> None:
@@ -116,25 +121,29 @@ class AsyncMpesa:
 
     async def _request(self, method: str, url: str, json_data: Optional[dict] = None) -> dict:
         last_error: Optional[Exception] = None
+        request_id = _generate_request_id()
 
-        for attempt in range(self._config.max_retries + 1):
+        for attempt in range(self._config.retry_config.max_retries + 1):
             try:
                 if attempt > 0:
                     self._logger.warning("Retrying request",
-                                         extra={"attempt": attempt, "url": url})
+                                         extra={"attempt": attempt, "url": url, "request_id": request_id})
 
                 token = await self._token_manager.get_token()
                 response = await self._client.request(
                     method=method,
                     url=url,
                     json=json_data,
-                    headers={"Authorization": f"Bearer {token}"},
+                    headers={
+                        "Authorization": f"Bearer {token}",
+                        "X-Request-ID": request_id,
+                    },
                 )
 
-                if response.status_code in RETRYABLE_STATUS_CODES and attempt < self._config.max_retries:
+                if response.status_code in RETRYABLE_STATUS_CODES and attempt < self._config.retry_config.max_retries:
                     delay = min(2 ** attempt * 1.0, 30.0)
                     self._logger.warning("Retryable status code, backing off",
-                                         extra={"status": response.status_code, "delay": delay, "attempt": attempt})
+                                         extra={"status": response.status_code, "delay": delay, "attempt": attempt, "request_id": request_id})
                     await asyncio.sleep(delay)
                     continue
 
@@ -143,6 +152,7 @@ class AsyncMpesa:
                     raise AuthenticationError(
                         "Authentication failed.",
                         status_code=401,
+                        request_id=request_id,
                         raw_response=response.text,
                     )
 
@@ -152,26 +162,27 @@ class AsyncMpesa:
                         "Rate limit exceeded.",
                         status_code=429,
                         retry_after=retry_after,
+                        request_id=request_id,
                         raw_response=response.text,
                     )
 
                 response.raise_for_status()
                 json_result = response.json()
                 self._logger.debug("Request successful",
-                                   extra={"method": method, "url": url, "status": response.status_code})
+                                   extra={"method": method, "url": url, "status": response.status_code, "request_id": request_id})
                 return json_result
 
             except httpx.TimeoutException as e:
-                last_error = TimeoutError("Request timed out.", cause=e)
-                if attempt < self._config.max_retries:
+                last_error = TimeoutError("Request timed out.", cause=e, request_id=request_id)
+                if attempt < self._config.retry_config.max_retries:
                     delay = min(2 ** attempt * 1.0, 30.0)
                     await asyncio.sleep(delay)
                     continue
                 raise last_error
 
             except httpx.ConnectError as e:
-                last_error = APIConnectionError("Connection failed.", cause=e)
-                if attempt < self._config.max_retries:
+                last_error = APIConnectionError("Connection failed.", cause=e, request_id=request_id)
+                if attempt < self._config.retry_config.max_retries:
                     delay = min(2 ** attempt * 1.0, 30.0)
                     await asyncio.sleep(delay)
                     continue
@@ -182,16 +193,17 @@ class AsyncMpesa:
 
             except httpx.HTTPStatusError as e:
                 self._logger.error("API error response",
-                                   extra={"status": e.response.status_code, "body": e.response.text})
+                                   extra={"status": e.response.status_code, "body": e.response.text, "request_id": request_id})
                 raise MpesaAPIError(
                     str(e),
                     status_code=e.response.status_code,
+                    request_id=request_id,
                     raw_response=e.response.text,
                 )
 
         if last_error:
             raise last_error
-        raise MpesaAPIError("Request failed after retries.")
+        raise MpesaAPIError("Request failed after retries.", request_id=request_id)
 
     async def _post(self, endpoint_key: str, data: dict) -> dict:
         url = get_full_url(self._config.environment, ENDPOINTS[endpoint_key])

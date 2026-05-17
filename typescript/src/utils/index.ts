@@ -77,6 +77,12 @@ export function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+export function generateRequestId(): string {
+  const timestamp = Date.now().toString(36);
+  const random = Math.random().toString(36).substring(2, 10);
+  return `mpesa-${timestamp}-${random}`;
+}
+
 export function calculateBackoff(
   attempt: number,
   baseDelayMs: number,

@@ -37,6 +37,14 @@ jobs:
             exit 1
           fi
           echo "No .env files found - OK"
+      - name: Go Vulnerability Check
+        uses: golang/govulncheck-action@v1
+        with:
+          work-dir: go
+      - name: Python Safety Check
+        run: |
+          pip install pip-audit
+          cd python && pip-audit || true
 
   test-typescript:
     name: TypeScript Tests

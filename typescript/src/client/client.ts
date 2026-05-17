@@ -1,7 +1,7 @@
 import axios, { type AxiosInstance, type AxiosRequestConfig } from "axios";
 import { getBaseUrl } from "../environment.js";
 import type { MpesaConfig, ResolvedConfig, Logger, LoggingHook, AccessTokenResponse, TokenCache } from "../types/index.js";
-import { maskSensitiveData, noopLogger } from "../utils/index.js";
+import { maskSensitiveData, noopLogger, generateRequestId } from "../utils/index.js";
 import { setupRetryInterceptor, mapAxiosError } from "../interceptors/retry.js";
 import { AuthenticationError } from "../errors/index.js";
 
@@ -52,9 +52,12 @@ export class MpesaApiClient {
     });
 
     this.client.interceptors.request.use((req) => {
+      const requestId = generateRequestId();
+      req.headers["X-Request-ID"] = requestId;
       this.logger.debug("Outgoing request", {
         method: req.method?.toUpperCase(),
         url: req.url,
+        requestId,
       });
       this.logging?.onRequest?.({
         method: req.method?.toUpperCase() ?? "GET",
@@ -62,33 +65,40 @@ export class MpesaApiClient {
         headers: req.headers as Record<string, string>,
         body: req.data ? maskSensitiveData(req.data) : undefined,
         timestamp: new Date(),
+        requestId,
       });
       return req;
     });
 
     this.client.interceptors.response.use(
       (res) => {
+        const requestId = (res.config.headers?.["X-Request-ID"] as string) ?? "";
         this.logger.debug("Response received", {
           status: res.status,
           url: res.config.url,
+          requestId,
         });
         this.logging?.onResponse?.({
           status: res.status,
           body: res.data,
           durationMs: 0,
           timestamp: new Date(),
+          requestId,
         });
         return res;
       },
       (err) => {
+        const requestId = (err.config?.headers?.["X-Request-ID"] as string) ?? "";
         this.logger.error("Request error", {
           message: err.message,
           status: err.response?.status,
           url: err.config?.url,
+          requestId,
         });
         this.logging?.onError?.({
           error: err,
           timestamp: new Date(),
+          requestId,
         });
         return Promise.reject(mapAxiosError(err));
       },

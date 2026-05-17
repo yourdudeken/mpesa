@@ -62,16 +62,18 @@ type RetryConfig struct {
 }
 
 type MpesaConfig struct {
-	ConsumerKey        string
-	ConsumerSecret     string
-	Environment        Environment
-	Passkey            string
-	InitiatorName      string
-	InitiatorPassword  string
-	SecurityCredential string
-	Timeout            time.Duration
-	RetryConfig        RetryConfig
-	Logger             Logger
+	ConsumerKey          string
+	ConsumerSecret       string
+	Environment          Environment
+	Passkey              string
+	InitiatorName        string
+	InitiatorPassword    string
+	SecurityCredential   string
+	Timeout              time.Duration
+	RetryConfig          RetryConfig
+	CircuitBreakerConfig CircuitBreakerConfig
+	RateLimiterConfig    RateLimiterConfig
+	Logger               Logger
 }
 
 // ---- Auth ----

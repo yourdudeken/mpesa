@@ -3,6 +3,8 @@ package client
 import (
 	"bytes"
 	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"encoding/json"
 	"io"
 	"math"
@@ -12,7 +14,16 @@ import (
 
 	"github.com/yourdudeken/mpesa-sdk/go/errors"
 	"github.com/yourdudeken/mpesa-sdk/go/types"
+	"github.com/yourdudeken/mpesa-sdk/go/validation"
 )
+
+func generateRequestID() string {
+	b := make([]byte, 8)
+	if _, err := rand.Read(b); err != nil {
+		return "mpesa-unknown"
+	}
+	return "mpesa-" + hex.EncodeToString(b)
+}
 
 var retryableStatusCodes = map[int]bool{
 	408: true, 429: true,
@@ -94,6 +105,10 @@ func (c *Client) Logger() types.Logger {
 	return c.logger
 }
 
+func (c *Client) GetAccessToken(ctx context.Context) (string, error) {
+	return c.tokenManager.GetToken(ctx)
+}
+
 func (tm *TokenManager) Invalidate() {
 	tm.mu.Lock()
 	defer tm.mu.Unlock()
@@ -154,9 +169,12 @@ func NewClient(config types.MpesaConfig) *Client {
 }
 
 func (c *Client) doRequest(ctx context.Context, method, url string, body interface{}) ([]byte, error) {
+	requestID := generateRequestID()
+
 	c.logger.Debug("Sending request",
 		"method", method,
 		"url", url,
+		"request_id", requestID,
 	)
 
 	var lastErr error
@@ -167,6 +185,7 @@ func (c *Client) doRequest(ctx context.Context, method, url string, body interfa
 				"url", url,
 				"attempt", attempt,
 				"max_retries", c.config.RetryConfig.MaxRetries,
+				"request_id", requestID,
 			)
 		}
 		token, err := c.tokenManager.GetToken(ctx)
@@ -192,6 +211,7 @@ func (c *Client) doRequest(ctx context.Context, method, url string, body interfa
 		req.Header.Set("Content-Type", "application/json")
 		req.Header.Set("Accept", "application/json")
 		req.Header.Set("Authorization", "Bearer "+token)
+		req.Header.Set("X-Request-ID", requestID)
 
 		if len(bodyData) > 0 {
 			req.ContentLength = int64(len(bodyData))
@@ -200,7 +220,8 @@ func (c *Client) doRequest(ctx context.Context, method, url string, body interfa
 		resp, err := c.httpClient.Do(req)
 		if err != nil {
 			lastErr = errors.NewAPIConnectionError("Request failed",
-				errors.WithCause(err))
+				errors.WithCause(err),
+				errors.WithRequestID(requestID))
 			if attempt < c.config.RetryConfig.MaxRetries {
 				select {
 				case <-ctx.Done():
@@ -241,6 +262,7 @@ func (c *Client) doRequest(ctx context.Context, method, url string, body interfa
 				"status", resp.StatusCode,
 				"attempt", attempt,
 				"delay_ms", delay.Milliseconds(),
+				"request_id", requestID,
 			)
 			time.Sleep(delay)
 			continue
@@ -250,18 +272,22 @@ func (c *Client) doRequest(ctx context.Context, method, url string, body interfa
 			c.tokenManager.Invalidate()
 			c.logger.Error("Authentication failed, token invalidated",
 				"status", resp.StatusCode,
+				"request_id", requestID,
 			)
 			return nil, errors.NewAuthenticationError("",
 				errors.WithStatusCode(resp.StatusCode),
+				errors.WithRequestID(requestID),
 				errors.WithRawResponse(string(respBody)))
 		}
 
 		if resp.StatusCode == 429 {
 			c.logger.Error("Rate limit exceeded",
 				"status", resp.StatusCode,
+				"request_id", requestID,
 			)
 			return nil, errors.NewRateLimitError("", 60,
 				errors.WithStatusCode(resp.StatusCode),
+				errors.WithRequestID(requestID),
 				errors.WithRawResponse(string(respBody)))
 		}
 
@@ -276,6 +302,7 @@ func (c *Client) doRequest(ctx context.Context, method, url string, body interfa
 				"status", resp.StatusCode,
 				"error_code", errResp.ErrorCode,
 				"error_message", errResp.ErrorMessage,
+				"request_id", requestID,
 			)
 			return nil, errors.NewMpesaAPIError(errResp.ErrorMessage, errResp.ErrorCode,
 				errors.WithStatusCode(resp.StatusCode),
@@ -287,11 +314,16 @@ func (c *Client) doRequest(ctx context.Context, method, url string, body interfa
 			"method", method,
 			"url", url,
 			"status", resp.StatusCode,
+			"request_id", requestID,
 		)
 		return respBody, nil
 	}
 
-	return nil, lastErr
+	if lastErr != nil {
+		return nil, lastErr
+	}
+	return nil, errors.NewAPIConnectionError("Request failed after retries",
+		errors.WithRequestID(requestID))
 }
 
 func calculateBackoffDuration(attempt int, config types.RetryConfig) time.Duration {
@@ -304,6 +336,26 @@ func calculateBackoffDuration(attempt int, config types.RetryConfig) time.Durati
 
 // ---- STK Push ----
 func (c *Client) STKPush(ctx context.Context, req types.STKPushRequest) (*types.STKPushResponse, error) {
+	if err := validation.PositiveInt(req.Amount, "Amount"); err != nil {
+		return nil, err
+	}
+	if err := validation.PhoneNumber(req.PhoneNumber, "PhoneNumber"); err != nil {
+		return nil, err
+	}
+	if err := validation.ValidURL(req.CallBackURL, "CallBackURL"); err != nil {
+		return nil, err
+	}
+	if err := validation.MaxLength(req.AccountReference, "AccountReference", 12); err != nil {
+		return nil, err
+	}
+	if err := validation.MaxLength(req.TransactionDesc, "TransactionDesc", 13); err != nil {
+		return nil, err
+	}
+	if err := validation.OneOf(req.TransactionType, "TransactionType",
+		[]types.TransactionType{types.CustomerPayBillOnline, types.CustomerBuyGoodsOnline}); err != nil {
+		return nil, err
+	}
+
 	if req.Password == "" && c.config.Passkey != "" {
 		timestamp := req.Timestamp
 		if timestamp == "" {
