@@ -71,7 +71,11 @@ class WebhookManager:
         return hmac.compare_digest(expected, signature)
 
 
+from mpesa.webhooks.retry import WebhookRetryQueue, DeliveryRecord
+
 __all__ = [
     "WebhookManager",
     "WebhookHandler",
+    "WebhookRetryQueue",
+    "DeliveryRecord",
 ]

@@ -67,6 +67,11 @@ def calculate_backoff(attempt: int, base_delay_ms: int = 1000, max_delay_ms: int
     return min(exponential + jitter, max_delay_ms) / 1000.0
 
 
+from mpesa.utils.batch import execute_batch, execute_batch_async
+from mpesa.utils.metrics import MetricsCollector, NoopMetricsCollector
+from mpesa.utils.tracing import Tracer, NoopTracer, Span, SpanContext, with_span
+
+
 __all__ = [
     "generate_timestamp",
     "generate_password",
@@ -75,4 +80,13 @@ __all__ = [
     "is_phone_number_valid",
     "format_phone_number",
     "calculate_backoff",
+    "execute_batch",
+    "execute_batch_async",
+    "MetricsCollector",
+    "NoopMetricsCollector",
+    "Tracer",
+    "NoopTracer",
+    "Span",
+    "SpanContext",
+    "with_span",
 ]

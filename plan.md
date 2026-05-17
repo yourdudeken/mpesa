@@ -8,7 +8,8 @@
 
 | Date | Version | Changes |
 |------|---------|---------|
-| 2026-05-17 | 5.0 | FINAL: Idempotency keys, credential rotation, audit trail logging, batch requests, webhook retry DLQ, encrypted token store, metrics/tracing interfaces, k6 load tests, integration tests, Snyk/Renovate, shared endpoints. See Implementation Log below. |
+| 2026-05-17 | 6.0 | FINAL: Circuit breaker + rate limiter wired into client request pipeline for all 3 SDKs. Python/Go webhook retry DLQ, batch requests, metrics/tracing interfaces. See Implementation Log below. |
+| 2026-05-17 | 5.0 | Idempotency keys, credential rotation, audit trail logging, batch requests, webhook retry DLQ, encrypted token store, metrics/tracing interfaces, k6 load tests, integration tests, Snyk/Renovate, shared endpoints. See Implementation Log below. |
 | 2026-05-17 | 4.0 | Full production hardening: Request ID correlation, Go validation, Flask/Django middleware, circuit breakers, rate limiters, health checks, retry config standardization, mock tests, CI/CD vuln scanning, compliance docs. See Implementation Log below. |
 | 2026-05-17 | 3.0 | Added Python AsyncMpesa client, FastAPI middleware, exported AsyncMpesa from package. See Implementation Log below. |
 | 2026-05-17 | 2.0 | Implemented Phase 1 (Critical Fixes & Security Hardening) + Phase 2 (Observability & Resilience) + Phase 4 (CI/CD Hardening). See Implementation Log below. |
@@ -164,7 +165,7 @@ The M-Pesa SDK is a polyglot monorepo (TypeScript, Python, Go) providing access 
 | Reactive backoff on 429 | PASS | All 3 languages |
 | Token bucket rate limiter (TypeScript) | PASS | `TokenBucketRateLimiter` + config in `MpesaConfig` |
 | Circuit breaker (TypeScript) | PASS | `CircuitBreaker` with closed/open/half-open states |
-| Circuit breaker (Python/Go) | DONE | Added to types/resilience.go and utils/circuit_breaker.py |
+| Circuit breaker (Python/Go) | DONE | Wired into client request pipeline for all 3 SDKs |
 
 ### Input Validation
 
@@ -194,7 +195,7 @@ The M-Pesa SDK is a polyglot monorepo (TypeScript, Python, Go) providing access 
 | 2 | No distributed tracing | DONE | Tracer interface defined, pluggable |
 | 3 | Incomplete test coverage | DONE | Mock tests (Go + TS), integration script, k6 load test |
 | 4 | Go services layer bug (STKQuery) | RESOLVED | Fixed BusinessShortCode conversion |
-| 5 | No circuit breakers | IN PROGRESS | TypeScript only |
+| 5 | No circuit breakers | RESOLVED | All 3 SDKs - wired into client request pipeline |
 | 6 | No health checks | DONE | Health endpoints in all 3 SDKs |
 | 7 | No metrics | DONE | MetricsCollector interface defined |
 | 8 | No idempotency | DONE | X-Idempotency-Key in all 3 SDKs |
@@ -306,6 +307,35 @@ The M-Pesa SDK is a polyglot monorepo (TypeScript, Python, Go) providing access 
 | CI | Renovate auto-deps | CI | `.github/renovate.json` - Renovate config with weekly schedule |
 | 3.6 | Python monolithic client refactor | Python | `mpesa/services/__init__.py` - Services accept `_post` callable; `mpesa/client/__init__.py` - Service properties on `Mpesa` class |
 
+### Session 8 (2026-05-17): Final Pipeline Integration & Cross-Language Parity
+
+#### Completed
+
+| # | Task | Lang | File(s) |
+|---|------|------|---------|
+| 2.2 | Wire circuit breaker into client request pipeline | Python | `python/mpesa/client/__init__.py` - Instantiated in `Mpesa.__init__()`, `_request()` wraps inner logic with `_circuit_breaker.call()` |
+| 2.2 | Wire circuit breaker into async client request pipeline | Python | `python/mpesa/client/async_client.py` - Added `acall()` method to CircuitBreaker, wired into async `_request()` |
+| 2.2 | Wire circuit breaker into client request pipeline | Go | `go/client/client.go` - Added `circuitBreaker` field, `doRequest()` checks state + records success/failure via `RecordSuccess()`/`RecordFailure()` |
+| 2.2 | Wire circuit breaker into client request pipeline | TS | `typescript/src/client/client.ts` - Instantiated `CircuitBreaker`, `request()` wraps via `circuitBreaker.call()` |
+| 2.3 | Wire rate limiter into client request pipeline | Python | `python/mpesa/client/__init__.py` - `_rate_limiter.acquire()` before circuit breaker |
+| 2.3 | Wire rate limiter into async client request pipeline | Python | `python/mpesa/client/async_client.py` - Async-safe `try_acquire()` + `asyncio.sleep()` loop |
+| 2.3 | Wire rate limiter into client request pipeline | Go | `go/client/client.go` - Added `RateLimiter` interface, `NoopRateLimiter` default, `rateLimiter.Acquire()` before circuit breaker |
+| 2.3 | Wire rate limiter into client request pipeline | TS | `typescript/src/client/client.ts` - `RateLimiterConfig` detected, `TokenBucketRateLimiter` or `NoopRateLimiter` created, `rateLimiter.acquire()` before circuit breaker |
+| 2.4 | Add metrics interfaces (Python/Go) | Python | `python/mpesa/utils/metrics.py` - `MetricsCollector` + `NoopMetricsCollector` |
+| 2.4 | Add metrics interfaces (Python/Go) | Go | `go/types/metrics.go` - `MetricsCollector` interface + `NoopMetricsCollector` |
+| 2.1 | Add tracing interfaces (Python/Go) | Python | `python/mpesa/utils/tracing.py` - `Tracer`, `Span`, `SpanContext`, `NoopTracer`, `with_span()` context manager |
+| 2.1 | Add tracing interfaces (Python/Go) | Go | `go/types/tracing.go` - `Tracer` interface + `NoopTracer` |
+| 5.3 | Add batch request support (Python/Go) | Python | `python/mpesa/utils/batch.py` - `execute_batch()` sync + `execute_batch_async()` |
+| 5.3 | Add batch request support (Python/Go) | Go | `go/client/batch.go` - `ExecuteBatch()` with goroutine-based concurrency |
+| 5.4 | Add webhook retry DLQ (Python/Go) | Python | `python/mpesa/webhooks/retry.py` - `WebhookRetryQueue` with threaded processing + dead letter queue |
+| 5.4 | Add webhook retry DLQ (Python/Go) | Go | `go/webhooks/retry.go` - `RetryQueue` with goroutine processing + dead letter queue |
+| - | Export new modules from Python package | Python | `python/mpesa/utils/__init__.py` - exports batch, metrics, tracing; `python/mpesa/webhooks/__init__.py` - exports retry queue |
+| - | Add `acall()` to Python CircuitBreaker | Python | `python/mpesa/utils/circuit_breaker.py` - Added `async def acall()` for async support |
+| - | Add `RecordSuccess()`/`RecordFailure()` to Go CircuitBreaker | Go | `go/types/resilience.go` - Added methods for inline circuit breaker tracking |
+| - | Add `RateLimiter` interface to Go types | Go | `go/types/resilience.go` - Interface with `Acquire()`/`TryAcquire()` |
+| - | Fix stray empty func in Go client | Go | `go/client/client.go` - Removed `func ()` block |
+| - | Update RateLimiter interface with `available()` | TS | `typescript/src/utils/rate-limiter.ts` - Already had interface |
+
 ### Session 7 (2026-05-17): Future Enhancements
 
 #### Completed
@@ -328,8 +358,10 @@ The M-Pesa SDK is a polyglot monorepo (TypeScript, Python, Go) providing access 
 
 | # | Task | Lang | Effort | Status |
 |---|------|------|--------|--------|
-| 2.1 | Add OpenTelemetry tracing support | All | 4h | DONE (interface defined, pluggable) |
-| 2.4 | Add metrics collection (prometheus client) | All | 3h | DONE (interface defined, pluggable) |
+| 2.1 | Add OpenTelemetry tracing support | All | 4h | DONE (interface defined all 3 SDKs, pluggable) |
+| 2.2 | Wire circuit breaker into client pipeline | All | 3h | DONE (all 3 SDKs) |
+| 2.3 | Wire rate limiter into client pipeline | All | 2h | DONE (all 3 SDKs) |
+| 2.4 | Add metrics collection (prometheus client) | All | 3h | DONE (interface defined all 3 SDKs, pluggable) |
 | 2.5 | Add health check endpoint | All | 1h | DONE |
 | 2.6 | Add idempotency key support | All | 2h | DONE |
 | 2.7 | Implement async/parallel support in Python | Python | 2h | DONE |
@@ -360,8 +392,8 @@ The M-Pesa SDK is a polyglot monorepo (TypeScript, Python, Go) providing access 
 |---|------|------|--------|--------|
 | 5.1 | Add compliance documentation (PCI-DSS, SOC2 guidance) | Docs | 2h | DONE |
 | 5.2 | Add audit trail logging | All | 2h | DONE |
-| 5.3 | Add batch request support (where API allows) | All | 2h | DONE (TS batch executor) |
-| 5.4 | Add webhook retry with dead-letter queue pattern | All | 2h | DONE (TS WebhookRetryQueue) |
+| 5.3 | Add batch request support (where API allows) | All | 2h | DONE (all 3 SDKs) |
+| 5.4 | Add webhook retry with dead-letter queue pattern | All | 2h | DONE (all 3 SDKs) |
 | 5.5 | Add credential rotation helper | All | 1h | DONE (rotate_credentials methods) |
 | 5.6 | Add encrypted token persistence option | All | 2h | DONE (AES-256-GCM file store) |
 
@@ -492,12 +524,12 @@ GET /health -> {
 | Fix Go retry body re-read | High | 30m | P0 | DONE |
 | Add structured logging | High | 4h | P0 | DONE |
 | Add runtime validation (TS) | High | 2h | P1 | DONE |
-| Add rate limiter | Medium | 3h | P1 | DONE (TS) |
-| Add circuit breaker | Medium | 3h | P1 | DONE (TS) |
+| Add rate limiter + client pipeline integration | Medium | 3h | P1 | DONE (all 3 SDKs) |
+| Add circuit breaker + client pipeline integration | Medium | 3h | P1 | DONE (all 3 SDKs) |
 | SAST/SCA in CI | Medium | 2h | P2 | DONE |
 | Docker compose | Low | 1h | P3 | DONE |
 | Add request ID correlation | High | 2h | P1 | DONE |
-| Add OTel tracing | Medium | 4h | P1 | DONE (interface) |
+| Add OTel tracing | Medium | 4h | P1 | DONE (interface all 3 SDKs) |
 | Add HTTP mock tests | High | 6h | P1 | DONE (Go + TS) |
 | Auto-generate endpoints | Medium | 2h | P2 | DONE (Python dynamic, Go/TS refs) |
 | Standardize API naming | Medium | 2h | P2 | DONE |
@@ -508,8 +540,9 @@ GET /health -> {
 | Credential rotation | Low | 1h | P3 | DONE |
 | Compliance docs | Low | 2h | P3 | DONE |
 | Audit trail logging | Medium | 2h | P2 | DONE |
-| Batch request support | Low | 2h | P3 | DONE (TS) |
-| Webhook retry DLQ | Medium | 2h | P2 | DONE (TS) |
+| Batch request support | Low | 2h | P3 | DONE (all 3 SDKs) |
+| Webhook retry DLQ | Medium | 2h | P2 | DONE (all 3 SDKs) |
 | Encrypted token store | Low | 2h | P3 | DONE |
 | Integration tests | Medium | 4h | P2 | DONE (script) |
 | Snyk / Renovate | Low | 1h | P3 | DONE |
+| Metrics collection interfaces | Low | 1h | P3 | DONE (all 3 SDKs) |

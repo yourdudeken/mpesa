@@ -4,6 +4,8 @@ import type { MpesaConfig, ResolvedConfig, Logger, LoggingHook, AccessTokenRespo
 import { maskSensitiveData, noopLogger, generateRequestId } from "../utils/index.js";
 import { setupRetryInterceptor, mapAxiosError } from "../interceptors/retry.js";
 import { AuthenticationError } from "../errors/index.js";
+import { CircuitBreaker } from "../utils/circuit-breaker.js";
+import { TokenBucketRateLimiter, NoopRateLimiter } from "../utils/rate-limiter.js";
 
 const DEFAULT_TIMEOUT = 30000;
 
@@ -13,9 +15,19 @@ export class MpesaApiClient {
   private tokenCache: TokenCache | null = null;
   private readonly logging?: LoggingHook;
   private readonly logger: Logger;
+  private readonly circuitBreaker: CircuitBreaker;
+  private readonly rateLimiter: TokenBucketRateLimiter | NoopRateLimiter;
 
   constructor(config: MpesaConfig) {
     this.logger = config.logger ?? noopLogger;
+
+    this.circuitBreaker = new CircuitBreaker(config.circuitBreakerConfig);
+
+    if (config.rateLimiterConfig) {
+      this.rateLimiter = new TokenBucketRateLimiter(config.rateLimiterConfig);
+    } else {
+      this.rateLimiter = new NoopRateLimiter();
+    }
 
     this.config = {
       consumerKey: config.consumerKey,
@@ -149,23 +161,27 @@ export class MpesaApiClient {
   }
 
   async request<T>(config: AxiosRequestConfig): Promise<T> {
-    const token = await this.getAccessToken();
-    const headers: Record<string, string> = {
-      ...(config.headers as Record<string, string>),
-      Authorization: `Bearer ${token}`,
-    };
+    await this.rateLimiter.acquire();
 
-    if (this.config.enableIdempotency && config.method?.toUpperCase() === "POST") {
-      headers["X-Idempotency-Key"] = this.generateIdempotencyKey();
-    }
+    return this.circuitBreaker.call<T>(async () => {
+      const token = await this.getAccessToken();
+      const headers: Record<string, string> = {
+        ...(config.headers as Record<string, string>),
+        Authorization: `Bearer ${token}`,
+      };
 
-    const mergedConfig: AxiosRequestConfig = {
-      ...config,
-      headers,
-    };
+      if (this.config.enableIdempotency && config.method?.toUpperCase() === "POST") {
+        headers["X-Idempotency-Key"] = this.generateIdempotencyKey();
+      }
 
-    const response = await this.client.request<T>(mergedConfig);
-    return response.data;
+      const mergedConfig: AxiosRequestConfig = {
+        ...config,
+        headers,
+      };
+
+      const response = await this.client.request<T>(mergedConfig);
+      return response.data;
+    });
   }
 
   async post<T>(url: string, data?: unknown): Promise<T> {

@@ -24,9 +24,6 @@ func (c *Client) RotateCredentials(consumerKey, consumerSecret string) {
 	c.logger.Info("Credentials rotated")
 }
 
-func (
-)
-
 func generateIdempotencyKey() string {
 	b := make([]byte, 8)
 	if _, err := rand.Read(b); err != nil {
@@ -135,11 +132,13 @@ func (tm *TokenManager) Invalidate() {
 }
 
 type Client struct {
-	config       types.MpesaConfig
-	httpClient   *http.Client
-	tokenManager *TokenManager
-	endpoints    environmentEndpoints
-	logger       types.Logger
+	config         types.MpesaConfig
+	httpClient     *http.Client
+	tokenManager   *TokenManager
+	endpoints      environmentEndpoints
+	logger         types.Logger
+	circuitBreaker *types.CircuitBreaker
+	rateLimiter    types.RateLimiter
 }
 
 func NewClient(config types.MpesaConfig) *Client {
@@ -171,9 +170,18 @@ func NewClient(config types.MpesaConfig) *Client {
 		"retry_max", config.RetryConfig.MaxRetries,
 	)
 
+	var rl types.RateLimiter
+	if config.RateLimiterConfig.TokensPerSecond > 0 {
+		rl = types.NewTokenBucketRateLimiter(config.RateLimiterConfig)
+	} else {
+		rl = &types.NoopRateLimiter{}
+	}
+
 	return &Client{
-		config:     config,
-		httpClient: httpClient,
+		config:         config,
+		httpClient:     httpClient,
+		circuitBreaker: types.NewCircuitBreaker(config.CircuitBreakerConfig),
+		rateLimiter:    rl,
 		tokenManager: NewTokenManager(
 			eps.Auth,
 			config.ConsumerKey,
@@ -186,8 +194,22 @@ func NewClient(config types.MpesaConfig) *Client {
 	}
 }
 
-func (c *Client) doRequest(ctx context.Context, method, url string, body interface{}) ([]byte, error) {
+func (c *Client) doRequest(ctx context.Context, method, url string, body interface{}) (respBody []byte, err error) {
 	requestID := generateRequestID()
+
+	c.rateLimiter.Acquire()
+
+	if c.circuitBreaker.State() == types.CircuitOpen {
+		return nil, types.ErrCircuitBreakerOpen
+	}
+
+	defer func() {
+		if err != nil {
+			c.circuitBreaker.RecordFailure()
+		} else {
+			c.circuitBreaker.RecordSuccess()
+		}
+	}()
 
 	c.logger.Debug("Sending request",
 		"method", method,
@@ -256,7 +278,7 @@ func (c *Client) doRequest(ctx context.Context, method, url string, body interfa
 			return nil, lastErr
 		}
 
-		respBody, err := io.ReadAll(resp.Body)
+		respBody, err = io.ReadAll(resp.Body)
 		resp.Body.Close()
 		if err != nil {
 			return nil, err

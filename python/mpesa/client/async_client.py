@@ -231,7 +231,7 @@ class AsyncMpesa:
                 raise last_error
             raise MpesaAPIError("Request failed after retries.", request_id=request_id)
 
-        return self._circuit_breaker.call(do_request)
+        return await self._circuit_breaker.acall(do_request)
 
     async def _post(self, endpoint_key: str, data: dict) -> dict:
         url = get_full_url(self._config.environment, ENDPOINTS[endpoint_key])

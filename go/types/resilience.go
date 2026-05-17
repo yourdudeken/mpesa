@@ -93,6 +93,31 @@ func (cb *CircuitBreaker) Execute(fn func() error) error {
 	return err
 }
 
+func (cb *CircuitBreaker) RecordSuccess() {
+	cb.mu.Lock()
+	defer cb.mu.Unlock()
+	if cb.state == CircuitHalfOpen {
+		cb.successCount++
+		if cb.successCount >= cb.successThreshold {
+			cb.state = CircuitClosed
+			cb.failureCount = 0
+			cb.successCount = 0
+		}
+	} else {
+		cb.failureCount = 0
+	}
+}
+
+func (cb *CircuitBreaker) RecordFailure() {
+	cb.mu.Lock()
+	defer cb.mu.Unlock()
+	cb.failureCount++
+	cb.lastFailureTime = time.Now()
+	if cb.failureCount >= cb.failureThreshold {
+		cb.state = CircuitOpen
+	}
+}
+
 func (cb *CircuitBreaker) Reset() {
 	cb.mu.Lock()
 	defer cb.mu.Unlock()
@@ -152,6 +177,11 @@ func (rl *TokenBucketRateLimiter) TryAcquire() bool {
 		return true
 	}
 	return false
+}
+
+type RateLimiter interface {
+	Acquire()
+	TryAcquire() bool
 }
 
 type NoopRateLimiter struct{}
