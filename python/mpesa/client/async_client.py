@@ -1,5 +1,5 @@
+import asyncio
 import logging
-import time
 from typing import Any, Optional
 
 import httpx
@@ -38,40 +38,41 @@ from mpesa.models import (
 )
 from mpesa.utils import generate_password, generate_timestamp
 
-from mpesa.client.async_client import AsyncMpesa
-
 RETRYABLE_STATUS_CODES = {408, 429, 500, 502, 503, 504}
 
-_LOGGER = logging.getLogger("mpesa")
 
-
-class _TokenManager:
-    def __init__(self, client: httpx.Client, config: MpesaConfig) -> None:
+class _AsyncTokenManager:
+    def __init__(self, client: httpx.AsyncClient, config: MpesaConfig) -> None:
         self._client = client
         self._config = config
         self._token: Optional[str] = None
         self._expires_at: float = 0.0
+        self._lock = asyncio.Lock()
         self._logger = _get_logger(config.logger)
 
-    def get_token(self) -> str:
-        if self._token and time.time() < self._expires_at:
+    async def get_token(self) -> str:
+        if self._token and asyncio.get_event_loop().time() < self._expires_at:
             return self._token
 
-        self._logger.debug("Fetching new access token")
+        async with self._lock:
+            if self._token and asyncio.get_event_loop().time() < self._expires_at:
+                return self._token
 
-        url = get_full_url(self._config.environment, ENDPOINTS["AUTH"])
-        response = self._client.get(
-            url,
-            params={"grant_type": "client_credentials"},
-            auth=(self._config.consumer_key, self._config.consumer_secret),
-        )
-        data = response.raise_for_status().json()
-        token_data = AccessTokenResponse(**data)
-        self._token = token_data.access_token
-        self._expires_at = time.time() + token_data.expires_in - 60
+            self._logger.debug("Fetching new access token")
 
-        self._logger.debug("Access token acquired", extra={"expires_in": token_data.expires_in})
-        return self._token
+            url = get_full_url(self._config.environment, ENDPOINTS["AUTH"])
+            response = await self._client.get(
+                url,
+                params={"grant_type": "client_credentials"},
+                auth=(self._config.consumer_key, self._config.consumer_secret),
+            )
+            data = response.raise_for_status().json()
+            token_data = AccessTokenResponse(**data)
+            self._token = token_data.access_token
+            self._expires_at = asyncio.get_event_loop().time() + token_data.expires_in - 60
+
+            self._logger.debug("Access token acquired", extra={"expires_in": token_data.expires_in})
+            return self._token
 
     def invalidate(self) -> None:
         self._token = None
@@ -79,14 +80,14 @@ class _TokenManager:
         self._logger.warning("Access token invalidated")
 
 
-class Mpesa:
+class AsyncMpesa:
     def __init__(self, config: MpesaConfig | dict[str, Any]) -> None:
         if isinstance(config, dict):
             config = MpesaConfig(**config)
 
         self._config = config
         self._logger = _get_logger(config.logger)
-        self._client = httpx.Client(
+        self._client = httpx.AsyncClient(
             base_url=get_full_url(config.environment, ""),
             timeout=config.timeout,
             headers={
@@ -98,8 +99,8 @@ class Mpesa:
                 "response": [self._log_response],
             },
         )
-        self._token_manager = _TokenManager(self._client, config)
-        self._logger.info("M-Pesa client initialized", extra={
+        self._token_manager = _AsyncTokenManager(self._client, config)
+        self._logger.info("Async M-Pesa client initialized", extra={
             "environment": config.environment,
             "timeout": config.timeout,
             "max_retries": config.max_retries,
@@ -113,7 +114,7 @@ class Mpesa:
         self._logger.debug("Response received",
                            extra={"status": response.status_code, "url": str(response.url)})
 
-    def _request(self, method: str, url: str, json_data: Optional[dict] = None) -> dict:
+    async def _request(self, method: str, url: str, json_data: Optional[dict] = None) -> dict:
         last_error: Optional[Exception] = None
 
         for attempt in range(self._config.max_retries + 1):
@@ -122,8 +123,8 @@ class Mpesa:
                     self._logger.warning("Retrying request",
                                          extra={"attempt": attempt, "url": url})
 
-                token = self._token_manager.get_token()
-                response = self._client.request(
+                token = await self._token_manager.get_token()
+                response = await self._client.request(
                     method=method,
                     url=url,
                     json=json_data,
@@ -134,7 +135,7 @@ class Mpesa:
                     delay = min(2 ** attempt * 1.0, 30.0)
                     self._logger.warning("Retryable status code, backing off",
                                          extra={"status": response.status_code, "delay": delay, "attempt": attempt})
-                    time.sleep(delay)
+                    await asyncio.sleep(delay)
                     continue
 
                 if response.status_code == 401:
@@ -164,7 +165,7 @@ class Mpesa:
                 last_error = TimeoutError("Request timed out.", cause=e)
                 if attempt < self._config.max_retries:
                     delay = min(2 ** attempt * 1.0, 30.0)
-                    time.sleep(delay)
+                    await asyncio.sleep(delay)
                     continue
                 raise last_error
 
@@ -172,7 +173,7 @@ class Mpesa:
                 last_error = APIConnectionError("Connection failed.", cause=e)
                 if attempt < self._config.max_retries:
                     delay = min(2 ** attempt * 1.0, 30.0)
-                    time.sleep(delay)
+                    await asyncio.sleep(delay)
                     continue
                 raise last_error
 
@@ -192,83 +193,83 @@ class Mpesa:
             raise last_error
         raise MpesaAPIError("Request failed after retries.")
 
-    def _post(self, endpoint_key: str, data: dict) -> dict:
+    async def _post(self, endpoint_key: str, data: dict) -> dict:
         url = get_full_url(self._config.environment, ENDPOINTS[endpoint_key])
-        return self._request("POST", url, data)
+        return await self._request("POST", url, data)
 
-    def stk_push(self, request: STKPushRequest | dict) -> STKPushResponse:
+    async def stk_push(self, request: STKPushRequest | dict) -> STKPushResponse:
         if isinstance(request, dict):
             request = STKPushRequest(**request)
         if not request.Password and self._config.passkey:
             timestamp = request.Timestamp or generate_timestamp()
             request.Password = generate_password(request.BusinessShortCode, self._config.passkey, timestamp)
             request.Timestamp = timestamp
-        result = self._post("STK_PUSH", request.model_dump())
+        result = await self._post("STK_PUSH", request.model_dump())
         return STKPushResponse(**result)
 
-    def stk_query(self, request: STKQueryRequest | dict) -> STKQueryResponse:
+    async def stk_query(self, request: STKQueryRequest | dict) -> STKQueryResponse:
         if isinstance(request, dict):
             request = STKQueryRequest(**request)
         if not request.Password and self._config.passkey:
             timestamp = request.Timestamp or generate_timestamp()
             request.Password = generate_password(request.BusinessShortCode, self._config.passkey, timestamp)
             request.Timestamp = timestamp
-        result = self._post("STK_QUERY", request.model_dump())
+        result = await self._post("STK_QUERY", request.model_dump())
         return STKQueryResponse(**result)
 
-    def c2b_register_url(self, request: C2BRegisterURLRequest | dict) -> C2BResponse:
+    async def c2b_register_url(self, request: C2BRegisterURLRequest | dict) -> C2BResponse:
         if isinstance(request, dict):
             request = C2BRegisterURLRequest(**request)
-        result = self._post("C2B_REGISTER_URL", request.model_dump())
+        result = await self._post("C2B_REGISTER_URL", request.model_dump())
         return C2BResponse(**result)
 
-    def c2b_simulate(self, request: C2BSimulateRequest | dict) -> C2BResponse:
+    async def c2b_simulate(self, request: C2BSimulateRequest | dict) -> C2BResponse:
         if isinstance(request, dict):
             request = C2BSimulateRequest(**request)
-        result = self._post("C2B_SIMULATE", request.model_dump())
+        result = await self._post("C2B_SIMULATE", request.model_dump())
         return C2BResponse(**result)
 
-    def b2c(self, request: B2CRequest | dict) -> B2CResponse:
+    async def b2c(self, request: B2CRequest | dict) -> B2CResponse:
         if isinstance(request, dict):
             request = B2CRequest(**request)
-        result = self._post("B2C", request.model_dump())
+        result = await self._post("B2C", request.model_dump())
         return B2CResponse(**result)
 
-    def b2b(self, request: B2BRequest | dict) -> B2BResponse:
+    async def b2b(self, request: B2BRequest | dict) -> B2BResponse:
         if isinstance(request, dict):
             request = B2BRequest(**request)
-        result = self._post("B2B", request.model_dump())
+        result = await self._post("B2B", request.model_dump())
         return B2BResponse(**result)
 
-    def reversal(self, request: ReversalRequest | dict) -> ReversalResponse:
+    async def reversal(self, request: ReversalRequest | dict) -> ReversalResponse:
         if isinstance(request, dict):
             request = ReversalRequest(**request)
-        result = self._post("REVERSAL", request.model_dump())
+        result = await self._post("REVERSAL", request.model_dump())
         return ReversalResponse(**result)
 
-    def transaction_status(self, request: TransactionStatusRequest | dict) -> TransactionStatusResponse:
+    async def transaction_status(self, request: TransactionStatusRequest | dict) -> TransactionStatusResponse:
         if isinstance(request, dict):
             request = TransactionStatusRequest(**request)
-        result = self._post("TRANSACTION_STATUS", request.model_dump())
+        result = await self._post("TRANSACTION_STATUS", request.model_dump())
         return TransactionStatusResponse(**result)
 
-    def account_balance(self, request: AccountBalanceRequest | dict) -> AccountBalanceResponse:
+    async def account_balance(self, request: AccountBalanceRequest | dict) -> AccountBalanceResponse:
         if isinstance(request, dict):
             request = AccountBalanceRequest(**request)
-        result = self._post("ACCOUNT_BALANCE", request.model_dump())
+        result = await self._post("ACCOUNT_BALANCE", request.model_dump())
         return AccountBalanceResponse(**result)
 
-    def dynamic_qr(self, request: DynamicQRRequest | dict) -> DynamicQRResponse:
+    async def dynamic_qr(self, request: DynamicQRRequest | dict) -> DynamicQRResponse:
         if isinstance(request, dict):
             request = DynamicQRRequest(**request)
-        result = self._post("DYNAMIC_QR", request.model_dump())
+        result = await self._post("DYNAMIC_QR", request.model_dump())
         return DynamicQRResponse(**result)
 
-    def close(self) -> None:
-        self._client.close()
+    async def close(self) -> None:
+        await self._client.aclose()
 
-    def __enter__(self) -> "Mpesa":
+    async def __aenter__(self) -> "AsyncMpesa":
         return self
 
-    def __exit__(self, *args: Any) -> None:
-        self.close()
+    async def __aexit__(self, *args: Any) -> None:
+        await self.close()

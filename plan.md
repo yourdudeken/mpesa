@@ -8,6 +8,7 @@
 
 | Date | Version | Changes |
 |------|---------|---------|
+| 2026-05-17 | 3.0 | Added Python AsyncMpesa client, FastAPI middleware, exported AsyncMpesa from package. See Implementation Log below. |
 | 2026-05-17 | 2.0 | Implemented Phase 1 (Critical Fixes & Security Hardening) + Phase 2 (Observability & Resilience) + Phase 4 (CI/CD Hardening). See Implementation Log below. |
 | 2026-05-17 | 1.0 | Initial audit and roadmap creation |
 
@@ -36,7 +37,7 @@ The M-Pesa SDK is a polyglot monorepo (TypeScript, Python, Go) providing access 
 | No OpenTelemetry/tracing | Medium | OPEN | No distributed tracing support yet |
 | Minimal test coverage | High | OPEN | No HTTP mock tests, no integration tests, no load tests |
 | Incomplete webhook signature verification | Medium | OPEN | TS/Python/Go verification is placeholder |
-| No async/parallel support | Medium | OPEN | Python sync-only, Go no worker pool |
+| No async/parallel support | Medium | RESOLVED | Python sync+async via AsyncMpesa client, Go no worker pool |
 | Monolithic Python client | Medium | OPEN | Mpesa class flat, services layer thin passthrough |
 | No compliance documentation | Medium | OPEN | No PCI-DSS/SOC2/GDPR guidance |
 
@@ -81,7 +82,7 @@ The M-Pesa SDK is a polyglot monorepo (TypeScript, Python, Go) providing access 
 
 **Issues:**
 - Monolithic design: Mpesa class contains ALL API methods directly; services layer duplicates interface
-- No async support: httpx is imported but only sync client used
+- No async support: Resolved with `AsyncMpesa` class using `AsyncClient` and `asyncio.sleep()` in retry backoff
 - Manual retry logic: Embedded in `_request()` with `time.sleep()` - blocks event loop
 - No connection pooling config: Default httpx pool settings
 
@@ -90,6 +91,7 @@ The M-Pesa SDK is a polyglot monorepo (TypeScript, Python, Go) providing access 
 - httpx `event_hooks` for request/response logging
 - RSA encryption upgraded from PKCS1v15 to OAEP with SHA-256 (MGF1)
 - FastAPI webhook router (`create_fastapi_router`) in new `mpesa/middleware/` module
+- `AsyncMpesa` async client in new `mpesa/client/async_client.py` module, exported from package top-level
 
 ### Go SDK (`go/`)
 
@@ -104,7 +106,7 @@ The M-Pesa SDK is a polyglot monorepo (TypeScript, Python, Go) providing access 
 **Issues:**
 - `services/service.go` adds minimal value - most methods are pass-through mapping
 - No response validation: JSON unmarshalling trusts server response entirely
-- No middleware (gin/echo/http.Handler) integrations
+- No middleware (gin/echo/http.Handler) integrations — Gin middleware added
 - `golang.org/x/time` dependency imported but `rate` package unused
 - Tests depend on real token generation in `TestSTKPushRequestGeneration` - no mocks
 
@@ -125,7 +127,7 @@ The M-Pesa SDK is a polyglot monorepo (TypeScript, Python, Go) providing access 
 | Retry config | `retryConfig` object | `max_retries` int | `RetryConfig` struct |
 | Error properties | `statusCode`, `requestId`, `rawResponse` | `status_code`, `request_id`, `raw_response` | Functional options |
 | Webhook events | Domain events | String events | Typed constants |
-| Framework support | Express, Fastify | FastAPI (NEW) | None |
+| Framework support | Express, Fastify | FastAPI (NEW) | Gin (NEW) |
 
 **RESOLVED:**
 - Logger interface pattern now consistent across all 3 languages (DEBUG/INFO/WARN/ERROR levels, `noopLogger` default)
@@ -246,7 +248,25 @@ The M-Pesa SDK is a polyglot monorepo (TypeScript, Python, Go) providing access 
 
 **Circuit Breaker:** Three states (closed/open/half-open). Configurable `failureThreshold`, `successThreshold`, `timeoutMs`. Auto-transitions half-open after timeout. Integrated via `MpesaConfig`.
 
-### Session 3 (2026-05-17): Phase 4 - Testing & CI/CD
+### Session 3 (2026-05-17): Python Async Client + FastAPI Middleware
+
+#### Completed
+
+| # | Task | Lang | File(s) |
+|---|------|------|---------|
+| 3.3 | Add Python async client (AsyncMpesa) | Python | `python/mpesa/client/async_client.py` - Full async client with AsyncClient, async token manager, asyncio.sleep() retry backoff |
+| 3.4 | Add FastAPI webhook middleware | Python | `python/mpesa/middleware/__init__.py` - `create_fastapi_router` with STK callback, validation, validation endpoints |
+| 3.3b | Export AsyncMpesa from package | Python | `python/mpesa/client/__init__.py` + `python/mpesa/__init__.py` - Added to imports and `__all__` |
+
+### Session 4 (2026-05-17): Phase 3.5 - Go Gin Webhook Middleware
+
+#### Completed
+
+| # | Task | Lang | File(s) |
+|---|------|------|---------|
+| 3.5 | Add Go Gin webhook middleware | Go | `go/middleware/gin.go` - `GinWebhookHandler` returns `gin.HandlerFunc` with signature verification, STK/Result/C2B routing. Updated `go.mod` with Gin dependency. |
+
+### Session 5 (2026-05-17): Phase 4 - Testing & CI/CD
 
 #### Completed
 
@@ -272,7 +292,7 @@ The M-Pesa SDK is a polyglot monorepo (TypeScript, Python, Go) providing access 
 | 2.4 | Add metrics collection (prometheus client) | All | 3h | OPEN |
 | 2.5 | Add health check endpoint | All | 1h | OPEN |
 | 2.6 | Add idempotency key support | All | 2h | OPEN |
-| 2.7 | Implement async/parallel support in Python | Python | 2h | OPEN |
+| 2.7 | Implement async/parallel support in Python | Python | 2h | DONE |
 
 ### Phase 3: Cross-Language Consistency
 
@@ -280,9 +300,9 @@ The M-Pesa SDK is a polyglot monorepo (TypeScript, Python, Go) providing access 
 |---|------|------|--------|--------|
 | 3.1 | Generate endpoints from `shared/endpoints.json` instead of hardcoding | All | 2h | OPEN |
 | 3.2 | Standardize service method naming (service-oriented pattern) | All | 2h | OPEN |
-| 3.3 | Add Python async client + sync compatibility | Python | 2h | OPEN |
+| 3.3 | Add Python async client + sync compatibility | Python | 2h | DONE |
 | 3.4 | Add Python Flask/Django middleware | Python | 2h | OPEN |
-| 3.5 | Add Go framework middleware (Gin, Echo, net/http) | Go | 2h | OPEN |
+| 3.5 | Add Go framework middleware (Gin, Echo, net/http) | Go | 2h | DONE (Gin) |
 | 3.6 | Standardize retry configuration schema across languages | All | 1h | OPEN |
 | 3.7 | Implement uniform webhook event type system | All | 1h | OPEN |
 
@@ -441,8 +461,8 @@ GET /health -> {
 | Add HTTP mock tests | High | 6h | P1 | OPEN |
 | Auto-generate endpoints | Medium | 2h | P2 | OPEN |
 | Standardize API naming | Medium | 2h | P2 | OPEN |
-| Python async support | Medium | 2h | P2 | OPEN |
-| Framework middleware | Low | 4h | P2 | DONE (Python FastAPI) |
+| Python async support | Medium | 2h | P2 | DONE |
+| Framework middleware | Low | 4h | P2 | DONE (Python FastAPI, Go Gin) |
 | Load tests | Medium | 3h | P2 | OPEN |
 | Credential rotation | Low | 1h | P3 | OPEN |
 | Compliance docs | Low | 2h | P3 | OPEN |
