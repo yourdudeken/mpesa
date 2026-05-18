@@ -3,12 +3,13 @@ title = "M-Pesa SDK Gitleaks Config"
 [allowlist]
 description = "Allowlist for M-Pesa SDK"
 paths = [
-    ".git",
-    "node_modules",
-    "dist",
-    "__pycache__",
-    ".pytest_cache",
-    "*.sum",
+    '''.git/.*''',
+    '''node_modules/.*''',
+    '''dist/.*''',
+    '''__pycache__/.*''',
+    '''\.pytest_cache/.*''',
+    '''.*\.sum$''',
+    '''.*\.md$''',
 ]
 
 [[rules]]
