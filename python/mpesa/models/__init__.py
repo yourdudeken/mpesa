@@ -1,9 +1,10 @@
 import logging
 from datetime import datetime
-from typing import Any, Optional, Literal, Protocol
+from typing import Any, Optional, Literal, Protocol, runtime_checkable
 from pydantic import BaseModel, Field
 
 
+@runtime_checkable
 class Logger(Protocol):
     def debug(self, msg: str, *args: Any, **kwargs: Any) -> None: ...
     def info(self, msg: str, *args: Any, **kwargs: Any) -> None: ...
