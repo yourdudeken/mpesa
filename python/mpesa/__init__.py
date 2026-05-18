@@ -1,4 +1,4 @@
-from mpesa.client import Mpesa
+from mpesa.client import Mpesa, AsyncMpesa
 from mpesa.models import (
     MpesaConfig,
     AccessTokenResponse,
@@ -48,6 +48,7 @@ from mpesa.services import (
 
 __all__ = [
     "Mpesa",
+    "AsyncMpesa",
     "MpesaConfig",
     "AccessTokenResponse",
     "STKPushRequest",

@@ -3,6 +3,8 @@ package client
 import (
 	"bytes"
 	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"encoding/json"
 	"io"
 	"math"
@@ -12,7 +14,31 @@ import (
 
 	"github.com/yourdudeken/mpesa-sdk/go/errors"
 	"github.com/yourdudeken/mpesa-sdk/go/types"
+	"github.com/yourdudeken/mpesa-sdk/go/validation"
 )
+
+func (c *Client) RotateCredentials(consumerKey, consumerSecret string) {
+	c.config.ConsumerKey = consumerKey
+	c.config.ConsumerSecret = consumerSecret
+	c.tokenManager.Invalidate()
+	c.logger.Info("Credentials rotated")
+}
+
+func generateIdempotencyKey() string {
+	b := make([]byte, 8)
+	if _, err := rand.Read(b); err != nil {
+		return "unknown"
+	}
+	return hex.EncodeToString(b)
+}
+
+func generateRequestID() string {
+	b := make([]byte, 8)
+	if _, err := rand.Read(b); err != nil {
+		return "mpesa-unknown"
+	}
+	return "mpesa-" + hex.EncodeToString(b)
+}
 
 var retryableStatusCodes = map[int]bool{
 	408: true, 429: true,
@@ -27,15 +53,23 @@ type TokenManager struct {
 	consumerKey    string
 	consumerSecret string
 	httpClient     *http.Client
+	logger         types.Logger
 }
 
-func NewTokenManager(endpoint, consumerKey, consumerSecret string, httpClient *http.Client) *TokenManager {
+func NewTokenManager(endpoint, consumerKey, consumerSecret string, httpClient *http.Client, logger types.Logger) *TokenManager {
 	return &TokenManager{
 		endpoint:       endpoint,
 		consumerKey:    consumerKey,
 		consumerSecret: consumerSecret,
 		httpClient:     httpClient,
+		logger:         logger,
 	}
+}
+
+func (tm *TokenManager) SetAuthEndpoint(endpoint string) {
+	tm.mu.Lock()
+	defer tm.mu.Unlock()
+	tm.endpoint = endpoint
 }
 
 func (tm *TokenManager) GetToken(ctx context.Context) (string, error) {
@@ -59,6 +93,8 @@ func (tm *TokenManager) GetToken(ctx context.Context) (string, error) {
 	req.URL.RawQuery = q.Encode()
 	req.SetBasicAuth(tm.consumerKey, tm.consumerSecret)
 
+	tm.logger.Debug("Fetching new access token")
+
 	resp, err := tm.httpClient.Do(req)
 	if err != nil {
 		return "", errors.NewAPIConnectionError("Failed to get access token",
@@ -79,7 +115,19 @@ func (tm *TokenManager) GetToken(ctx context.Context) (string, error) {
 	tm.token = tokenResp.AccessToken
 	tm.expiresAt = time.Now().Add(time.Duration(tokenResp.ExpiresIn-60) * time.Second)
 
+	tm.logger.Debug("Access token acquired",
+		"expires_in", tokenResp.ExpiresIn,
+	)
+
 	return tm.token, nil
+}
+
+func (c *Client) Logger() types.Logger {
+	return c.logger
+}
+
+func (c *Client) GetAccessToken(ctx context.Context) (string, error) {
+	return c.tokenManager.GetToken(ctx)
 }
 
 func (tm *TokenManager) Invalidate() {
@@ -90,10 +138,13 @@ func (tm *TokenManager) Invalidate() {
 }
 
 type Client struct {
-	config       types.MpesaConfig
-	httpClient   *http.Client
-	tokenManager *TokenManager
-	endpoints    environmentEndpoints
+	config         types.MpesaConfig
+	httpClient     *http.Client
+	tokenManager   *TokenManager
+	endpoints      environmentEndpoints
+	logger         types.Logger
+	circuitBreaker *types.CircuitBreaker
+	rateLimiter    types.RateLimiter
 }
 
 func NewClient(config types.MpesaConfig) *Client {
@@ -114,70 +165,137 @@ func NewClient(config types.MpesaConfig) *Client {
 
 	eps := getEndpoints(config.Environment)
 
+	logger := config.Logger
+	if logger == nil {
+		logger = types.NewNoopLogger()
+	}
+
+	logger.Debug("Creating M-Pesa client",
+		"environment", config.Environment,
+		"timeout", config.Timeout.String(),
+		"retry_max", config.RetryConfig.MaxRetries,
+	)
+
+	var rl types.RateLimiter
+	if config.RateLimiterConfig.TokensPerSecond > 0 {
+		rl = types.NewTokenBucketRateLimiter(config.RateLimiterConfig)
+	} else {
+		rl = &types.NoopRateLimiter{}
+	}
+
 	return &Client{
-		config:     config,
-		httpClient: httpClient,
+		config:         config,
+		httpClient:     httpClient,
+		circuitBreaker: types.NewCircuitBreaker(config.CircuitBreakerConfig),
+		rateLimiter:    rl,
 		tokenManager: NewTokenManager(
 			eps.Auth,
 			config.ConsumerKey,
 			config.ConsumerSecret,
 			httpClient,
+			logger,
 		),
 		endpoints: eps,
+		logger:    logger,
 	}
 }
 
-func (c *Client) doRequest(ctx context.Context, method, url string, body interface{}) ([]byte, error) {
-	var reqBody io.Reader
-	if body != nil {
-		data, err := json.Marshal(body)
-		if err != nil {
-			return nil, errors.NewValidationError("Failed to marshal request body",
-				errors.WithCause(err))
-		}
-		reqBody = bytes.NewReader(data)
+func (c *Client) doRequest(ctx context.Context, method, url string, body interface{}) (respBody []byte, err error) {
+	requestID := generateRequestID()
+
+	c.rateLimiter.Acquire()
+
+	if c.circuitBreaker.State() == types.CircuitOpen {
+		return nil, types.ErrCircuitBreakerOpen
 	}
+
+	defer func() {
+		if err != nil {
+			c.circuitBreaker.RecordFailure()
+		} else {
+			c.circuitBreaker.RecordSuccess()
+		}
+	}()
+
+	c.logger.Debug("Sending request",
+		"method", method,
+		"url", url,
+		"request_id", requestID,
+	)
 
 	var lastErr error
 	for attempt := 0; attempt <= c.config.RetryConfig.MaxRetries; attempt++ {
+		if attempt > 0 {
+			c.logger.Warn("Retrying request",
+				"method", method,
+				"url", url,
+				"attempt", attempt,
+				"max_retries", c.config.RetryConfig.MaxRetries,
+				"request_id", requestID,
+			)
+		}
 		token, err := c.tokenManager.GetToken(ctx)
 		if err != nil {
 			return nil, err
 		}
 
-		req, err := http.NewRequestWithContext(ctx, method, url, reqBody)
+		var reqBodyReader io.Reader
+		var bodyData []byte
+		if body != nil {
+			bodyData, err = json.Marshal(body)
+			if err != nil {
+				return nil, errors.NewValidationError("Failed to marshal request body",
+					errors.WithCause(err))
+			}
+			reqBodyReader = bytes.NewReader(bodyData)
+		}
+
+		req, err := http.NewRequestWithContext(ctx, method, url, reqBodyReader)
 		if err != nil {
 			return nil, err
 		}
 		req.Header.Set("Content-Type", "application/json")
 		req.Header.Set("Accept", "application/json")
 		req.Header.Set("Authorization", "Bearer "+token)
+		req.Header.Set("X-Request-ID", requestID)
+		if c.config.IdempotencyEnabled && method == "POST" {
+			req.Header.Set("X-Idempotency-Key", generateIdempotencyKey())
+		}
 
-		if body != nil {
-			data, _ := json.Marshal(body)
-			req.Body = io.NopCloser(bytes.NewReader(data))
-			req.ContentLength = int64(len(data))
+		if len(bodyData) > 0 {
+			req.ContentLength = int64(len(bodyData))
 		}
 
 		resp, err := c.httpClient.Do(req)
 		if err != nil {
 			lastErr = errors.NewAPIConnectionError("Request failed",
-				errors.WithCause(err))
+				errors.WithCause(err),
+				errors.WithRequestID(requestID))
 			if attempt < c.config.RetryConfig.MaxRetries {
+				select {
+				case <-ctx.Done():
+					return nil, ctx.Err()
+				default:
+				}
 				delay := calculateBackoffDuration(attempt, c.config.RetryConfig)
 				time.Sleep(delay)
 				continue
 			}
 			return nil, lastErr
 		}
-		defer resp.Body.Close()
 
-		respBody, err := io.ReadAll(resp.Body)
+		respBody, err = io.ReadAll(resp.Body)
+		resp.Body.Close()
 		if err != nil {
 			return nil, err
 		}
 
 		if retryableStatusCodes[resp.StatusCode] && attempt < c.config.RetryConfig.MaxRetries {
+			select {
+			case <-ctx.Done():
+				return nil, ctx.Err()
+			default:
+			}
 			var delay time.Duration
 			if resp.StatusCode == 429 {
 				retryAfter := resp.Header.Get("Retry-After")
@@ -189,20 +307,36 @@ func (c *Client) doRequest(ctx context.Context, method, url string, body interfa
 			} else {
 				delay = calculateBackoffDuration(attempt, c.config.RetryConfig)
 			}
+			c.logger.Warn("Retryable status code, backing off",
+				"status", resp.StatusCode,
+				"attempt", attempt,
+				"delay_ms", delay.Milliseconds(),
+				"request_id", requestID,
+			)
 			time.Sleep(delay)
 			continue
 		}
 
 		if resp.StatusCode == 401 {
 			c.tokenManager.Invalidate()
+			c.logger.Error("Authentication failed, token invalidated",
+				"status", resp.StatusCode,
+				"request_id", requestID,
+			)
 			return nil, errors.NewAuthenticationError("",
 				errors.WithStatusCode(resp.StatusCode),
+				errors.WithRequestID(requestID),
 				errors.WithRawResponse(string(respBody)))
 		}
 
 		if resp.StatusCode == 429 {
+			c.logger.Error("Rate limit exceeded",
+				"status", resp.StatusCode,
+				"request_id", requestID,
+			)
 			return nil, errors.NewRateLimitError("", 60,
 				errors.WithStatusCode(resp.StatusCode),
+				errors.WithRequestID(requestID),
 				errors.WithRawResponse(string(respBody)))
 		}
 
@@ -213,16 +347,32 @@ func (c *Client) doRequest(ctx context.Context, method, url string, body interfa
 				ErrorMessage string `json:"errorMessage"`
 			}
 			json.Unmarshal(respBody, &errResp)
+			c.logger.Error("API error response",
+				"status", resp.StatusCode,
+				"error_code", errResp.ErrorCode,
+				"error_message", errResp.ErrorMessage,
+				"request_id", requestID,
+			)
 			return nil, errors.NewMpesaAPIError(errResp.ErrorMessage, errResp.ErrorCode,
 				errors.WithStatusCode(resp.StatusCode),
 				errors.WithRequestID(errResp.RequestID),
 				errors.WithRawResponse(string(respBody)))
 		}
 
+		c.logger.Debug("Request successful",
+			"method", method,
+			"url", url,
+			"status", resp.StatusCode,
+			"request_id", requestID,
+		)
 		return respBody, nil
 	}
 
-	return nil, lastErr
+	if lastErr != nil {
+		return nil, lastErr
+	}
+	return nil, errors.NewAPIConnectionError("Request failed after retries",
+		errors.WithRequestID(requestID))
 }
 
 func calculateBackoffDuration(attempt int, config types.RetryConfig) time.Duration {
@@ -235,6 +385,26 @@ func calculateBackoffDuration(attempt int, config types.RetryConfig) time.Durati
 
 // ---- STK Push ----
 func (c *Client) STKPush(ctx context.Context, req types.STKPushRequest) (*types.STKPushResponse, error) {
+	if err := validation.PositiveInt(req.Amount, "Amount"); err != nil {
+		return nil, err
+	}
+	if err := validation.PhoneNumber(req.PhoneNumber, "PhoneNumber"); err != nil {
+		return nil, err
+	}
+	if err := validation.ValidURL(req.CallBackURL, "CallBackURL"); err != nil {
+		return nil, err
+	}
+	if err := validation.MaxLength(req.AccountReference, "AccountReference", 12); err != nil {
+		return nil, err
+	}
+	if err := validation.MaxLength(req.TransactionDesc, "TransactionDesc", 13); err != nil {
+		return nil, err
+	}
+	if err := validation.OneOf(string(req.TransactionType), "TransactionType",
+		[]string{string(types.CustomerPayBillOnline), string(types.CustomerBuyGoodsOnline)}); err != nil {
+		return nil, err
+	}
+
 	if req.Password == "" && c.config.Passkey != "" {
 		timestamp := req.Timestamp
 		if timestamp == "" {

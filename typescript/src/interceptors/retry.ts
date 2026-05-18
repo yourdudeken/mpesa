@@ -1,7 +1,7 @@
 import type { AxiosError, AxiosInstance } from "axios";
 import { RateLimitError, APIConnectionError, TimeoutError } from "../errors/index.js";
-import { calculateBackoff, delay } from "../utils/index.js";
-import type { RetryConfig } from "../types/index.js";
+import { calculateBackoff, delay, noopLogger } from "../utils/index.js";
+import type { RetryConfig, Logger } from "../types/index.js";
 import { AuthenticationError, MpesaAPIError } from "../errors/index.js";
 
 const DEFAULT_RETRY_CONFIG: RetryConfig = {
@@ -22,6 +22,7 @@ const RETRYABLE_ERROR_CODES = new Set([
 export function setupRetryInterceptor(
   client: AxiosInstance,
   retryConfig: RetryConfig = DEFAULT_RETRY_CONFIG,
+  logger: Logger = noopLogger,
 ): void {
   client.interceptors.response.use(
     (response) => response,
@@ -29,9 +30,16 @@ export function setupRetryInterceptor(
       const config = error.config;
       if (!config) return Promise.reject(error);
 
-      config.retryCount = (config.retryCount ?? 0) + 1;
+      const attempt = (config.retryCount ?? 0) + 1;
+      const requestId = (config.headers?.["X-Request-ID"] as string) ?? "";
 
-      if (config.retryCount > retryConfig.maxRetries) {
+      if (attempt > retryConfig.maxRetries) {
+        logger.warn("Max retries exceeded", {
+          url: config.url,
+          attempt: attempt - 1,
+          maxRetries: retryConfig.maxRetries,
+          requestId,
+        });
         return Promise.reject(error);
       }
 
@@ -43,18 +51,35 @@ export function setupRetryInterceptor(
         return Promise.reject(error);
       }
 
+      config.retryCount = attempt;
+
+      logger.warn("Retrying request after error", {
+        url: config.url,
+        status: error.response?.status,
+        code: error.code,
+        attempt,
+        maxRetries: retryConfig.maxRetries,
+        requestId,
+      });
+
       if (error.response?.status === 429) {
         const retryAfter = parseInt(
           error.response.headers["retry-after"] ?? "5",
           10,
         );
+        logger.warn("Rate limited, backing off", { retryAfter, requestId });
         await delay(retryAfter * 1000);
       } else {
         const backoff = calculateBackoff(
-          config.retryCount - 1,
+          attempt - 1,
           retryConfig.baseDelayMs,
           retryConfig.maxDelayMs,
         );
+        logger.warn("Backing off before retry", {
+          backoffMs: backoff,
+          attempt,
+          requestId,
+        });
         await delay(backoff);
       }
 

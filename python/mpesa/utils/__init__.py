@@ -16,7 +16,7 @@ def generate_password(shortcode: int | str, passkey: str, timestamp: str) -> str
 
 
 def generate_security_credential(password: str, cert_path: str) -> str:
-    from cryptography.hazmat.primitives import serialization
+    from cryptography.hazmat.primitives import serialization, hashes
     from cryptography.hazmat.primitives.asymmetric import padding
 
     with open(cert_path, "rb") as f:
@@ -24,7 +24,11 @@ def generate_security_credential(password: str, cert_path: str) -> str:
 
     encrypted = cert.encrypt(
         password.encode(),
-        padding.PKCS1v15(),
+        padding.OAEP(
+            mgf=padding.MGF1(algorithm=hashes.SHA256()),
+            algorithm=hashes.SHA256(),
+            label=None,
+        ),
     )
     return base64.b64encode(encrypted).decode()
 
@@ -63,6 +67,11 @@ def calculate_backoff(attempt: int, base_delay_ms: int = 1000, max_delay_ms: int
     return min(exponential + jitter, max_delay_ms) / 1000.0
 
 
+from mpesa.utils.batch import execute_batch, execute_batch_async
+from mpesa.utils.metrics import MetricsCollector, NoopMetricsCollector
+from mpesa.utils.tracing import Tracer, NoopTracer, Span, SpanContext, with_span
+
+
 __all__ = [
     "generate_timestamp",
     "generate_password",
@@ -71,4 +80,13 @@ __all__ = [
     "is_phone_number_valid",
     "format_phone_number",
     "calculate_backoff",
+    "execute_batch",
+    "execute_batch_async",
+    "MetricsCollector",
+    "NoopMetricsCollector",
+    "Tracer",
+    "NoopTracer",
+    "Span",
+    "SpanContext",
+    "with_span",
 ]

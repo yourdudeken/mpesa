@@ -1,19 +1,34 @@
 import axios, { type AxiosInstance, type AxiosRequestConfig } from "axios";
 import { getBaseUrl } from "../environment.js";
-import type { MpesaConfig, LoggingHook, AccessTokenResponse, TokenCache } from "../types/index.js";
-import { maskSensitiveData } from "../utils/index.js";
+import type { MpesaConfig, ResolvedConfig, Logger, LoggingHook, AccessTokenResponse, TokenCache } from "../types/index.js";
+import { maskSensitiveData, noopLogger, generateRequestId } from "../utils/index.js";
 import { setupRetryInterceptor, mapAxiosError } from "../interceptors/retry.js";
 import { AuthenticationError } from "../errors/index.js";
+import { CircuitBreaker } from "../utils/circuit-breaker.js";
+import { TokenBucketRateLimiter, NoopRateLimiter } from "../utils/rate-limiter.js";
 
 const DEFAULT_TIMEOUT = 30000;
 
 export class MpesaApiClient {
   private readonly client: AxiosInstance;
-  private readonly config: Required<MpesaConfig>;
+  private readonly config: ResolvedConfig;
   private tokenCache: TokenCache | null = null;
   private readonly logging?: LoggingHook;
+  private readonly logger: Logger;
+  private readonly circuitBreaker: CircuitBreaker;
+  private readonly rateLimiter: TokenBucketRateLimiter | NoopRateLimiter;
 
   constructor(config: MpesaConfig) {
+    this.logger = config.logger ?? noopLogger;
+
+    this.circuitBreaker = new CircuitBreaker(config.circuitBreakerConfig);
+
+    if (config.rateLimiterConfig) {
+      this.rateLimiter = new TokenBucketRateLimiter(config.rateLimiterConfig);
+    } else {
+      this.rateLimiter = new NoopRateLimiter();
+    }
+
     this.config = {
       consumerKey: config.consumerKey,
       consumerSecret: config.consumerSecret,
@@ -29,6 +44,7 @@ export class MpesaApiClient {
       },
       timeout: config.timeout ?? DEFAULT_TIMEOUT,
       logging: config.logging ?? {},
+      logger: this.logger,
     };
     this.logging = this.config.logging;
 
@@ -41,40 +57,69 @@ export class MpesaApiClient {
       },
     });
 
+    this.logger.info("M-Pesa API client initialized", {
+      environment: this.config.environment,
+      timeout: this.config.timeout,
+      retryMax: this.config.retryConfig.maxRetries,
+    });
+
     this.client.interceptors.request.use((req) => {
+      const requestId = generateRequestId();
+      req.headers["X-Request-ID"] = requestId;
+      this.logger.debug("Outgoing request", {
+        method: req.method?.toUpperCase(),
+        url: req.url,
+        requestId,
+      });
       this.logging?.onRequest?.({
         method: req.method?.toUpperCase() ?? "GET",
         url: req.url ?? "",
         headers: req.headers as Record<string, string>,
         body: req.data ? maskSensitiveData(req.data) : undefined,
         timestamp: new Date(),
+        requestId,
       });
       return req;
     });
 
     this.client.interceptors.response.use(
       (res) => {
+        const requestId = (res.config.headers?.["X-Request-ID"] as string) ?? "";
+        this.logger.debug("Response received", {
+          status: res.status,
+          url: res.config.url,
+          requestId,
+        });
         this.logging?.onResponse?.({
           status: res.status,
           body: res.data,
           durationMs: 0,
           timestamp: new Date(),
+          requestId,
         });
         return res;
       },
       (err) => {
+        const requestId = (err.config?.headers?.["X-Request-ID"] as string) ?? "";
+        this.logger.error("Request error", {
+          message: err.message,
+          status: err.response?.status,
+          url: err.config?.url,
+          requestId,
+        });
         this.logging?.onError?.({
           error: err,
           timestamp: new Date(),
+          requestId,
         });
         return Promise.reject(mapAxiosError(err));
       },
     );
 
-    setupRetryInterceptor(this.client, this.config.retryConfig);
+    setupRetryInterceptor(this.client, this.config.retryConfig, this.logger);
   }
 
-  getConfig(): Readonly<Required<MpesaConfig>> {
+  getConfig(): Readonly<ResolvedConfig> {
     return this.config;
   }
 
@@ -87,6 +132,8 @@ export class MpesaApiClient {
     if (this.tokenCache && !this.isTokenExpired()) {
       return this.tokenCache.token;
     }
+
+    this.logger.debug("Fetching new access token");
 
     const response = await this.client.get<AccessTokenResponse>("/oauth/v1/generate", {
       params: { grant_type: "client_credentials" },
@@ -102,21 +149,39 @@ export class MpesaApiClient {
       expiresAt: new Date(Date.now() + (data.expires_in - 60) * 1000),
     };
 
+    this.logger.debug("Access token acquired", {
+      expiresIn: data.expires_in,
+    });
+
     return data.access_token;
   }
 
-  async request<T>(config: AxiosRequestConfig): Promise<T> {
-    const token = await this.getAccessToken();
-    const mergedConfig: AxiosRequestConfig = {
-      ...config,
-      headers: {
-        ...config.headers,
-        Authorization: `Bearer ${token}`,
-      },
-    };
+  private generateIdempotencyKey(): string {
+    return `${Date.now()}-${Math.random().toString(36).substring(2, 10)}`;
+  }
 
-    const response = await this.client.request<T>(mergedConfig);
-    return response.data;
+  async request<T>(config: AxiosRequestConfig): Promise<T> {
+    await this.rateLimiter.acquire();
+
+    return this.circuitBreaker.call<T>(async () => {
+      const token = await this.getAccessToken();
+      const headers: Record<string, string> = {
+        ...(config.headers as Record<string, string>),
+        Authorization: `Bearer ${token}`,
+      };
+
+      if (this.config.enableIdempotency && config.method?.toUpperCase() === "POST") {
+        headers["X-Idempotency-Key"] = this.generateIdempotencyKey();
+      }
+
+      const mergedConfig: AxiosRequestConfig = {
+        ...config,
+        headers,
+      };
+
+      const response = await this.client.request<T>(mergedConfig);
+      return response.data;
+    });
   }
 
   async post<T>(url: string, data?: unknown): Promise<T> {
@@ -125,6 +190,13 @@ export class MpesaApiClient {
 
   async get<T>(url: string, params?: Record<string, unknown>): Promise<T> {
     return this.request<T>({ method: "GET", url, params });
+  }
+
+  rotateCredentials(consumerKey: string, consumerSecret: string): void {
+    this.config.consumerKey = consumerKey;
+    this.config.consumerSecret = consumerSecret;
+    this.invalidateToken();
+    this.logger.info("Credentials rotated");
   }
 
   invalidateToken(): void {
