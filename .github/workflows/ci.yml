@@ -39,10 +39,19 @@ jobs:
             exit 1
           fi
           echo "No .env files found - OK"
-      - name: Go Vulnerability Check
-        uses: golang/govulncheck-action@v1
+      - name: Setup Go
+        uses: actions/setup-go@v5
         with:
-          work-dir: go
+          go-version: '1.24'
+      - name: Install dependencies
+        run: |
+          cd go
+          go mod tidy
+          go mod download
+      - name: Run govulncheck
+        run: |
+          go install golang.org/x/vuln/cmd/govulncheck@latest
+          govulncheck -C go -format text ./...
       - name: Python Safety Check
         run: |
           pip install pip-audit
@@ -85,14 +94,16 @@ jobs:
   test-go:
     name: Go Tests
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        go-version: ["1.22", "1.23"]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version: ${{ matrix.go-version }}
+          go-version: '1.24'
+      - name: Install dependencies
+        run: |
+          cd go
+          go mod tidy
+          go mod download
       - run: cd go && go vet ./...
       - run: cd go && go test ./... -v -race -count=1
 
