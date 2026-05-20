@@ -50,9 +50,29 @@ const sidebars: SidebarsConfig = {
     "webhooks",
     {
       type: "category",
+      label: "Resilience",
+      items: [
+        "resilience/circuit-breaker",
+        "resilience/rate-limiter",
+        "resilience/batch-requests",
+        "resilience/webhook-dlq",
+      ],
+    },
+    {
+      type: "category",
+      label: "Observability",
+      items: [
+        "observability/tracing",
+        "observability/metrics",
+      ],
+    },
+    {
+      type: "category",
       label: "Advanced",
       items: [
         "typescript/retry-resilience",
+        "python/retry-resilience",
+        "go/retry-resilience",
         "typescript/framework-integrations",
       ],
     },
